@@ -30,7 +30,8 @@ target → `.claude/rules/content-writing.md`. `docs/plans/archive/**` is read-o
 - **One verification gate, run once per step**: `make check` — markdownlint over every `.md` (BLOCKING)
   plus a timeline drift report (ADVISORY: `timeline-from-git.py` scans all of `~/projects`, so another
   repo's commits stale `timeline.json`; `make timeline` regenerates it, then commit the regen). `make`
-  with no argument lists every target; inc3 adds the Astro ones. Never gate a commit on `cmd | tail` —
+  with no argument lists every target; `dev`/`build`/`preview` are guarded stubs until inc3 ships
+  the Astro site. Never gate a commit on `cmd | tail` —
   the pipe reports tail's exit status.
 - **Every new assertion owes a mutate-and-confirm-red demo** before a stage is called verified — including
   the content tests (evidence rule, banned words): a check that cannot fail proves nothing.

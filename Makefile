@@ -35,16 +35,20 @@ help: ## show this list of targets
 #      repo gains commits; failing on that would turn a content commit red for
 #      activity that has nothing to do with this repo. Drift is printed loudly
 #      and `make timeline` is the fix.
-# The drift probe is tree-preserving: it snapshots the two generated files, runs
-# the script, compares, and restores them. The one side effect it cannot undo is
+# The drift probe is tree-preserving on every exit path: it snapshots the two
+# generated files, runs the script, compares, and restores them — including when
+# the script itself dies mid-write. The one side effect it cannot undo is
 # a NEW chapter stub (the script creates those when a repo first crosses
 # MIN_COMMITS) — those are reported as untracked and deliberately left in place.
 check: ## THE gate: markdownlint (blocking) + a timeline drift report (advisory)
 	@$(MAKE) --no-print-directory lint
-	@tmp=$$(mktemp -d); \
-	cp content/timeline.json "$$tmp/timeline.json"; \
-	cp content/journey/README.md "$$tmp/README.md"; \
-	python3 scripts/timeline-from-git.py >/dev/null || { rm -rf "$$tmp"; exit 1; }; \
+	@tmp=$$(mktemp -d) || exit 1; \
+	restore() { cp "$$tmp/timeline.json" content/timeline.json \
+	  && cp "$$tmp/README.md" content/journey/README.md; }; \
+	cp content/timeline.json "$$tmp/timeline.json" || exit 1; \
+	cp content/journey/README.md "$$tmp/README.md" || exit 1; \
+	python3 scripts/timeline-from-git.py >/dev/null \
+	  || { restore; rm -rf "$$tmp"; exit 1; }; \
 	drift=0; \
 	diff -q "$$tmp/timeline.json" content/timeline.json >/dev/null || drift=1; \
 	diff -q "$$tmp/README.md" content/journey/README.md >/dev/null || drift=1; \
@@ -56,8 +60,7 @@ check: ## THE gate: markdownlint (blocking) + a timeline drift report (advisory)
 	else \
 	  printf 'timeline ............. ok\n'; \
 	fi; \
-	cp "$$tmp/timeline.json" content/timeline.json; \
-	cp "$$tmp/README.md" content/journey/README.md; \
+	restore || { echo "error: could not restore the generated files from $$tmp" >&2; exit 1; }; \
 	rm -rf "$$tmp"; \
 	new=$$(git status --porcelain content/journey | sed -n 's/^?? //p'); \
 	if [ -n "$$new" ]; then \
