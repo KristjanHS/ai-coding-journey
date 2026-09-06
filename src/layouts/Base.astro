@@ -1,0 +1,112 @@
+---
+// The site's whole design system for inc3: one token layer, inherited by every
+// later stage. No component library, no nav chrome — that arrives with the deck.
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+  <body>
+    <header class="site">
+      <a href="/">ai-coding-journey</a>
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    /* type scale — 1.25 ratio off a fluid base */
+    --font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    --size-0: 0.833rem;
+    --size-1: 1rem;
+    --size-2: 1.25rem;
+    --size-3: 1.563rem;
+    --size-4: 1.953rem;
+
+    /* spacing scale */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 2rem;
+    --space-5: 4rem;
+
+    /* colour tokens — only these are redefined for dark */
+    --fg: #16181d;
+    --fg-dim: #5b6070;
+    --bg: #fdfdfc;
+    --bg-sunk: #f2f2ef;
+    --rule: #e0e0da;
+    --accent: #9a4b1f;
+
+    --measure: 68ch;
+    --radius: 3px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fg: #e6e6e1;
+      --fg-dim: #9a9ba6;
+      --bg: #14161a;
+      --bg-sunk: #1c1f25;
+      --rule: #2c3038;
+      --accent: #e8956a;
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0 var(--space-3) var(--space-5);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: var(--size-1);
+    line-height: 1.6;
+  }
+
+  main { max-width: var(--measure); margin: 0 auto; }
+
+  .site {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+  }
+
+  a { color: var(--accent); }
+  .site a { color: var(--fg-dim); text-decoration: none; }
+  .site a:hover { color: var(--accent); }
+
+  h1 { font-size: var(--size-4); line-height: 1.2; margin: var(--space-5) 0 var(--space-3); }
+  h2 { font-size: var(--size-2); margin: var(--space-4) 0 var(--space-2); }
+  h3 { font-size: var(--size-1); margin: var(--space-3) 0 var(--space-1); }
+
+  code, pre { font-family: var(--font-mono); font-size: var(--size-0); }
+  pre {
+    background: var(--bg-sunk);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+    overflow-x: auto;
+  }
+  blockquote {
+    margin: var(--space-3) 0;
+    padding-left: var(--space-3);
+    border-left: 2px solid var(--rule);
+    color: var(--fg-dim);
+  }
+</style>

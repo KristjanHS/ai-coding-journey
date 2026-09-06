@@ -1,0 +1,41 @@
+---
+import Base from './Base.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'journey'>;
+}
+const { entry } = Astro.props;
+const { title, repo, start, end, commits, stage, tools, artifact } = entry.data;
+---
+<Base title={`${title} · ai-coding-journey`}>
+  <p class="back"><a href="/journey/">← the journey</a></p>
+  <dl class="meta">
+    <div><dt>repo</dt><dd>{repo}</dd></div>
+    <div><dt>span</dt><dd>{start} → {end}</dd></div>
+    <div><dt>commits</dt><dd>{commits.toLocaleString('en-US')}</dd></div>
+    <div><dt>stage</dt><dd>{stage}</dd></div>
+    <div><dt>tools</dt><dd>{tools.length > 0 ? tools.join(', ') : '—'}</dd></div>
+    <div><dt>artifact</dt><dd>{artifact}</dd></div>
+  </dl>
+  <article><slot /></article>
+</Base>
+
+<style>
+  .back { font-family: var(--font-mono); font-size: var(--size-0); margin: var(--space-4) 0 0; }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: var(--space-2) var(--space-3);
+    margin: var(--space-3) 0 0;
+    padding: var(--space-3);
+    background: var(--bg-sunk);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+  }
+  dt { color: var(--fg-dim); }
+  dd { margin: 0; }
+  /* The chapter's own H1 opens the page — the meta block sits above it. */
+  article :global(h1:first-child) { margin-top: var(--space-4); }
+</style>

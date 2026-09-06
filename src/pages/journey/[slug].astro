@@ -1,0 +1,15 @@
+---
+import { getCollection, render } from 'astro:content';
+import Chapter from '../../layouts/Chapter.astro';
+
+export async function getStaticPaths() {
+  const chapters = await getCollection('journey');
+  return chapters.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Chapter entry={entry}>
+  <Content />
+</Chapter>

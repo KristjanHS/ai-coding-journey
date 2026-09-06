@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import timeline from '../../../content/timeline.json';
+
+const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeCompare(b.id));
+
+// Mirrors MIN_COMMITS in scripts/timeline-from-git.py: below it a repo is an
+// experiment line, not a chapter. The generator writes those lines into
+// content/journey/00-experiments.md for GitHub; the site reads the same rows
+// straight out of timeline.json rather than parsing that file back.
+const MIN_COMMITS = 5;
+const experiments = timeline
+  .filter((row) => row.commits < MIN_COMMITS)
+  .sort((a, b) => a.first_commit.localeCompare(b.first_commit));
+---
+<Base
+  title="The journey · ai-coding-journey"
+  description="One chapter per repo, from a 20-year coding pause to a ~5k-commit app built with AI agents."
+>
+  <h1>The journey</h1>
+  <p class="lede">One chapter per repo, oldest first.</p>
+
+  <ol class="chapters">
+    {chapters.map((entry) => (
+      <li>
+        <a href={`/journey/${entry.id}/`}>{entry.data.title}</a>
+        <span class="stage">{entry.data.stage}</span>
+        <span class="commits">{entry.data.commits.toLocaleString('en-US')} commits</span>
+        <span class="span">{entry.data.start} → {entry.data.end}</span>
+      </li>
+    ))}
+  </ol>
+
+  <h2>Also tried</h2>
+  <p class="lede">Repos with fewer than {MIN_COMMITS} commits — no chapter of their own.</p>
+  <ul class="experiments">
+    {experiments.map((row) => (
+      <li>
+        <span class="repo">{row.repo}</span>
+        <span class="span">{row.first_commit}</span>
+        <span class="commits">{row.commits} commits</span>
+      </li>
+    ))}
+  </ul>
+</Base>
+
+<style>
+  .lede { color: var(--fg-dim); margin-top: 0; }
+  .chapters, .experiments { list-style: none; padding: 0; }
+  .chapters li, .experiments li {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1fr) 9rem 7rem auto;
+    gap: var(--space-2);
+    align-items: baseline;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .stage, .commits, .span, .repo {
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+  }
+  .repo { color: var(--fg); }
+  @media (max-width: 34rem) {
+    .chapters li, .experiments li { grid-template-columns: 1fr; gap: var(--space-1); }
+  }
+</style>
