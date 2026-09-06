@@ -59,6 +59,18 @@ out from under a pinned CUDA build. The fix was a flag and a comment I had to wr
 re-adding VS Code to PATH, and when that failed, reinstalling VS Code and the Remote-WSL extension.
 I did not root-cause it.
 
+**A run that silently used no GPU at all.** Re-running the Windows setup later the same day, I
+dropped `--n-gpu-layers` from the launch command while only 1.2 GiB of VRAM was free. Ollama offloaded
+nothing and ran the whole model on CPU — `layers.offload=0`, `CPU model buffer size = 3922.02 MiB` —
+and reported no error. A second setting in that same run was rejected just as quietly:
+
+```text
+msg="quantized kv cache requested but flash attention disabled" type=heap
+```
+
+The `OLLAMA_KV_CACHE_TYPE=heap` I had set did nothing, because flash attention was off. Both were
+one log line each in a log I skimmed.
+
 ## What I learned
 
 **Pick the model from a benchmark, not from a vibe.** Comparing coding models against HumanEval
@@ -73,10 +85,32 @@ pass@1 alongside their 4-bit VRAM footprint made the choice mechanical:
 The 8 GB VRAM on the machine is the real constraint: it caps local work at roughly 7-billion-parameter
 models, which decided the shortlist before any quality argument did.
 
-**Run the same workload four ways before believing a setup is fast.** Ollama and Oobabooga, each on
-Windows 10 and inside WSL 2. The repo README records the outcome — Windows Ollama was fastest of the
-four. The timings behind that sit in my local-LLM notes and land in a later chapter; this chapter
-claims only that the comparison was run, not a number I can show here yet.
+**I believed a benchmark I never ran.** My README states that Windows Ollama was fastest of four
+local setups. Going back through the logs to find the numbers behind it, there are none. What the
+notes actually contain is four server-startup logs, and they cannot be compared:
+
+| setup | Ollama | model | GPU offload | first `/api/generate` |
+| --- | --- | --- | --- | --- |
+| Ollama / Windows | 0.6.1 | Mistral-7B-**Instruct** | 33/33 layers | 1.42 s |
+| Ollama / WSL 2 | 0.9.2 | Mistral-7B-**Instruct** | 33/33 layers | 49.47 s |
+| Ollama / Windows redo | 0.6.1 | Mistral-7B-**Instruct** | **0/33 — CPU only** | 1.40 s |
+| Oobabooga / Windows | n/a | Mistral-7B-**base** | 33/33 layers | never ran |
+
+That 1.42 s against 49.47 s reads like Windows being thirty-five times faster. It is not a generation
+measurement at all — it is model load time. The Windows runner was launched with `--no-mmap`, so
+weights were read up front; the WSL runner used `mmap = true` and cold-read 3.83 GiB from disk. Both
+logs even say so directly, and I did not read them:
+
+```text
+msg="llama runner started in 1.26 seconds"
+msg="llama runner started in 49.02 seconds"
+```
+
+Subtract the load and each run generated for a fraction of a second. On top of that the two Ollama
+versions differ, the Oobabooga run used base weights rather than Instruct and produced no generation
+at all, and the fourth setup — Oobabooga under WSL — was never logged. The lesson is not about
+Ollama. It is that "X is fastest" survived in my own README for months because I never asked which
+number said so.
 
 **Pin the tool, not just the library.** After being broken by an upgrade I pinned the agent CLI the
 same way I pin a dependency, with a standing instruction not to update it globally.
