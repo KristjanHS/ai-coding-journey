@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+// Counts are derived at build time from the collections themselves, so a
+// section can never advertise rows it does not have. A zero-length section
+// reads "arrives at inc5" instead of a link that looks live and isn't.
+const counts = {
+  journey: (await getCollection('journey')).length,
+  prompts: (await getCollection('prompts')).length,
+  'case-study': (await getCollection('case-study')).length,
+  course: (await getCollection('course')).length,
+};
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+const sections = [
+  {
+    href: '/journey/',
+    title: 'The journey',
+    blurb: 'One chapter per repo, oldest first.',
+    count: plural(counts.journey, 'chapter', 'chapters'),
+  },
+  {
+    href: '/prompts/',
+    title: 'Prompts',
+    blurb: 'Reusable prompts, reproduced as they were typed.',
+    count: plural(counts.prompts, 'prompt', 'prompts'),
+  },
+  {
+    href: '/case-study/',
+    title: 'Case study',
+    blurb: 'The markdown layer of the app this ends at.',
+    count: counts['case-study'] > 0 ? plural(counts['case-study'], 'page', 'pages') : null,
+  },
+  {
+    href: '/course/',
+    title: 'Course',
+    blurb: 'Built from the same markdown.',
+    count: counts.course > 0 ? plural(counts.course, 'page', 'pages') : null,
+  },
+];
+const PENDING = 'arrives at inc5';
+---
+<Base
+  title="ai-coding-journey"
+  description="From a 20-year coding pause to a ~5k-commit app built with AI coding agents."
+>
+  <h1>ai-coding-journey</h1>
+  <p class="lede">
+    From a 20-year coding pause to a ~5k-commit app built with AI coding agents — one chapter
+    per repo, with the prompts, rules and defects that got it there.
+  </p>
+
+  <ul class="sections">
+    {sections.map((section) => (
+      <li>
+        <a href={section.href}>{section.title}</a>
+        <span class="count">{section.count ?? PENDING}</span>
+        <span class="blurb">{section.blurb}</span>
+      </li>
+    ))}
+  </ul>
+</Base>
+
+<style>
+  .lede { color: var(--fg-dim); margin-top: 0; max-width: 52ch; }
+  .sections { list-style: none; padding: 0; margin-top: var(--space-4); }
+  .sections li {
+    display: grid;
+    grid-template-columns: minmax(9rem, auto) 9rem 1fr;
+    gap: var(--space-2) var(--space-3);
+    align-items: baseline;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .count, .blurb { font-size: var(--size-0); color: var(--fg-dim); }
+  .count { font-family: var(--font-mono); }
+  @media (max-width: 34rem) {
+    .sections li { grid-template-columns: 1fr; gap: var(--space-1); }
+  }
+</style>

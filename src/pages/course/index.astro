@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionIndex from '../../components/SectionIndex.astro';
+
+// Empty until inc5 — the empty branch of SectionIndex is what renders today.
+const rows = (await getCollection('course'))
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map((entry) => ({ href: `/course/${entry.id}/`, title: entry.data.title }));
+---
+<Base
+  title="Course · ai-coding-journey"
+  description="The course skeleton built from the same markdown."
+>
+  <SectionIndex
+    title="Course"
+    lede="Built from the same markdown as the journey."
+    rows={rows}
+    empty="Nothing here yet — the course arrives at inc5."
+  />
+</Base>

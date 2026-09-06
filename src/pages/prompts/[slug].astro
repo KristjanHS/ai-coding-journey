@@ -1,0 +1,38 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const prompts = await getCollection('prompts');
+  return prompts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Base title={`${entry.data.title} · ai-coding-journey`}>
+  <p class="back"><a href="/prompts/">← prompts</a></p>
+  <dl class="meta">
+    <div><dt>source</dt><dd>{entry.data.source}</dd></div>
+    <div><dt>captured</dt><dd>{entry.data.captured}</dd></div>
+  </dl>
+  <article><Content /></article>
+</Base>
+
+<style>
+  .back { font-family: var(--font-mono); font-size: var(--size-0); margin: var(--space-4) 0 0; }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--space-2) var(--space-3);
+    margin: var(--space-3) 0 0;
+    padding: var(--space-3);
+    background: var(--bg-sunk);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+  }
+  dt { color: var(--fg-dim); }
+  dd { margin: 0; }
+  article :global(h1:first-child) { margin-top: var(--space-4); }
+</style>

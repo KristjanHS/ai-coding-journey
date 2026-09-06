@@ -35,4 +35,37 @@ const journey = defineCollection({
   }),
 });
 
-export const collections = { journey };
+// The prompts collection: sanitised, reusable prompts lifted from OneNote.
+// `captured` is a free-form span ("2025-12-07/2026-06-21"), not a single date —
+// the source undates individual prompts, so no ISO shape is imposed on it.
+const prompts = defineCollection({
+  loader: glob({ pattern: '*.md', base: './content/prompts' }),
+  schema: z.object({
+    title: z.string(),
+    source: z.string(),
+    captured: z.string(),
+  }),
+});
+
+// case-study and course are real collections over real (currently empty) dirs,
+// so inc5 ships content by dropping .md files in rather than by building the
+// wiring it assumed was already there. Each dir carries a .gitkeep because git
+// cannot track an empty one, and a glob loader on a missing `base` warns every
+// build. Until inc5 no entry exercises these schemas, so they stay provisional:
+// `title` is the one key any index needs; inc5 owns pinning the rest.
+const provisional = z.object({
+  title: z.string(),
+  summary: z.string().optional(),
+});
+
+const caseStudy = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './content/case-study' }),
+  schema: provisional,
+});
+
+const course = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './content/course' }),
+  schema: provisional,
+});
+
+export const collections = { journey, prompts, 'case-study': caseStudy, course };

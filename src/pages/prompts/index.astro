@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionIndex from '../../components/SectionIndex.astro';
+
+const rows = (await getCollection('prompts'))
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map((entry) => ({
+    href: `/prompts/${entry.id}/`,
+    title: entry.data.title,
+    meta: entry.data.captured,
+  }));
+---
+<Base
+  title="Prompts · ai-coding-journey"
+  description="Sanitised, reusable prompts, reproduced as they were actually typed."
+>
+  <SectionIndex
+    title="Prompts"
+    lede="Reproduced as written — typos and notes-to-self included."
+    rows={rows}
+    empty="No prompts published yet."
+  />
+</Base>

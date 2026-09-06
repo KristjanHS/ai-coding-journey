@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionIndex from '../../components/SectionIndex.astro';
+
+// Empty until inc5 — the empty branch of SectionIndex is what renders today.
+const rows = (await getCollection('case-study'))
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map((entry) => ({ href: `/case-study/${entry.id}/`, title: entry.data.title }));
+---
+<Base
+  title="Case study · ai-coding-journey"
+  description="The sanitised markdown layer of a private ~5k-commit app."
+>
+  <SectionIndex
+    title="Case study"
+    lede="The sanitised markdown layer of the app this journey ends at."
+    rows={rows}
+    empty="Nothing here yet — the case study arrives at inc5."
+  />
+</Base>

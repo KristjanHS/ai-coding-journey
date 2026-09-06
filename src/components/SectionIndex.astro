@@ -1,0 +1,55 @@
+---
+// The one index shape shared by /prompts/, /case-study/ and /course/. Rows are
+// plain objects, not CollectionEntry, so three collections with three different
+// schemas can feed one component. /journey/ stays bespoke — it carries the
+// "also tried" timeline fold-in that no other section has.
+export interface Row {
+  href: string;
+  title: string;
+  meta?: string;
+}
+
+interface Props {
+  title: string;
+  lede: string;
+  rows: Row[];
+  empty: string;
+}
+const { title, lede, rows, empty } = Astro.props;
+---
+<h1>{title}</h1>
+<p class="lede">{lede}</p>
+
+{rows.length > 0 ? (
+  <ul class="rows">
+    {rows.map((row) => (
+      <li>
+        <a href={row.href}>{row.title}</a>
+        {row.meta && <span class="meta">{row.meta}</span>}
+      </li>
+    ))}
+  </ul>
+) : (
+  <p class="empty">{empty}</p>
+)}
+
+<style>
+  .lede { color: var(--fg-dim); margin-top: 0; }
+  .rows { list-style: none; padding: 0; }
+  .rows li {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1fr) auto;
+    gap: var(--space-2);
+    align-items: baseline;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .meta { font-family: var(--font-mono); font-size: var(--size-0); color: var(--fg-dim); }
+  .empty {
+    padding: var(--space-4) var(--space-3);
+    background: var(--bg-sunk);
+    border-radius: var(--radius);
+    color: var(--fg-dim);
+    text-align: center;
+  }
+</style>
