@@ -177,7 +177,7 @@ reads each git log, and writes three things:
 
 Nothing on that list is hand-edited; `make timeline` regenerates and the result is committed. Because
 the script scans *all* of `~/projects`, another repo's commits are enough to stale this repo's
-`timeline.json` — which is why the gate reports drift **loudly but never blocks on it**.
+`timeline.json`, so the gate does **not** check for drift — regenerate when the spine matters.
 
 ---
 
@@ -191,18 +191,17 @@ make dev        # Astro dev server on localhost:4321
 make ship       # clean tree + gate + push — the push is the deploy
 ```
 
-`make check` is four parts, all reported — the first three blocking:
+`make check` is three parts, all blocking:
 
 | Part | Blocks? | What it catches |
 | --- | --- | --- |
 | `markdownlint-cli2` over every `.md` | ✅ | formatting drift across the product itself |
 | `astro build` | ✅ | the Zod frontmatter gate — a bad `stage` enum, a string `commits`, an out-of-enum `artifact` |
 | `vitest run` | ✅ | the evidence rule, the missing `What didn't work`, the banned vocabulary, and the two mirrored constants |
-| timeline drift report | ❌ advisory | a stale `timeline.json` — printed as a diff with `make timeline` named as the fix |
 
-The drift probe snapshots the generated files, runs the script, compares, and restores them on **every**
-exit path, so the report cannot leave edits in the tree. The one thing it cannot undo is a **new chapter
-stub** — those are reported as untracked and deliberately left in place for you to fill in.
+The timeline is not part of the gate. Run `make timeline` when you want the spine refreshed; it rewrites
+`timeline.json`, the index and the generated frontmatter, and creates a chapter stub for any repo that has
+newly crossed 5 commits. Review and commit that as its own change.
 
 Never gate a commit on `cmd | tail`: the pipe reports tail's exit status, not the command's.
 

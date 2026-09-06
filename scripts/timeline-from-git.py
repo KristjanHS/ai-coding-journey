@@ -6,8 +6,8 @@ Usage: python3 scripts/timeline-from-git.py [PROJECTS_DIR]   (default ~/projects
 Deterministic for a fixed set of repos: rerunning rewrites timeline.json and the index
 byte-identically. Chapter stubs and 00-experiments.md are created only when absent, but
 the four GENERATED frontmatter fields (start/end/commits/stage) are re-synced into every
-existing chapter on each run -- so upstream commit drift shows up as a diff in `make
-check` instead of rotting silently. Author-owned frontmatter (title/tools/deck/artifact,
+existing chapter on each run, so a regen surfaces upstream commit drift as a reviewable
+diff in the tree. Author-owned frontmatter (title/tools/deck/artifact,
 and any other key) and the chapter body are never touched.
 Hand-maintain STAGE and EXCLUDE below; never hand-edit the generated files.
 """

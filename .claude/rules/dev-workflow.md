@@ -15,8 +15,8 @@ rule's `paths:` on purpose — it defines the gate, so editing it loads the gate
 
 ## The one gate
 
-**`make check`** = `markdownlint-cli2` (BLOCKING) + `astro build` (BLOCKING) + `vitest run` (BLOCKING) +
-a timeline drift report (ADVISORY). Run it **once per step** — don't re-run to "confirm".
+**`make check`** = `markdownlint-cli2` (BLOCKING) + `astro build` (BLOCKING) + `vitest run` (BLOCKING).
+Run it **once per step** — don't re-run to "confirm".
 
 Each part answers something the others can't:
 
@@ -30,9 +30,10 @@ Each part answers something the others can't:
   that sees frontmatter *types*.
 - **`vitest run`** is the executable half of `content-writing.md` — the evidence rule and the anti-hype
   rule as assertions. Authoring guidance for those tests → `testing-project.md`.
-- **timeline drift never blocks.** `scripts/timeline-from-git.py` scans all of `~/projects`, so another
-  repo's commits stale `content/timeline.json` — failing on that would red a content commit for activity
-  outside this repo. `make timeline` regenerates; commit the regen.
+- **the timeline is not in the gate.** `scripts/timeline-from-git.py` scans all of `~/projects`, so
+  another repo's commits stale `content/timeline.json`; the old advisory drift report ran the generator on
+  every gate to print a diff nobody was meant to act on. Run `make timeline` when the spine matters and
+  commit the regen on its own.
 
 **Never gate a commit on `cmd | tail`** — the pipe reports tail's exit status, so a red run reads green.
 The `lint`/`site`/`test` targets each capture-and-replay instead of piping, for exactly this reason.
@@ -59,8 +60,7 @@ twice and needs a linked `.vercel/`), and no separate build step (`check` alread
 
 ⚠ **A green push is not a green site.** Until the dashboard import has happened a push publishes nothing
 but the GitHub-rendered markdown; after it, the Vercel build can still fail on its own. Confirm the
-deployment — never infer it from a successful push. Drift stays advisory here too: a stale
-`timeline.json` never blocks a release.
+deployment — never infer it from a successful push. A stale `timeline.json` never blocks a release.
 
 The output is **static** — no adapter. Never install `@astrojs/vercel`: it switches the build to a server
 output nothing here needs. `vercel.json` states framework, build command and `dist` explicitly rather than

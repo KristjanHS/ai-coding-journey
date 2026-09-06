@@ -29,7 +29,7 @@ help: ## show this list of targets
 	  commitwt 'same, but in the linked worktree'
 
 # THE gate (CLAUDE.md: "one verification gate, run once per step").
-# Four parts, all reported, the first three blocking and the timeline advisory:
+# Three parts, all blocking:
 #   1. markdownlint-cli2 over every .md — BLOCKS (exit non-zero on a violation).
 #   2. astro build — BLOCKS. It carries the Zod frontmatter gate: a bad `stage`
 #      enum, a string `commits` or an out-of-enum `artifact` fails the build.
@@ -39,51 +39,16 @@ help: ## show this list of targets
 #      banned vocabulary. It also mirror-checks the two hand-copied constants
 #      (the banned list against content-writing.md, MIN_COMMITS against the
 #      generator), so a divergence reds instead of rotting quietly.
-#   4. a timeline drift report — NEVER blocks. timeline-from-git.py scans all of
-#      ~/projects, so the committed timeline.json goes stale whenever ANOTHER
-#      repo gains commits; failing on that would turn a content commit red for
-#      activity that has nothing to do with this repo. Drift is printed loudly
-#      and `make timeline` is the fix.
-# The drift probe is tree-preserving on every exit path: it snapshots the
-# generated files, runs the script, compares, and restores them — including when
-# the script itself dies mid-write. The snapshot covers ALL of content/journey,
-# not just README.md, because the script's sync_frontmatter rewrites chapter .md
-# files in place too; snapshotting only the index let those edits leak into the
-# tree unrestored and unreported. The one side effect it cannot undo is a NEW
-# chapter stub (the script creates those when a repo first crosses MIN_COMMITS)
-# — those are reported as untracked and deliberately left in place.
-check: ## THE gate: markdownlint + astro build + vitest (blocking) + a timeline drift report (advisory)
+# There is deliberately NO timeline drift probe here. It ran the generator on
+# every gate to compare-and-restore, and the answer was almost always drift the
+# repo could do nothing about: timeline-from-git.py scans all of ~/projects, so
+# another repo's commits staled content/timeline.json and printed a diff nobody
+# was meant to act on. `make timeline` regenerates on demand; that is the whole
+# mechanism now.
+check: ## THE gate: markdownlint + astro build + vitest, all blocking
 	@$(MAKE) --no-print-directory lint
 	@$(MAKE) --no-print-directory site
 	@$(MAKE) --no-print-directory test
-	@tmp=$$(mktemp -d) || exit 1; \
-	restore() { cp "$$tmp/timeline.json" content/timeline.json \
-	  && cp -a "$$tmp/journey/." content/journey/; }; \
-	cp content/timeline.json "$$tmp/timeline.json" || exit 1; \
-	cp -a content/journey "$$tmp/journey" || exit 1; \
-	python3 scripts/timeline-from-git.py >/dev/null \
-	  || { restore; rm -rf "$$tmp"; exit 1; }; \
-	drift=0; \
-	diff -q "$$tmp/timeline.json" content/timeline.json >/dev/null || drift=1; \
-	for f in "$$tmp"/journey/*.md; do \
-	  [ -e "$$f" ] || continue; \
-	  diff -q "$$f" "content/journey/$$(basename "$$f")" >/dev/null || drift=1; \
-	done; \
-	if [ "$$drift" = 1 ]; then \
-	  printf 'timeline ............. DRIFT\n'; \
-	  diff -u "$$tmp/timeline.json" content/timeline.json \
-	    | grep -E '^[-+][^-+]' | sed 's/^/    /'; \
-	  printf "    ! run 'make timeline' and commit the regen\n"; \
-	else \
-	  printf 'timeline ............. ok\n'; \
-	fi; \
-	restore || { echo "error: could not restore the generated files from $$tmp" >&2; exit 1; }; \
-	rm -rf "$$tmp"; \
-	touched=$$(git status --porcelain content/journey | grep -E '^(\?\?| M)' || true); \
-	if [ -n "$$touched" ]; then \
-	  printf 'content/journey ...... DIRTY (new stubs and/or edits — review and commit)\n'; \
-	  printf '%s\n' "$$touched" | sed 's/^/    /'; \
-	fi
 
 # The release: refuse a dirty tree, run THE gate, push. The push IS the deploy —
 # Vercel's git integration builds and publishes every push to `main` once the
@@ -99,9 +64,6 @@ check: ## THE gate: markdownlint + astro build + vitest (blocking) + a timeline 
 # ⚠ Until the repo is imported on vercel.com, a push publishes nothing but the
 # GitHub-rendered markdown. Confirm the deployment after a release; a green push
 # is not a green site.
-#
-# Drift stays advisory (see `check`): a stale timeline.json is a regen commit
-# away and never blocks a release.
 ship: ## the release: clean tree + make check (builds dist/) + push — the push is the Vercel deploy
 	@[ -z "$$(git status --porcelain)" ] || { \
 	  echo "error: working tree dirty — commit or stash before shipping" >&2; \
