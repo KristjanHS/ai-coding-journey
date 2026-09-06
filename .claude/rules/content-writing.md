@@ -35,7 +35,7 @@ measured*. A chapter without one is not done; the content test (from inc3) reds 
 | `content/journey/NN-<repo>.md` | frontmatter from `timeline.json` (never hand-edit dates/commits); `## What I was trying to do` · `## What didn't work` · `## What I learned` · `## Artifact`; ≤1 screenshot per section, referenced from `content/media/` | narrative padding, tool marketing, claims about repos not in `timeline.json`, anything the anti-hype list bans |
 | `content/journey/00-experiments.md` | one line per <5-commit repo: name · date · one-sentence outcome | a section per repo |
 | `content/journey/README.md` | **generated** index from `timeline.json` | hand edits |
-| `content/prompts/<repo>.md` | a prompt verbatim as used (sanitised), the date, one line on what it was for and whether it is still used | improved/idealised rewrites presented as the original |
+| `content/prompts/<repo>.md`, or a cross-cutting page where prompts span repos | a prompt verbatim as used (sanitised), one line on what it was for, and whether it is still used; a date per prompt where the source has one, else one page-level `captured:` range plus an explicit "undated in source" note | improved/idealised rewrites presented as the original; an inferred date; a guessed still-used status |
 | `content/case-study/crash-dash/**` | sanitised copies of the private repo's `.md` layer + architecture excerpts ≤40 lines each, each with its origin path and date | code files, `.env`, migrations, live URLs, commit SHAs of the private repo |
 | `content/course/skeleton.md` | module title · learning outcome · which chapters it draws on | syllabus detail, grading, schedule |
 | `content/timeline.json` | nothing by hand — regenerate | any manual edit |
