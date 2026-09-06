@@ -66,7 +66,6 @@ in [`00-experiments.md`](content/journey/00-experiments.md) instead of a chapter
 
 | Where | What is there |
 | --- | --- |
-
 | [`content/journey/`](content/journey/README.md) | one chapter per repo — the spine of the book |
 | [`content/prompts/`](content/prompts/agent-loop.md) | prompts reproduced as typed, typos and Estonian notes-to-self included |
 | `content/case-study/` | the sanitised `.md` layer of a private production repo *(empty until inc5)* |
@@ -88,7 +87,6 @@ not a maturity ladder:
 
 | Stage | What the method looked like |
 | --- | --- |
-
 | **chat** | code pasted in and out of a chat window; the human is the integration layer |
 | **local-llm** | models run locally, retrieval and evaluation built by hand |
 | **first-agent** | an agent edits the repo directly; small, short-lived experiments |
@@ -128,7 +126,6 @@ Read it top to bottom:
 
 | Piece | Example | Meaning |
 | --- | --- | --- |
-
 | **Frontmatter** | `commits: 4978` | Generated from the repo's git log. Prose cites counts rounded ("roughly 4,970"), never exact, so a regen doesn't strand a sentence. |
 | **Stage** | `production-app` | Which rung of the method this repo belongs to (see [the five stages](#-the-five-stages)). |
 | **`artifact:`** | `present` / `pending` | Whether the chapter carries its evidence yet. `present` with an empty `## Artifact` body reds the test suite. |
@@ -198,7 +195,6 @@ make ship       # clean tree + gate + push — the push is the deploy
 
 | Part | Blocks? | What it catches |
 | --- | --- | --- |
-
 | `markdownlint-cli2` over every `.md` | ✅ | formatting drift across the product itself |
 | `astro build` | ✅ | the Zod frontmatter gate — a bad `stage` enum, a string `commits`, an out-of-enum `artifact` |
 | `vitest run` | ✅ | the evidence rule, the missing `What didn't work`, the banned vocabulary, and the two mirrored constants |
@@ -238,7 +234,6 @@ infrastructure, so a push costs no Actions minutes.
 
 | Path | What it holds |
 | --- | --- |
-
 | `content/` | **the product** — journey, prompts, case study, course, timeline |
 | `src/` | the Astro site: `content.config.ts` (the schema), layouts, and the journey/prompts routes |
 | `tests/content.test.ts` | the executable half of the two content rules |
