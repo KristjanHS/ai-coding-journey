@@ -18,8 +18,10 @@ as-is); an Astro site on Vercel (from inc3) renders it as a browsable journey, a
 - `sources/` — gitignored OneNote exports (`.docx` per page) + pandoc output. Read via a cheap sub-agent
   brief, never whole files into the main session.
 
-**Writable `.md` targets** — `content/**`, `docs/plans/**`, `README.md`, `CLAUDE.md`; admission rows per
-target → `.claude/rules/content-writing.md`. `docs/plans/archive/**` is read-only.
+**Writable `.md` targets** — `content/**`, `docs/plans/**`, `README.md`, `docs/creator.md`, `CLAUDE.md`;
+admission rows per target → `.claude/rules/content-writing.md`. `docs/plans/archive/**` is read-only.
+`README.md` addresses **readers** of the journey only — every build/verify/deploy/repo-layout detail lives
+in `docs/creator.md`; never reintroduce it into the README.
 
 ## Workflow
 

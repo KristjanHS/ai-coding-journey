@@ -1,0 +1,127 @@
+# Working on this repo
+
+Everything a contributor — or the author six months from now — needs to build, verify and publish this
+knowledge base. The [README](../README.md) is for people **reading** the journey; this page is for people
+**running** it.
+
+- [Prerequisites](#prerequisites)
+- [Building it](#building-it) — the one verification gate
+- [How the timeline is generated](#how-the-timeline-is-generated)
+- [How the content rules are enforced](#how-the-content-rules-are-enforced)
+- [Deploying it](#deploying-it)
+- [Repository map](#repository-map)
+
+---
+
+## Prerequisites
+
+Node (for Astro, markdownlint and vitest) and Python 3 (for the timeline generator). Then:
+
+```bash
+npm install
+```
+
+The `make` targets check for the binaries they need and tell you to run `npm install` if one is missing.
+
+---
+
+## Building it
+
+```bash
+make            # list every target
+make check      # THE gate — run it once per step
+make timeline   # regenerate timeline.json + the index, then commit the regen
+make dev        # Astro dev server on localhost:4321
+make ship       # clean tree + gate + push — the push is the deploy
+```
+
+`make check` is three parts, all blocking:
+
+| Part | Blocks? | What it catches |
+| --- | --- | --- |
+| `markdownlint-cli2` over every `.md` | ✅ | formatting drift across the product itself |
+| `astro build` | ✅ | the Zod frontmatter gate — a bad `stage` enum, a string `commits`, an out-of-enum `artifact` |
+| `vitest run` | ✅ | the evidence rule, the missing `What didn't work`, the banned vocabulary, and the two mirrored constants |
+
+The timeline is not part of the gate. Run `make timeline` when you want the spine refreshed; it rewrites
+`timeline.json`, the index and the generated frontmatter, and creates a chapter stub for any repo that has
+newly crossed 5 commits. Review and commit that as its own change.
+
+Two things the gate cannot see: `markdownlint` ignores `.claude/`, so a malformed rule file never reds it,
+and nothing type-checks the prose. Both are reviewed by eye.
+
+Never gate a commit on `cmd | tail`: the pipe reports tail's exit status, not the command's.
+
+---
+
+## How the timeline is generated
+
+`scripts/timeline-from-git.py` is the single source of the spine. It scans the repos under `~/projects`,
+reads each git log, and writes three things:
+
+1. **`content/timeline.json`** — repo · first commit · last commit · commit count · stage.
+2. **`content/journey/README.md`** — the index table, regenerated whole.
+3. **The four generated frontmatter keys** in every chapter (`start` · `end` · `commits` · `stage`),
+   rewritten in place — plus a fresh chapter **stub** the first time a repo crosses **5 commits**.
+
+Nothing on that list is hand-edited; `make timeline` regenerates and the result is committed. Author-owned
+frontmatter (`title`, `tools`, `deck`, `artifact`) and the chapter body are never touched by the script.
+
+Because it scans *all* of `~/projects`, another repo's commits are enough to stale this repo's
+`timeline.json` — which is why the gate does **not** probe for drift. Regenerate when the spine matters.
+Prose that cites a commit count is written rounded ("roughly 4,970") for the same reason: a regen must not
+strand a sentence.
+
+The stage of each repo is hand-maintained in `STAGE` in that script, mirrored into every chapter's
+frontmatter and validated by the Zod schema in `src/content.config.ts`.
+
+---
+
+## How the content rules are enforced
+
+The [two content rules](../README.md#-the-two-content-rules) are binding *and* executable. The vitest suite
+in `tests/content.test.ts` is their machine half; `.claude/rules/content-writing.md` is their prose half.
+The two are mirror-tested against each other, so a reworded rule reds instead of rotting quietly — the
+banned-vocabulary list and the `MIN_COMMITS` threshold are each asserted against their other copy.
+
+Every new assertion owes a **mutate-and-confirm-red demo** before the step that added it counts as
+verified. A check that cannot fail proves nothing.
+
+---
+
+## Deploying it
+
+The site is **static**. `astro build` writes plain HTML into `dist/` — no server runtime, no serverless
+functions, and **no `@astrojs/vercel` adapter**: Vercel auto-detects a static Astro project, and installing
+an adapter would switch the build to a server output nothing here needs. `vercel.json` states the same
+settings explicitly so the build does not depend on detection.
+
+The one-time setup — sign in at [vercel.com](https://vercel.com) with the GitHub account that owns the
+repo, **Add New… → Project → Import** `ai-coding-journey`, leave every build setting untouched because
+`vercel.json` already declares them — was done on 2026-09-06. The project now lives at
+[ai-coding-journey-five.vercel.app](https://ai-coding-journey-five.vercel.app).
+
+There is nothing left to run: Vercel's git integration builds and publishes **every push to `main`**, so
+`make ship` (clean tree → gate → push) is the whole release. `make ship` deliberately does not call the
+`vercel` CLI — that would publish the same commit twice and would need a linked `.vercel/` directory a
+fresh clone does not have. Nor is there a GitHub Actions workflow: Vercel builds on its own
+infrastructure, so a push costs no Actions minutes.
+
+⚠ A green push is still not a green site — check the deployment.
+
+---
+
+## Repository map
+
+| Path | What it holds |
+| --- | --- |
+| `content/` | **the product** — journey, prompts, case study, course, timeline |
+| `src/` | the Astro site: `content.config.ts` (the schema), layouts, and the journey/prompts routes |
+| `tests/content.test.ts` | the executable half of the two content rules |
+| `vercel.json` | the static-build settings Vercel reads — framework, build command, `dist` |
+| `scripts/timeline-from-git.py` | the generator behind `timeline.json`, the index, and chapter stubs |
+| `scripts/onenote/` | the export path that lifts the source notebook out of Windows |
+| `sources/` | gitignored OneNote exports — raw input, never published |
+| `.claude/rules/` | the path-gated conventions the agent works under — the executable rules' prose half |
+| `CLAUDE.md` | the agent's brief for this repo: where things live, the one gate, the constraints |
+| `docs/plans/` | the living spec and the per-increment specs (a symlink out of the repo) |

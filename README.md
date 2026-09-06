@@ -10,15 +10,14 @@
 [![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
 [![Live](https://img.shields.io/badge/Live-vercel-000000?logo=vercel&logoColor=white)](https://ai-coding-journey-five.vercel.app)
 
-[What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-five-stages) · [The two rules](#-the-two-content-rules) · [Build it](#-building-it) · [Chapters](content/journey/README.md) · [Prompts](content/prompts/agent-loop.md)
+[What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-five-stages) · [The two rules](#-the-two-content-rules) · [Chapters](content/journey/README.md) · [Prompts](content/prompts/agent-loop.md)
 
 </div>
 
 > **Status 2026-09-06:** the markdown under `content/` is the product and renders on GitHub as-is. An
 > Astro site (inc3) now builds the journey and prompts routes from those same files; `case-study/` and
 > `course/` are wired collections over empty directories, and the whole thing renders live at
-> **[ai-coding-journey-five.vercel.app](https://ai-coding-journey-five.vercel.app)**. `make ship` is the
-> release — and the push it ends with *is* the deploy ([Deploying it](#-deploying-it)).
+> **[ai-coding-journey-five.vercel.app](https://ai-coding-journey-five.vercel.app)**.
 
 It is a chapter per repo, in the order the repos were started, tracing how the tooling moved from a chat
 window to agents running under a written review system. The author **does not read the generated code**;
@@ -37,13 +36,9 @@ least one real artifact and a *What didn't work* section — **failures get equa
 
 - 📖 [Decoding a chapter](#-decoding-a-chapter)
 - 📐 [The two content rules](#-the-two-content-rules)
-- 🧮 [How the timeline is generated](#-how-the-timeline-is-generated)
-
-**Reference** — the machinery behind the pages
-
-- 🧰 [Building it](#-building-it) — the one verification gate
-- 📁 [Repository map](#-repository-map)
 - 🧭 [Status and roadmap](#-status-and-roadmap)
+
+**Working on the repo itself** — building, verifying, publishing → [`docs/creator.md`](docs/creator.md)
 
 ---
 
@@ -80,10 +75,8 @@ progress meter; no count is published on this page, because a hardcoded one rots
 
 ## 🪜 The five stages
 
-Each repo is tagged with the stage of the journey it belongs to (`STAGE` in
-`scripts/timeline-from-git.py`, mirrored into every chapter's frontmatter and validated by the Zod
-schema in `src/content.config.ts`). The stages are a description of what changed in the working method,
-not a maturity ladder:
+Each repo is tagged with the stage of the journey it belongs to, and that tag appears in every chapter's
+frontmatter. The stages describe what changed in the working method — they are not a maturity ladder:
 
 | Stage | What the method looked like |
 | --- | --- |
@@ -139,9 +132,8 @@ taught me, and here is the artifact you can check it against.*
 
 ## 📐 The two content rules
 
-Both are binding, both are executable — the vitest suite in `tests/content.test.ts` is their machine
-half, and `.claude/rules/content-writing.md` their prose half. The two are mirror-tested against each
-other, so a reworded rule reds instead of rotting quietly.
+Both are binding, and both are enforced by a test suite rather than by good intentions — a chapter that
+breaks one of them cannot be published ([how that is wired](docs/creator.md#how-the-content-rules-are-enforced)).
 
 **1 · The evidence rule.** Every chapter carries **≥1 artifact block**: a real prompt, a rule or skill
 excerpt, a defect a reviewer sub-agent caught (with the fix commit's subject), or a measured number
@@ -160,88 +152,8 @@ excerpt, a defect a reviewer sub-agent caught (with the fix commit's subject), o
 - **Public-link gate** — before the first public link, a fresh sub-agent runs a sceptical senior-engineer
   review over `content/`; every hype finding is fixed or the sentence is deleted.
 
-> Every assertion above owes a mutate-and-confirm-red demo before it counts as verified. A check that
-> cannot fail proves nothing — which is itself one of the lessons the chapters keep arriving at.
-
----
-
-## 🧮 How the timeline is generated
-
-`scripts/timeline-from-git.py` is the single source of the spine. It scans the repos under `~/projects`,
-reads each git log, and writes three things:
-
-1. **`content/timeline.json`** — repo · first commit · last commit · commit count · stage.
-2. **`content/journey/README.md`** — the index table, regenerated whole.
-3. **The four generated frontmatter keys** in every chapter (`start` · `end` · `commits` · `stage`),
-   rewritten in place — plus a fresh chapter **stub** the first time a repo crosses **5 commits**.
-
-Nothing on that list is hand-edited; `make timeline` regenerates and the result is committed. Because
-the script scans *all* of `~/projects`, another repo's commits are enough to stale this repo's
-`timeline.json`, so the gate does **not** check for drift — regenerate when the spine matters.
-
----
-
-## 🧰 Building it
-
-```bash
-make            # list every target
-make check      # THE gate — run it once per step
-make timeline   # regenerate timeline.json + the index, then commit the regen
-make dev        # Astro dev server on localhost:4321
-make ship       # clean tree + gate + push — the push is the deploy
-```
-
-`make check` is three parts, all blocking:
-
-| Part | Blocks? | What it catches |
-| --- | --- | --- |
-| `markdownlint-cli2` over every `.md` | ✅ | formatting drift across the product itself |
-| `astro build` | ✅ | the Zod frontmatter gate — a bad `stage` enum, a string `commits`, an out-of-enum `artifact` |
-| `vitest run` | ✅ | the evidence rule, the missing `What didn't work`, the banned vocabulary, and the two mirrored constants |
-
-The timeline is not part of the gate. Run `make timeline` when you want the spine refreshed; it rewrites
-`timeline.json`, the index and the generated frontmatter, and creates a chapter stub for any repo that has
-newly crossed 5 commits. Review and commit that as its own change.
-
-Never gate a commit on `cmd | tail`: the pipe reports tail's exit status, not the command's.
-
----
-
-## 🚀 Deploying it
-
-The site is **static**. `astro build` writes plain HTML into `dist/` — no server runtime, no serverless
-functions, and **no `@astrojs/vercel` adapter**: Vercel auto-detects a static Astro project, and installing
-an adapter would switch the build to a server output nothing here needs. `vercel.json` states the same
-settings explicitly so the build does not depend on detection.
-
-The one-time setup — sign in at [vercel.com](https://vercel.com) with the GitHub account that owns the
-repo, **Add New… → Project → Import** `ai-coding-journey`, leave every build setting untouched because
-`vercel.json` already declares them — was done on 2026-09-06. The project now lives at
-[ai-coding-journey-five.vercel.app](https://ai-coding-journey-five.vercel.app).
-
-There is nothing left to run: Vercel's git integration builds and publishes **every push to `main`**, so
-`make ship` (clean tree → gate → push) is the whole release. `make ship` deliberately does not call the
-`vercel` CLI — that would publish the same commit twice and would need a linked `.vercel/` directory a
-fresh clone does not have. Nor is there a GitHub Actions workflow: Vercel builds on its own
-infrastructure, so a push costs no Actions minutes.
-
-⚠ A green push is still not a green site — check the deployment.
-
----
-
-## 📁 Repository map
-
-| Path | What it holds |
-| --- | --- |
-| `content/` | **the product** — journey, prompts, case study, course, timeline |
-| `src/` | the Astro site: `content.config.ts` (the schema), layouts, and the journey/prompts routes |
-| `tests/content.test.ts` | the executable half of the two content rules |
-| `vercel.json` | the static-build settings Vercel reads — framework, build command, `dist` |
-| `scripts/timeline-from-git.py` | the generator behind `timeline.json`, the index, and chapter stubs |
-| `scripts/onenote/` | the export path that lifts the source notebook out of Windows |
-| `sources/` | gitignored OneNote exports — raw input, never published |
-| `.claude/rules/` | the path-gated conventions the agent works under — the executable rules' prose half |
-| `CLAUDE.md` | the agent's brief for this repo: where things live, the one gate, the constraints |
+> Every check above has itself been broken on purpose once, to prove it can fail. A check that cannot
+> fail proves nothing — which is itself one of the lessons the chapters keep arriving at.
 
 ---
 
@@ -249,8 +161,8 @@ infrastructure, so a push costs no Actions minutes.
 
 **Live today:** thirteen chapters (several still stubs) plus the experiments round-up, one prompts page
 lifted verbatim from OneNote, a generated timeline and index, the two content rules in executable form,
-and an Astro build over the same markdown — home, journey and prompts routes, with `case-study/` and
-`course/` as wired empty states, committed Vercel settings and a `make ship` whose push is the deploy.
+and an Astro site over the same markdown — home, journey and prompts routes, with `case-study/` and
+`course/` as honest empty states.
 
 **Where it's heading.** Fill the pending chapters to `artifact: present`; publish the sanitised
 crash-dash case study and the course skeleton (inc5); then the web-native lecture deck (TalTech, 19 Nov 2026), which is what the
@@ -259,3 +171,10 @@ and a book from the same files is the long horizon.
 
 Increments stay thin — one session each, visible on GitHub the same day. The binding constraint is not
 ambition; it is the token budget.
+
+---
+
+## 🛠 Working on this repo
+
+Building it, the one verification gate, how the timeline is generated, and how it deploys —
+**[`docs/creator.md`](docs/creator.md)**.
