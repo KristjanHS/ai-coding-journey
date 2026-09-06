@@ -66,6 +66,7 @@ check: ## THE gate: markdownlint + astro build + vitest (blocking) + a timeline 
 	drift=0; \
 	diff -q "$$tmp/timeline.json" content/timeline.json >/dev/null || drift=1; \
 	for f in "$$tmp"/journey/*.md; do \
+	  [ -e "$$f" ] || continue; \
 	  diff -q "$$f" "content/journey/$$(basename "$$f")" >/dev/null || drift=1; \
 	done; \
 	if [ "$$drift" = 1 ]; then \

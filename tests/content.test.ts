@@ -74,6 +74,17 @@ function section(body: string, heading: string): string | undefined {
   return (next === -1 ? after : after.slice(0, next)).trim();
 }
 
+/**
+ * A whole-word match for `word`, safe for entries that begin or end with a
+ * non-word character. `\b` cannot express a boundary next to `+` or `.`, so a
+ * future banned entry like `C++` would compile to a regex that never matches —
+ * unenforced, and silent about it. Explicit lookarounds have no such hole.
+ */
+function bounded(word: string): string {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return `(?<![A-Za-z0-9])${escaped}(?![A-Za-z0-9])`;
+}
+
 const CONTENT_FILES = contentFiles();
 const CHAPTERS = chapters();
 
@@ -102,7 +113,10 @@ describe('evidence rule', () => {
   it.each(CHAPTERS)('%s: artifact frontmatter matches the Artifact body', (path) => {
     const body = read(path);
     const declared = frontmatter(body, 'artifact');
-    expect(declared, `${path}: no \`artifact:\` in frontmatter`).toBeDefined();
+    // The enum is also the Zod schema's, and `astro build` runs before vitest in
+    // `make check` — but assert it here too so `make test` stands on its own and
+    // a typo cannot fall through to the `pending` branch below.
+    expect([`present`, `pending`], `${path}: \`artifact: ${declared}\``).toContain(declared);
 
     const artifact = section(body, 'Artifact');
     expect(artifact, `${path}: no \`## Artifact\` heading`).toBeDefined();
@@ -125,9 +139,7 @@ describe('anti-hype rule', () => {
   // not just the chapters -- because the rule's own `paths:` is content/**/*.md.
   it.each(CONTENT_FILES)('%s: uses no banned vocabulary', (path) => {
     const body = read(path);
-    const hits = BANNED.filter((word) =>
-      new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(body),
-    );
+    const hits = BANNED.filter((word) => new RegExp(bounded(word), 'i').test(body));
     expect(hits, `${path}: banned vocabulary`).toEqual([]);
   });
 });
