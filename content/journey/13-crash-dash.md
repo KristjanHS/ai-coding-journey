@@ -19,7 +19,7 @@ Ship and operate a production dashboard application without reading the generate
 That is the honest description, and it is the whole point of this chapter. The repo is private, so
 nothing here quotes its source. What can be shown is the layer I *do* write and read: the rules that
 constrain the agent, the gates that have to go green, and the defects those gates caught. Roughly
-4,969 commits over 73 days, counted from the repo's git log on 2026-09-06 — a rate that is only
+4,970 commits over 73 days, counted from the repo's git log on 2026-09-06 — a rate that is only
 survivable if the review system, not my attention, is what holds quality.
 
 ## What didn't work
@@ -61,7 +61,8 @@ two failures above matter more than any feature in the repo.
 
 ## Artifact
 
-From the repo's indicator rules (2026-07-25) — the rule that ended the duplicated-threshold problem:
+From the repo's indicator rules — the rule that ended the duplicated-threshold problem. The rule file
+was created 2026-07-25; this wording entered it on 2026-07-28:
 
 ```text
 A retune is a ONE-place edit — never restate a cut's value. registry.ts is the
@@ -70,7 +71,8 @@ docblock, a test fixture, a mock level, a plan doc, or docs/public prose —
 every copy is a second source that has to be hand-found on the next retune.
 ```
 
-And from the research-probe rules, added the same day — the rule that ended the false-confidence problem:
+And from the research-probe rules — the rule that ended the false-confidence problem. That file dates
+from 2026-07-25 too, but this rule was only written after the failure it describes, on 2026-08-07:
 
 ```text
 sim:notify is not evidence. It synthesizes confirmed STATES directly, so it

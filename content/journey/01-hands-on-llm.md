@@ -26,7 +26,7 @@ checkpoints because I did not trust myself to notice a skipped prerequisite:
 > to learn and practice. Each step needs to have a check-point that validates I have understood
 > enough and I have not missed a step that is necessary to continue.
 
-169 commits between 2025-06-19 and 2026-04-11. The early ones are not impressive and that is the
+Around 170 commits, nearly all of them between 2025-06-19 and 2026-04-11. The early ones are not impressive and that is the
 point — `test2 for vscode wsl 2 venv verification`, then `cwd debug`, then `removed ready`.
 
 ## What didn't work
@@ -74,7 +74,9 @@ one log line each in a log I skimmed.
 ## What I learned
 
 **Pick the model from a benchmark, not from a vibe.** Comparing coding models against HumanEval
-pass@1 alongside their 4-bit VRAM footprint made the choice mechanical:
+pass@1 alongside their 4-bit VRAM footprint made the choice mechanical. These are the published
+figures I recorded at decision time, not measurements of my own — the next section is about what
+happens when that distinction is forgotten:
 
 | model | HumanEval pass@1 | 4-bit VRAM |
 | --- | --- | --- |
