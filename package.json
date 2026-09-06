@@ -1,0 +1,13 @@
+{
+  "name": "ai-coding-journey",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Public markdown-first knowledge base of one person's journey back into coding with AI agents.",
+  "scripts": {
+    "check": "make check",
+    "lint": "markdownlint-cli2 \"**/*.md\""
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.23.2"
+  }
+}

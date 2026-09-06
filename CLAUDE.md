@@ -27,9 +27,11 @@ target → `.claude/rules/content-writing.md`. `docs/plans/archive/**` is read-o
   reviewer caught / measured number) and a *What didn't work* line. Banned vocabulary and the sceptic
   review gate → `content-writing.md`. A claim about a private repo names the lesson, never code, live
   links or colleagues.
-- **One verification gate, run once per step** (from inc3: `npm run check`; until then `python3
-  scripts/timeline-from-git.py` must regenerate `timeline.json` + the journey index byte-identically).
-  Never gate a commit on `cmd | tail` — the pipe reports tail's exit status.
+- **One verification gate, run once per step**: `make check` — markdownlint over every `.md` (BLOCKING)
+  plus a timeline drift report (ADVISORY: `timeline-from-git.py` scans all of `~/projects`, so another
+  repo's commits stale `timeline.json`; `make timeline` regenerates it, then commit the regen). `make`
+  with no argument lists every target; inc3 adds the Astro ones. Never gate a commit on `cmd | tail` —
+  the pipe reports tail's exit status.
 - **Every new assertion owes a mutate-and-confirm-red demo** before a stage is called verified — including
   the content tests (evidence rule, banned words): a check that cannot fail proves nothing.
 - **Token budget is the binding resource.** Thin increments (≤1 session, visible on GitHub the same day);
