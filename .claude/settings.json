@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./docs/plans/archive/**)",
+      "Read(./docs/archive/**)",
+      "Read(**/.env.prod)"
+    ]
+  }
+}
