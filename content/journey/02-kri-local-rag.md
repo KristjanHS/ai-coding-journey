@@ -38,8 +38,9 @@ feature had zero test coverage. Nothing failed loudly; the code path was simply 
 times anyway. Every layer was individually defensible and the stack as a whole was maintenance cost for
 no benefit.
 
-**Sixty lines of Streamlit logging plumbing.** Per-thread handler gymnastics in `rag_app.py`
-(lines 51–79 and 185–226) to get log lines attributed correctly in the UI.
+**Sixty lines of Streamlit logging plumbing.** Per-thread handler gymnastics in `rag_app.py` — lines
+51–79 and 185–226 as the 2026-06-24 review found them — to get log lines attributed correctly in the
+UI. That file has since been refactored, so those line numbers locate the finding, not current code.
 
 **A startup routine that was not load-bearing.** The bootstrap performed a warmup dance — a PDF
 round-trip, a `delete_many`, a version fallback — on the theory that the embedder needed priming. It

@@ -61,7 +61,7 @@ two failures above matter more than any feature in the repo.
 
 ## Artifact
 
-From the repo's indicator rules (2026-06-25) — the rule that ended the duplicated-threshold problem:
+From the repo's indicator rules (2026-07-25) — the rule that ended the duplicated-threshold problem:
 
 ```text
 A retune is a ONE-place edit — never restate a cut's value. registry.ts is the
@@ -70,7 +70,7 @@ docblock, a test fixture, a mock level, a plan doc, or docs/public prose —
 every copy is a second source that has to be hand-found on the next retune.
 ```
 
-And from the research-probe rules, same date — the rule that ended the false-confidence problem:
+And from the research-probe rules, added the same day — the rule that ended the false-confidence problem:
 
 ```text
 sim:notify is not evidence. It synthesizes confirmed STATES directly, so it

@@ -2,8 +2,13 @@
   "permissions": {
     "deny": [
       "Read(./docs/plans/archive/**)",
+      "Read(**/dotfiles/docs/plans/ai-coding-journey/archive/**)",
       "Read(./docs/archive/**)",
-      "Read(**/.env.prod)"
+      "Read(**/.env*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/id_rsa)",
+      "Read(**/id_ed25519)"
     ],
     "blockReadsOutsideWorkingDirectories": false
   }
