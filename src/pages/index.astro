@@ -3,15 +3,11 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 
 // Counts are derived at build time from the collections themselves, so a
-// section can never advertise rows it does not have. A zero-length section
-// reads "arrives at inc5" instead of a link that looks live and isn't.
-const counts = {
-  journey: (await getCollection('journey')).length,
-  prompts: (await getCollection('prompts')).length,
-  'case-study': (await getCollection('case-study')).length,
-  course: (await getCollection('course')).length,
-};
-
+// section can never advertise rows it does not have. One rule covers all four:
+// a section with no entries is not a link, and says why it is empty in its own
+// words — "arrives at inc5" for the unwritten sections, "none yet" for the
+// published ones. A live-looking link onto an empty index is the thing this
+// avoids, so the branch is on the count, never on the section's identity.
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 const sections = [
@@ -19,28 +15,39 @@ const sections = [
     href: '/journey/',
     title: 'The journey',
     blurb: 'One chapter per repo, oldest first.',
-    count: plural(counts.journey, 'chapter', 'chapters'),
+    count: (await getCollection('journey')).length,
+    unit: ['chapter', 'chapters'] as const,
+    whenEmpty: 'none yet',
   },
   {
     href: '/prompts/',
     title: 'Prompts',
     blurb: 'Reusable prompts, reproduced as they were typed.',
-    count: plural(counts.prompts, 'prompt', 'prompts'),
+    count: (await getCollection('prompts')).length,
+    unit: ['prompt', 'prompts'] as const,
+    whenEmpty: 'none yet',
   },
   {
     href: '/case-study/',
     title: 'Case study',
     blurb: 'The markdown layer of the app this ends at.',
-    count: counts['case-study'] > 0 ? plural(counts['case-study'], 'page', 'pages') : null,
+    count: (await getCollection('case-study')).length,
+    unit: ['page', 'pages'] as const,
+    whenEmpty: 'arrives at inc5',
   },
   {
     href: '/course/',
     title: 'Course',
     blurb: 'Built from the same markdown.',
-    count: counts.course > 0 ? plural(counts.course, 'page', 'pages') : null,
+    count: (await getCollection('course')).length,
+    unit: ['page', 'pages'] as const,
+    whenEmpty: 'arrives at inc5',
   },
-];
-const PENDING = 'arrives at inc5';
+].map((section) => ({
+  ...section,
+  live: section.count > 0,
+  label: section.count > 0 ? plural(section.count, ...section.unit) : section.whenEmpty,
+}));
 ---
 <Base
   title="ai-coding-journey"
@@ -55,8 +62,10 @@ const PENDING = 'arrives at inc5';
   <ul class="sections">
     {sections.map((section) => (
       <li>
-        <a href={section.href}>{section.title}</a>
-        <span class="count">{section.count ?? PENDING}</span>
+        {section.live
+          ? <a href={section.href}>{section.title}</a>
+          : <span class="pending">{section.title}</span>}
+        <span class="count">{section.label}</span>
         <span class="blurb">{section.blurb}</span>
       </li>
     ))}
@@ -75,6 +84,7 @@ const PENDING = 'arrives at inc5';
     border-bottom: 1px solid var(--rule);
   }
   .count, .blurb { font-size: var(--size-0); color: var(--fg-dim); }
+  .pending { color: var(--fg-dim); }
   .count { font-family: var(--font-mono); }
   @media (max-width: 34rem) {
     .sections li { grid-template-columns: 1fr; gap: var(--space-1); }
