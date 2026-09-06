@@ -189,7 +189,7 @@ make            # list every target
 make check      # THE gate — run it once per step
 make timeline   # regenerate timeline.json + the index, then commit the regen
 make dev        # Astro dev server on localhost:4321
-make ship       # clean tree + gate + push
+make ship       # clean tree + gate + push — the push is the deploy
 ```
 
 `make check` is four parts, all reported — the first three blocking:
@@ -210,6 +210,31 @@ Never gate a commit on `cmd | tail`: the pipe reports tail's exit status, not th
 
 ---
 
+## 🚀 Deploying it
+
+The site is **static**. `astro build` writes plain HTML into `dist/` — no server runtime, no serverless
+functions, and **no `@astrojs/vercel` adapter**: Vercel auto-detects a static Astro project, and installing
+an adapter would switch the build to a server output nothing here needs. `vercel.json` states the same
+settings explicitly so the build does not depend on detection.
+
+One-time setup, done once by hand:
+
+1. Sign in at [vercel.com](https://vercel.com) with the GitHub account that owns this repo.
+2. **Add New… → Project**, then **Import** `ai-coding-journey`.
+3. Leave every build setting untouched — `vercel.json` already declares the framework, the build command
+   and `dist` as the output directory.
+4. **Deploy.**
+
+After that there is nothing to run: Vercel's git integration builds and publishes **every push to `main`**,
+so `make ship` (clean tree → gate → push) is the whole release. `make ship` deliberately does not call the
+`vercel` CLI — that would publish the same commit twice and would need a linked `.vercel/` directory a
+fresh clone does not have.
+
+⚠ Until the import in step 2 has happened, a push publishes nothing but the GitHub-rendered markdown. A
+green push is not a green site — check the deployment.
+
+---
+
 ## 📁 Repository map
 
 | Path | What it holds |
@@ -218,6 +243,7 @@ Never gate a commit on `cmd | tail`: the pipe reports tail's exit status, not th
 | `content/` | **the product** — journey, prompts, case study, course, timeline |
 | `src/` | the Astro site: `content.config.ts` (the schema), layouts, and the journey/prompts routes |
 | `tests/content.test.ts` | the executable half of the two content rules |
+| `vercel.json` | the static-build settings Vercel reads — framework, build command, `dist` |
 | `scripts/timeline-from-git.py` | the generator behind `timeline.json`, the index, and chapter stubs |
 | `scripts/onenote/` | the export path that lifts the source notebook out of Windows |
 | `sources/` | gitignored OneNote exports — raw input, never published |
@@ -231,11 +257,10 @@ Never gate a commit on `cmd | tail`: the pipe reports tail's exit status, not th
 **Live today:** thirteen chapters (several still stubs) plus the experiments round-up, one prompts page
 lifted verbatim from OneNote, a generated timeline and index, the two content rules in executable form,
 and an Astro build over the same markdown — home, journey and prompts routes, with `case-study/` and
-`course/` as wired empty states.
+`course/` as wired empty states, committed Vercel settings and a `make ship` whose push is the deploy.
 
 **Where it's heading.** Fill the pending chapters to `artifact: present`; publish the sanitised
-crash-dash case study and the course skeleton (inc5); add the deploy step to `make ship` so the site
-ships with the markdown; then the web-native lecture deck (TalTech, 19 Nov 2026), which is what the
+crash-dash case study and the course skeleton (inc5); then the web-native lecture deck (TalTech, 19 Nov 2026), which is what the
 `deck:` frontmatter key is reserved for. Interactive explorers over `timeline.json` come after that,
 and a book from the same files is the long horizon.
 

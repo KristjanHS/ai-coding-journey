@@ -51,11 +51,20 @@ remains the user's eye.
 
 ## Release
 
-**`make ship` is the release**: refuse a dirty tree → `make check` → `git push`. Drift stays advisory here
-too — a stale `timeline.json` is a regen commit away and never blocks a release. Until the Vercel project
-is connected, the push *is* the deploy surface: GitHub renders `content/` as-is. When the site is live,
-re-read the `ship` recipe before assuming a push published anything — a target that documents a deploy step
-in a comment but doesn't run one is the failure this line exists to catch.
+**`make ship` is the release**: refuse a dirty tree → `make check` → `git push`. **The push IS the
+deploy** — Vercel's git integration builds and publishes every push to `main` once the repo is imported on
+vercel.com. There is deliberately no `vercel` CLI call in the recipe (it would publish the same commit
+twice and needs a linked `.vercel/`), and no separate build step (`check` already runs `astro build`, so
+`dist/` is proven before the push).
+
+⚠ **A green push is not a green site.** Until the dashboard import has happened a push publishes nothing
+but the GitHub-rendered markdown; after it, the Vercel build can still fail on its own. Confirm the
+deployment — never infer it from a successful push. Drift stays advisory here too: a stale
+`timeline.json` never blocks a release.
+
+The output is **static** — no adapter. Never install `@astrojs/vercel`: it switches the build to a server
+output nothing here needs. `vercel.json` states framework, build command and `dist` explicitly rather than
+relying on Vercel's auto-detection.
 
 ## Code review
 

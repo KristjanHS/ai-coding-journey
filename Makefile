@@ -85,12 +85,24 @@ check: ## THE gate: markdownlint + astro build + vitest (blocking) + a timeline 
 	  printf '%s\n' "$$touched" | sed 's/^/    /'; \
 	fi
 
-# The release, early form: refuse a dirty tree, run THE gate, push. There is no
-# deploy step yet on purpose — GitHub renders content/ as-is, so a push IS the
-# release until inc3 puts the Astro site on Vercel; that deploy joins here, after
-# the push, when it exists. Drift stays advisory (see `check`): a stale
-# timeline.json is a regen commit away and never blocks a content release.
-ship: ## the release: clean tree + make check + git push (deploy joins at inc3)
+# The release: refuse a dirty tree, run THE gate, push. The push IS the deploy —
+# Vercel's git integration builds and publishes every push to `main` once the
+# repo is imported on vercel.com (README §Deploying it). There is deliberately no
+# `vercel deploy` CLI call here: it would be a SECOND publish of the same commit,
+# it needs a linked .vercel/ and an authenticated CLI that a fresh clone does not
+# have, and it would bypass the build Vercel runs anyway.
+#
+# No separate build step either — `check` already runs `astro build` (see the
+# `site` target), so dist/ is proven green before the push. A second build would
+# verify nothing the gate did not.
+#
+# ⚠ Until the repo is imported on vercel.com, a push publishes nothing but the
+# GitHub-rendered markdown. Confirm the deployment after a release; a green push
+# is not a green site.
+#
+# Drift stays advisory (see `check`): a stale timeline.json is a regen commit
+# away and never blocks a release.
+ship: ## the release: clean tree + make check (builds dist/) + push — the push is the Vercel deploy
 	@[ -z "$$(git status --porcelain)" ] || { \
 	  echo "error: working tree dirty — commit or stash before shipping" >&2; \
 	  git status --short >&2; exit 1; }
