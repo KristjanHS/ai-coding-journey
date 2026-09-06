@@ -67,7 +67,7 @@ in [`00-experiments.md`](content/journey/00-experiments.md) instead of a chapter
 
 | [`content/journey/`](content/journey/README.md) | one chapter per repo — the spine of the book |
 | [`content/prompts/`](content/prompts/agent-loop.md) | prompts reproduced as typed, typos and Estonian notes-to-self included |
-| `content/case-study/crash-dash/` | the sanitised `.md` layer of a private production repo *(empty until inc5)* |
+| `content/case-study/` | the sanitised `.md` layer of a private production repo *(empty until inc5)* |
 | `content/course/` | the course skeleton — module, outcome, chapters it draws on *(empty until inc5)* |
 | `content/timeline.json` | the generated spine every index and frontmatter block is synced from |
 
@@ -131,7 +131,7 @@ Read it top to bottom:
 | **Stage** | `production-app` | Which rung of the method this repo belongs to (see [the five stages](#-the-five-stages)). |
 | **`artifact:`** | `present` / `pending` | Whether the chapter carries its evidence yet. `present` with an empty `## Artifact` body reds the test suite. |
 | **`## What didn't work`** | *"A green test suite that never touched the code it claimed to cover."* | Required in every chapter. A chapter with only lessons is not done. |
-| **`## Artifact`** | commit `53c5f5f`, quoted | The one section that makes a claim checkable by someone who wasn't there. |
+| **`## Artifact`** | the repo's own rule, quoted and dated: *"A retune is a ONE-place edit — never restate a cut's value."* | The one section that makes a claim checkable by someone who wasn't there. A private repo contributes rule excerpts and dates, never code or commit SHAs. |
 
 So a chapter says: *here is what I set out to do, here is what failed and how I know, here is what that
 taught me, and here is the artifact you can check it against.*
