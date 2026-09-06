@@ -6,6 +6,7 @@ as-is); an Astro site on Vercel (from inc3) renders it as a browsable journey, a
 (TalTech, 19 Nov 2026) and, later, interactive explorers. Long horizon: a book from the same files.
 
 ## Where things live
+
 - **Living spec** (north star, binding constraints, increment backlog, shipped log, open calls):
   `2026-09-06-journey-design.md` (docs/plans/). Read it before any content or design change; it is the
   single source of the *evidence rule* and the *anti-hype rule*. Never inline build detail there — each
@@ -21,6 +22,7 @@ as-is); an Astro site on Vercel (from inc3) renders it as a browsable journey, a
 target → `.claude/rules/content-writing.md`. `docs/plans/archive/**` is read-only.
 
 ## Workflow
+
 - **Evidence over tone.** A chapter ships only with ≥1 artifact block (prompt / rule excerpt / defect a
   reviewer caught / measured number) and a *What didn't work* line. Banned vocabulary and the sceptic
   review gate → `content-writing.md`. A claim about a private repo names the lesson, never code, live
@@ -36,6 +38,7 @@ target → `.claude/rules/content-writing.md`. `docs/plans/archive/**` is read-o
   naming a colleague or a private deployment URL.
 
 ## Rules
+
 Path-gated conventions live in `.claude/rules/`, each auto-loaded by its own `paths:` frontmatter
 (`plan-hygiene.md` on `docs/**/*.md`, `content-writing.md` on `content/**/*.md`). Global rules in
 `~/.claude/rules/` (prose budget, instruction-file discipline, testing, large-file reads) fire here too.
