@@ -37,7 +37,8 @@ target → `.claude/rules/content-writing.md`. `docs/plans/archive/**` is read-o
   the content tests (evidence rule, banned words): a check that cannot fail proves nothing.
 - **Token budget is the binding resource.** Thin increments (≤1 session, visible on GitHub the same day);
   bulk reads (OneNote digests, crash-dash `.md` sweeps) go to a sub-agent; only its brief returns.
-- Stay on `main`; no worktrees unless asked. Public repo — never commit `sources/`, `.env*`, or anything
+- Stay on `main`; release with `make ship` (clean tree + gate + push; a deploy step joins it at
+  inc3). No worktrees unless asked. Public repo — never commit `sources/`, `.env*`, or anything
   naming a colleague or a private deployment URL.
 
 ## Rules

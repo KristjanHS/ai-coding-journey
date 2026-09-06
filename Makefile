@@ -14,7 +14,7 @@ MDLINT := node_modules/.bin/markdownlint-cli2
 # the shared include at the bottom must not be able to steal the default goal.
 .DEFAULT_GOAL := help
 
-.PHONY: help check lint timeline dev build preview
+.PHONY: help check lint timeline ship dev build preview
 
 help: ## show this list of targets
 	@printf 'Usage: make <target>\n\n'
@@ -67,6 +67,18 @@ check: ## THE gate: markdownlint (blocking) + a timeline drift report (advisory)
 	  printf 'new chapter stubs .... CREATED (left in place — review and commit)\n'; \
 	  printf '%s\n' "$$new" | sed 's/^/    /'; \
 	fi
+
+# The release, early form: refuse a dirty tree, run THE gate, push. There is no
+# deploy step yet on purpose — GitHub renders content/ as-is, so a push IS the
+# release until inc3 puts the Astro site on Vercel; that deploy joins here, after
+# the push, when it exists. Drift stays advisory (see `check`): a stale
+# timeline.json is a regen commit away and never blocks a content release.
+ship: ## the release: clean tree + make check + git push (deploy joins at inc3)
+	@[ -z "$$(git status --porcelain)" ] || { \
+	  echo "error: working tree dirty — commit or stash before shipping" >&2; \
+	  git status --short >&2; exit 1; }
+	@$(MAKE) --no-print-directory check
+	git push
 
 # markdownlint-cli2 reads .markdownlint-cli2.jsonc for both rules and ignores
 # (node_modules, sources, docs/plans/archive, .claude) — never re-list them here.
