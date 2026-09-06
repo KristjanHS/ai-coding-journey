@@ -23,8 +23,10 @@ INDEX = JOURNEY / "README.md"
 EXPERIMENTS = JOURNEY / "00-experiments.md"
 MIN_COMMITS = 5  # below this a repo is an experiment line, not a chapter
 
-# Repos never scanned: tooling dirs, copied-not-modified course/lab material,
-# other people's repos, this repo, and git worktrees (any name ending in -wt).
+# Repos never scanned: tooling dirs, learning/course repos (work done while learning
+# someone else's material, not the author's own build -- 01-claude-code-pm-course has
+# 121 commits, many the author's, and is still excluded on that ground), other people's
+# repos, this repo, and git worktrees (any name ending in -wt).
 EXCLUDE = {
     "ai-coding-journey",
     "bin",
