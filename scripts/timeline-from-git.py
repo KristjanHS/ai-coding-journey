@@ -4,13 +4,18 @@
 Usage: python3 scripts/timeline-from-git.py [PROJECTS_DIR]   (default ~/projects)
 
 Deterministic for a fixed set of repos: rerunning rewrites timeline.json and the index
-byte-identically. Chapter stubs and 00-experiments.md are created only when absent.
+byte-identically. Chapter stubs and 00-experiments.md are created only when absent, but
+the four GENERATED frontmatter fields (start/end/commits/stage) are re-synced into every
+existing chapter on each run -- so upstream commit drift shows up as a diff in `make
+check` instead of rotting silently. Author-owned frontmatter (title/tools/deck/artifact,
+and any other key) and the chapter body are never touched.
 Hand-maintain STAGE and EXCLUDE below; never hand-edit the generated files.
 """
 
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -121,6 +126,45 @@ def stub(number: int, r: dict) -> str:
     )
 
 
+# The four frontmatter keys derived from git. Everything else in a chapter's
+# frontmatter is author-owned and must survive a resync untouched.
+GENERATED_KEYS = ("start", "end", "commits", "stage")
+
+
+def sync_frontmatter(path: Path, r: dict) -> bool:
+    """Rewrite the generated frontmatter keys of an existing chapter in place.
+
+    Returns True if the file changed. Only the four GENERATED_KEYS are rewritten,
+    and only keys already present -- a chapter with hand-removed keys is reported
+    by the caller rather than silently re-grown.
+    """
+    text = path.read_text()
+    m = re.match(r"---\n(.*?\n)---\n", text, re.S)
+    if not m:
+        return False
+    want = {
+        "start": r["first_commit"],
+        "end": r["last_commit"],
+        "commits": str(r["commits"]),
+        "stage": r["stage"],
+    }
+    block = m.group(1)
+    for key, value in want.items():
+        block, n = re.subn(
+            rf"^{key}: *.*$", f"{key}: {value}", block, count=1, flags=re.M
+        )
+        if n == 0:
+            print(
+                f"  WARNING: {path.name} has no '{key}:' frontmatter key",
+                file=sys.stderr,
+            )
+    new = text[: m.start(1)] + block + text[m.end(1) :]
+    if new == text:
+        return False
+    path.write_text(new)
+    return True
+
+
 def experiments(rows: list[dict]) -> str:
     lines = [
         "# 00 · Experiments\n",
@@ -165,11 +209,14 @@ def main() -> int:
     chapters = list(enumerate(big, start=1))
 
     created = []
+    synced = []
     for n, r in chapters:
         p = chapter_file(n, r["repo"])
         if not p.exists():
             p.write_text(stub(n, r))
             created.append(p.name)
+        elif sync_frontmatter(p, r):
+            synced.append(p.name)
     if small and not EXPERIMENTS.exists():
         EXPERIMENTS.write_text(experiments(small))
         created.append(EXPERIMENTS.name)
@@ -180,6 +227,8 @@ def main() -> int:
     )
     if created:
         print("created: " + ", ".join(created))
+    if synced:
+        print("frontmatter resynced: " + ", ".join(synced))
     return 0
 
 

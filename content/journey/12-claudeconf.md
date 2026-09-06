@@ -2,8 +2,8 @@
 title: claudeconf
 repo: claudeconf
 start: 2026-06-18
-end: 2026-07-09
-commits: 43
+end: 2026-09-06
+commits: 44
 stage: config-engineering
 tools: []
 deck: false
