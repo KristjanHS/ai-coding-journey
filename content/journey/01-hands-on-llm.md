@@ -2,8 +2,8 @@
 title: hands-on-llm
 repo: hands-on-llm
 start: 2025-06-19
-end: 2026-04-11
-commits: 169
+end: 2026-09-06
+commits: 170
 stage: chat
 tools: [copilot, gemini-code-assist, continue, cursor, claude-code]
 deck: false
