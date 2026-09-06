@@ -75,10 +75,20 @@ done
 if [ -d "$SRC/$REPO_NAME" ]; then
   find "$SRC/$REPO_NAME" -type f | sed "s|^$ROOT/|  |" && found=1
 fi
-if [ "$found" -eq 0 ] && [ -d "$SRC" ]; then
-  # Neither Stage 0 shape matched; fall back to a filename keyword scan of the export tree.
-  while IFS= read -r f; do
-    echo "  [loose match] ${f#"$ROOT"/}"; found=1
-  done < <(find "$SRC" -type f -iname "*${REPO_NAME//-/*}*" 2>/dev/null | sort)
+if [ "$found" -eq 0 ] && [ -f "$ROOT/scripts/onenote-map.tsv" ]; then
+  # Neither Stage 0 shape matched. Resolve via the page-title map instead.
+  while IFS=$'\t' read -r page repo basis; do
+    case "$page" in \#*|"") continue;; esac
+    [ "$repo" = "$REPO_NAME" ] || continue
+    hit=$(find "$SRC" -type f -name "$page" 2>/dev/null | head -1)
+    if [ -n "$hit" ]; then
+      case "$basis" in \?*) mark="[unconfirmed]";; *) mark="[mapped]";; esac
+      echo "  $mark ${hit#"$ROOT"/}"
+      echo "           basis: ${basis#? }"
+      found=1
+    else
+      echo "  MISSING — map names '$page' but it is not in the export"
+    fi
+  done < "$ROOT/scripts/onenote-map.tsv"
 fi
 [ "$found" -eq 1 ] || echo "  ABSENT — no OneNote export found for '$REPO_NAME'"

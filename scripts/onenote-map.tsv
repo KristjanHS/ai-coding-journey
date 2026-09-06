@@ -1,0 +1,37 @@
+# OneNote page title -> chapter repo. Stage 0 of inc2 assumed the export could be
+# renamed to <NN>-<repo>; it could not — page titles carry no repo name. This file
+# is the mapping instead. Consumed by scripts/digest-repo.sh.
+#
+# page	repo	basis
+# repo "-" means the page feeds no chapter. A page may map to several repos.
+#
+# --- evidenced: confirmed against repo contents or the page's own text ---
+My AI Learning Journey.md	hands-on-llm	page's phase0/1 plan matches the repo's phase0/ phase1/ tree
+My AI Learning Journey.md	kri-local-rag	the page's RAG project section (Weaviate, MiniLM, Streamlit)
+Crash-dash.md	crash-dash	page title is the repo name
+Windows ollama.md	hands-on-llm	phase1 local-LLM logs
+Wsl ollama.md	hands-on-llm	log paths reference projects/hands-on-llm
+New win ollama.md	hands-on-llm	phase1 local-LLM logs
+Win ooba.md	hands-on-llm	phase1 Oobabooga, named in the repo README
+AI coding agent prompts.md	-	cross-cutting; shipped as content/prompts/agent-loop.md
+#
+# --- inferred from title alone: CONFIRM BEFORE USE ---
+Learn_ RAG for org tooling.md	kri-local-rag	? title + RAG subject
+Stt-faster problem summary.md	stt-faster	? title
+Stt-faster ToDo - Plans.md	stt-faster	? title
+Xls analysis.md	xls-analyser	? title
+EDF project xls.md	edf-budget-planner	? title
+08.12.2025 bashrc.md	dotfiles	? shell config subject
+Claude code_ memory, commands, sub-agents.md	dotfiles	? could equally be claudeconf
+Local llm server performance test.md	hands-on-llm	? local-LLM subject
+LLM eval - safety - compliance engineer _ RAG quality.md	kri-local-rag	? RAG quality subject
+#
+# --- no chapter ---
+Learn_ AI Safety Research Eng.md	-	learning notes, no repo of the author's own
+AI alignment contribution tracks.md	-	career research, not a build
+Google antigravity.md	-	tool trial, too thin for a chapter
+Chatgpt settings - minu konto seaded ja info.md	-	personal account settings; never publish
+#
+# --- repos with no page in this export ---
+# dewpoint-app dewpoint-ts docs-generator llm-eng-template proj-mgmt
+# gitlab-standup token-monitor claudeconf
