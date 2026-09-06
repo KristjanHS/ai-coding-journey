@@ -1,4 +1,4 @@
 {
-  "config": { "MD013": false, "MD041": false, "MD025": { "front_matter_title": "" } },
+  "config": { "MD013": false, "MD033": false, "MD041": false, "MD025": { "front_matter_title": "" } },
   "ignores": ["node_modules", "sources", "docs/plans/archive", ".claude"]
 }
