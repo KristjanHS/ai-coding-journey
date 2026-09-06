@@ -19,6 +19,11 @@ Adapted from crash-dash's rule of the same name; project-specific doc names stri
 - Never `git rm` a plan doc — archiving keeps every stem cite resolving. Commit a staged plan doc before the
   session ends.
 
+## Where plan docs actually live
+
+`docs/plans` is a symlink into `~/projects/dotfiles/docs/plans/ai-coding-journey/`, gitignored here — commit
+a plan doc in the *dotfiles* repo, pathspec'd to that dir, and lint it: only `docs/plans/archive` is ignored.
+
 ## Cite plan docs by stem, not path
 
 Cite `<stem>.md (docs/plans/)` — never a `docs/plans/`-prefixed path, and never into `docs/plans/archive/`

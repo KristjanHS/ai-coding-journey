@@ -11,10 +11,7 @@ as-is); an Astro site on Vercel (from inc3) renders it as a browsable journey, a
   `2026-09-06-journey-design.md` (docs/plans/). Read it before any content or design change; it is the
   single source of the *evidence rule* and the *anti-hype rule*. Never inline build detail there — each
   increment gets a thin `docs/plans/YYYY-MM-DD-<inc>-spec.md`, run via `/qimpag`, then `git mv`'d to
-  `docs/plans/archive/` on ship. `docs/plans` is a **symlink** into
-  `~/projects/dotfiles/docs/plans/ai-coding-journey/` and is gitignored here — a plan-doc commit lands in
-  the *dotfiles* repo, pathspec'd to that directory. It is still linted: only `docs/plans/archive` is
-  ignored by markdownlint, so a newly authored plan doc must pass `make check` like any other `.md`.
+  `docs/plans/archive/` on ship.
 - `content/journey/NN-<repo>.md` — one chapter per repo · `content/prompts/` — sanitised reusable prompts ·
   `content/case-study/crash-dash/` — sanitised `.md` layer of a private repo · `content/course/` — course
   skeleton · `content/timeline.json` — **generated** by `scripts/timeline-from-git.py`, never hand-edited.
