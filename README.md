@@ -8,6 +8,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![markdownlint](https://img.shields.io/badge/markdownlint-cli2-000000?logo=markdown&logoColor=white)](https://github.com/DavidAnson/markdownlint-cli2)
 [![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
+[![Live](https://img.shields.io/badge/Live-vercel-000000?logo=vercel&logoColor=white)](https://ai-coding-journey-five.vercel.app)
 
 [What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-five-stages) · [The two rules](#-the-two-content-rules) · [Build it](#-building-it) · [Chapters](content/journey/README.md) · [Prompts](content/prompts/agent-loop.md)
 
@@ -15,8 +16,9 @@
 
 > **Status 2026-09-06:** the markdown under `content/` is the product and renders on GitHub as-is. An
 > Astro site (inc3) now builds the journey and prompts routes from those same files; `case-study/` and
-> `course/` are wired collections over empty directories. `make ship` is the release — and the push it
-> ends with *is* the deploy, once the repo is imported on Vercel ([Deploying it](#-deploying-it)).
+> `course/` are wired collections over empty directories, and the whole thing renders live at
+> **[ai-coding-journey-five.vercel.app](https://ai-coding-journey-five.vercel.app)**. `make ship` is the
+> release — and the push it ends with *is* the deploy ([Deploying it](#-deploying-it)).
 
 It is a chapter per repo, in the order the repos were started, tracing how the tooling moved from a chat
 window to agents running under a written review system. The author **does not read the generated code**;
@@ -217,21 +219,18 @@ functions, and **no `@astrojs/vercel` adapter**: Vercel auto-detects a static As
 an adapter would switch the build to a server output nothing here needs. `vercel.json` states the same
 settings explicitly so the build does not depend on detection.
 
-One-time setup, done once by hand:
+The one-time setup — sign in at [vercel.com](https://vercel.com) with the GitHub account that owns the
+repo, **Add New… → Project → Import** `ai-coding-journey`, leave every build setting untouched because
+`vercel.json` already declares them — was done on 2026-09-06. The project now lives at
+[ai-coding-journey-five.vercel.app](https://ai-coding-journey-five.vercel.app).
 
-1. Sign in at [vercel.com](https://vercel.com) with the GitHub account that owns this repo.
-2. **Add New… → Project**, then **Import** `ai-coding-journey`.
-3. Leave every build setting untouched — `vercel.json` already declares the framework, the build command
-   and `dist` as the output directory.
-4. **Deploy.**
-
-After that there is nothing to run: Vercel's git integration builds and publishes **every push to `main`**,
-so `make ship` (clean tree → gate → push) is the whole release. `make ship` deliberately does not call the
+There is nothing left to run: Vercel's git integration builds and publishes **every push to `main`**, so
+`make ship` (clean tree → gate → push) is the whole release. `make ship` deliberately does not call the
 `vercel` CLI — that would publish the same commit twice and would need a linked `.vercel/` directory a
-fresh clone does not have.
+fresh clone does not have. Nor is there a GitHub Actions workflow: Vercel builds on its own
+infrastructure, so a push costs no Actions minutes.
 
-⚠ Until the import in step 2 has happened, a push publishes nothing but the GitHub-rendered markdown. A
-green push is not a green site — check the deployment.
+⚠ A green push is still not a green site — check the deployment.
 
 ---
 
