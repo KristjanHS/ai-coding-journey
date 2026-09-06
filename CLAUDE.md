@@ -27,22 +27,24 @@ target → `.claude/rules/content-writing.md`. `docs/plans/archive/**` is read-o
   reviewer caught / measured number) and a *What didn't work* line. Banned vocabulary and the sceptic
   review gate → `content-writing.md`. A claim about a private repo names the lesson, never code, live
   links or colleagues.
-- **One verification gate, run once per step**: `make check` — markdownlint over every `.md` (BLOCKING)
-  plus a timeline drift report (ADVISORY: `timeline-from-git.py` scans all of `~/projects`, so another
-  repo's commits stale `timeline.json`; `make timeline` regenerates it, then commit the regen). `make`
-  with no argument lists every target; `dev`/`build`/`preview` are guarded stubs until inc3 ships
-  the Astro site. Never gate a commit on `cmd | tail` —
-  the pipe reports tail's exit status.
+- **One verification gate, run once per step**: `make check` — markdownlint over every `.md`, `astro
+  build` (it carries the Zod frontmatter schema) and the `vitest` content suite, all three BLOCKING, plus
+  a timeline drift report (ADVISORY: `timeline-from-git.py` scans all of `~/projects`, so another repo's
+  commits stale `timeline.json`; `make timeline` regenerates it, then commit the regen). `make` with no
+  argument lists every target; `dev`/`build`/`preview` are real as of inc3. Never gate a commit on
+  `cmd | tail` — the pipe reports tail's exit status.
 - **Every new assertion owes a mutate-and-confirm-red demo** before a stage is called verified — including
   the content tests (evidence rule, banned words): a check that cannot fail proves nothing.
 - **Token budget is the binding resource.** Thin increments (≤1 session, visible on GitHub the same day);
   bulk reads (OneNote digests, crash-dash `.md` sweeps) go to a sub-agent; only its brief returns.
-- Stay on `main`; release with `make ship` (clean tree + gate + push; a deploy step joins it at
-  inc3). No worktrees unless asked. Public repo — never commit `sources/`, `.env*`, or anything
-  naming a colleague or a private deployment URL.
+- Stay on `main`; release with `make ship` (clean tree + gate + push). **The push IS the deploy** —
+  Vercel's git integration publishes every push to `main` once the repo is imported; there is no `vercel`
+  CLI call and no second build. A green push is not a green site. No worktrees unless asked. Public
+  repo — never commit `sources/`, `.env*`, or anything naming a colleague or a private deployment URL.
 
 ## Rules
 
 Path-gated conventions live in `.claude/rules/`, each auto-loaded by its own `paths:` frontmatter
-(`plan-hygiene.md` on `docs/**/*.md`, `content-writing.md` on `content/**/*.md`). Global rules in
+(`plan-hygiene.md` on `docs/**/*.md`, `content-writing.md` on `content/**/*.md`, `dev-workflow.md` on
+`src/**`, the Astro/vitest configs and the `Makefile`, `testing-project.md` on `tests/**/*.test.ts`). Global rules in
 `~/.claude/rules/` (prose budget, instruction-file discipline, testing, large-file reads) fire here too.

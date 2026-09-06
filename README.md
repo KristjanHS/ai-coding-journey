@@ -15,8 +15,8 @@
 
 > **Status 2026-09-06:** the markdown under `content/` is the product and renders on GitHub as-is. An
 > Astro site (inc3) now builds the journey and prompts routes from those same files; `case-study/` and
-> `course/` are wired collections over empty directories, and the deploy step is not yet part of
-> `make ship`.
+> `course/` are wired collections over empty directories. `make ship` is the release — and the push it
+> ends with *is* the deploy, once the repo is imported on Vercel ([Deploying it](#-deploying-it)).
 
 It is a chapter per repo, in the order the repos were started, tracing how the tooling moved from a chat
 window to agents running under a written review system. The author **does not read the generated code**;
