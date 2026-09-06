@@ -9,10 +9,12 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "make check",
-    "lint": "markdownlint-cli2 \"**/*.md\""
+    "lint": "markdownlint-cli2 \"**/*.md\"",
+    "test": "vitest run"
   },
   "devDependencies": {
     "astro": "^7.3.1",
-    "markdownlint-cli2": "^0.23.2"
+    "markdownlint-cli2": "^0.23.2",
+    "vitest": "^5.0.0"
   }
 }

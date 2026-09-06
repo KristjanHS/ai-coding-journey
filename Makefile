@@ -8,13 +8,14 @@
 
 ASTRO := node_modules/.bin/astro
 MDLINT := node_modules/.bin/markdownlint-cli2
+VITEST := node_modules/.bin/vitest
 
 # `make` with no argument lists the targets. Set explicitly — make otherwise
 # takes the FIRST target it reads (help, here) only by accident of ordering, and
 # the shared include at the bottom must not be able to steal the default goal.
 .DEFAULT_GOAL := help
 
-.PHONY: help check lint site timeline ship dev build preview
+.PHONY: help check lint site test timeline ship dev build preview
 
 help: ## show this list of targets
 	@printf 'Usage: make <target>\n\n'
@@ -28,33 +29,45 @@ help: ## show this list of targets
 	  commitwt 'same, but in the linked worktree'
 
 # THE gate (CLAUDE.md: "one verification gate, run once per step").
-# Two halves, both reported, lint blocking and timeline advisory:
+# Four parts, all reported, the first three blocking and the timeline advisory:
 #   1. markdownlint-cli2 over every .md — BLOCKS (exit non-zero on a violation).
 #   2. astro build — BLOCKS. It carries the Zod frontmatter gate: a bad `stage`
 #      enum, a string `commits` or an out-of-enum `artifact` fails the build.
-#   3. a timeline drift report — NEVER blocks. timeline-from-git.py scans all of
+#   3. the vitest content suite — BLOCKS. The executable half of the two content
+#      rules: `artifact: present` must have a body under `## Artifact`, every
+#      chapter needs `## What didn't work`, and no content file may use the
+#      banned vocabulary. It also mirror-checks the two hand-copied constants
+#      (the banned list against content-writing.md, MIN_COMMITS against the
+#      generator), so a divergence reds instead of rotting quietly.
+#   4. a timeline drift report — NEVER blocks. timeline-from-git.py scans all of
 #      ~/projects, so the committed timeline.json goes stale whenever ANOTHER
 #      repo gains commits; failing on that would turn a content commit red for
 #      activity that has nothing to do with this repo. Drift is printed loudly
 #      and `make timeline` is the fix.
-# The drift probe is tree-preserving on every exit path: it snapshots the two
+# The drift probe is tree-preserving on every exit path: it snapshots the
 # generated files, runs the script, compares, and restores them — including when
-# the script itself dies mid-write. The one side effect it cannot undo is
-# a NEW chapter stub (the script creates those when a repo first crosses
-# MIN_COMMITS) — those are reported as untracked and deliberately left in place.
-check: ## THE gate: markdownlint + astro build (blocking) + a timeline drift report (advisory)
+# the script itself dies mid-write. The snapshot covers ALL of content/journey,
+# not just README.md, because the script's sync_frontmatter rewrites chapter .md
+# files in place too; snapshotting only the index let those edits leak into the
+# tree unrestored and unreported. The one side effect it cannot undo is a NEW
+# chapter stub (the script creates those when a repo first crosses MIN_COMMITS)
+# — those are reported as untracked and deliberately left in place.
+check: ## THE gate: markdownlint + astro build + vitest (blocking) + a timeline drift report (advisory)
 	@$(MAKE) --no-print-directory lint
 	@$(MAKE) --no-print-directory site
+	@$(MAKE) --no-print-directory test
 	@tmp=$$(mktemp -d) || exit 1; \
 	restore() { cp "$$tmp/timeline.json" content/timeline.json \
-	  && cp "$$tmp/README.md" content/journey/README.md; }; \
+	  && cp -a "$$tmp/journey/." content/journey/; }; \
 	cp content/timeline.json "$$tmp/timeline.json" || exit 1; \
-	cp content/journey/README.md "$$tmp/README.md" || exit 1; \
+	cp -a content/journey "$$tmp/journey" || exit 1; \
 	python3 scripts/timeline-from-git.py >/dev/null \
 	  || { restore; rm -rf "$$tmp"; exit 1; }; \
 	drift=0; \
 	diff -q "$$tmp/timeline.json" content/timeline.json >/dev/null || drift=1; \
-	diff -q "$$tmp/README.md" content/journey/README.md >/dev/null || drift=1; \
+	for f in "$$tmp"/journey/*.md; do \
+	  diff -q "$$f" "content/journey/$$(basename "$$f")" >/dev/null || drift=1; \
+	done; \
 	if [ "$$drift" = 1 ]; then \
 	  printf 'timeline ............. DRIFT\n'; \
 	  diff -u "$$tmp/timeline.json" content/timeline.json \
@@ -65,10 +78,10 @@ check: ## THE gate: markdownlint + astro build (blocking) + a timeline drift rep
 	fi; \
 	restore || { echo "error: could not restore the generated files from $$tmp" >&2; exit 1; }; \
 	rm -rf "$$tmp"; \
-	new=$$(git status --porcelain content/journey | sed -n 's/^?? //p'); \
-	if [ -n "$$new" ]; then \
-	  printf 'new chapter stubs .... CREATED (left in place — review and commit)\n'; \
-	  printf '%s\n' "$$new" | sed 's/^/    /'; \
+	touched=$$(git status --porcelain content/journey | grep -E '^(\?\?| M)' || true); \
+	if [ -n "$$touched" ]; then \
+	  printf 'content/journey ...... DIRTY (new stubs and/or edits — review and commit)\n'; \
+	  printf '%s\n' "$$touched" | sed 's/^/    /'; \
 	fi
 
 # The release, early form: refuse a dirty tree, run THE gate, push. There is no
@@ -96,6 +109,13 @@ site: ## build the Astro site quietly; print the log only if it fails
 	@[ -x $(ASTRO) ] || { echo "error: astro missing — run 'npm install'" >&2; exit 1; }
 	@out=$$($(ASTRO) build 2>&1) || { printf 'astro build .......... FAILED\n'; printf '%s\n' "$$out"; exit 1; }
 	@printf 'astro build .......... ok\n'
+
+# The content suite, runnable on its own. `check` calls this target — it is an
+# alias for convenience, never a second gate. Never piped: the exit status must
+# stay vitest's own.
+test: ## run the vitest content suite (evidence + anti-hype assertions)
+	@[ -x $(VITEST) ] || { echo "error: vitest missing — run 'npm install'" >&2; exit 1; }
+	@$(VITEST) run --reporter dot
 
 # Regenerate the generated content: timeline.json, the journey index, and any
 # missing chapter stubs. Writes into the tree — review and commit the result.
