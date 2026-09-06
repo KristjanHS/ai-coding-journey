@@ -59,7 +59,11 @@ inventory "$WORK/docs/plans"       "-- docs/plans/ (incl archive/) --"
 echo "=== candidate artifact sources ==="
 echo "-- commit subjects matching fix|review --"
 if [ -d "$WORK/.git" ]; then
-  git -C "$WORK" log --oneline --all | grep -iE '\b(fix|review)' | head -20 || echo "  (none)"
+  # `| head -20 || echo` fired the fallback AFTER 20 real lines: head closes the pipe,
+  # the upstream dies on SIGPIPE, and pipefail propagates 141. `sed -n 1,20p` drains
+  # its input instead of closing early, so nothing upstream ever sees SIGPIPE.
+  hits=$(git -C "$WORK" log --oneline --all | { grep -iE '\b(fix|review)' || true; } | sed -n '1,20p')
+  if [ -n "$hits" ]; then echo "$hits"; else echo "  (none)"; fi
 else
   echo "  (no checkout)"
 fi
@@ -73,7 +77,10 @@ for ext in docx md; do
   done
 done
 if [ -d "$SRC/$REPO_NAME" ]; then
-  find "$SRC/$REPO_NAME" -type f | sed "s|^$ROOT/|  |" && found=1
+  # `find | sed && found=1` sets found even on no output (sed exits 0) — an empty
+  # fallback dir would then suppress the ABSENT marker silently. Guard on content.
+  fallback=$(find "$SRC/$REPO_NAME" -type f | sed "s|^$ROOT/|  |")
+  [ -n "$fallback" ] && { echo "$fallback"; found=1; } || true
 fi
 if [ "$found" -eq 0 ] && [ -f "$ROOT/scripts/onenote-map.tsv" ]; then
   # Neither Stage 0 shape matched. Resolve via the page-title map instead.
