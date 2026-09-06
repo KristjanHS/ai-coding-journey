@@ -2,29 +2,22 @@
   {
     "repo": "hands-on-llm",
     "first_commit": "2025-06-19",
-    "last_commit": "2026-09-06",
+    "last_commit": "2026-04-11",
     "commits": 170,
     "stage": "chat"
   },
   {
     "repo": "kri-local-rag",
     "first_commit": "2025-07-13",
-    "last_commit": "2026-09-06",
+    "last_commit": "2026-06-25",
     "commits": 741,
     "stage": "local-llm"
   },
   {
-    "repo": "dewpoint-app",
+    "repo": "dewpoint",
     "first_commit": "2025-07-15",
-    "last_commit": "2026-09-06",
-    "commits": 4,
-    "stage": "chat"
-  },
-  {
-    "repo": "dewpoint-ts",
-    "first_commit": "2025-07-15",
-    "last_commit": "2026-09-06",
-    "commits": 102,
+    "last_commit": "2026-06-25",
+    "commits": 106,
     "stage": "chat"
   },
   {
@@ -37,35 +30,35 @@
   {
     "repo": "llm-eng-template",
     "first_commit": "2025-09-03",
-    "last_commit": "2026-09-06",
+    "last_commit": "2025-10-20",
     "commits": 70,
     "stage": "chat"
   },
   {
     "repo": "stt-faster",
     "first_commit": "2025-10-05",
-    "last_commit": "2026-09-06",
+    "last_commit": "2026-05-29",
     "commits": 274,
     "stage": "local-llm"
   },
   {
     "repo": "xls-analyser",
     "first_commit": "2025-12-06",
-    "last_commit": "2026-09-06",
+    "last_commit": "2025-12-06",
     "commits": 9,
     "stage": "first-agent"
   },
   {
     "repo": "proj-mgmt",
     "first_commit": "2026-03-29",
-    "last_commit": "2026-09-06",
+    "last_commit": "2026-08-11",
     "commits": 11,
     "stage": "first-agent"
   },
   {
     "repo": "edf-budget-planner",
     "first_commit": "2026-03-31",
-    "last_commit": "2026-09-06",
+    "last_commit": "2026-07-27",
     "commits": 668,
     "stage": "production-app"
   },
@@ -87,13 +80,13 @@
     "repo": "dotfiles",
     "first_commit": "2026-04-05",
     "last_commit": "2026-09-06",
-    "commits": 707,
+    "commits": 711,
     "stage": "config-engineering"
   },
   {
     "repo": "claudeconf",
     "first_commit": "2026-06-18",
-    "last_commit": "2026-09-06",
+    "last_commit": "2026-07-09",
     "commits": 44,
     "stage": "config-engineering"
   },

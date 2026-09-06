@@ -2,7 +2,7 @@
 title: llm-eng-template
 repo: llm-eng-template
 start: 2025-09-03
-end: 2026-09-06
+end: 2025-10-20
 commits: 70
 stage: chat
 tools: [cursor]

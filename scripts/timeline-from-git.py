@@ -50,11 +50,34 @@ EXCLUDE = {
     "Closaria-FE",
 }
 
+# Paths that do not count as real work when dating a repo's last activity.
+# A `chore(claude):` deny-list sweep landed across the projects dir on 2026-09-06
+# touching only AI-config: it made 13 repos claim activity on that day where 2 had
+# any. Each entry needs BOTH the root-anchored and the `**/`-prefixed form --
+# `.claude/**` alone misses llm-eng-template's nested cookiecutter `.claude/`, and
+# `**/.claude/**` alone misses every root-level one.
+AI_CONFIG_PATHS = [
+    ":(exclude).claude/**",
+    ":(exclude)**/.claude/**",
+    ":(exclude).claudeignore",
+    ":(exclude)**/.claudeignore",
+    ":(exclude).gitignore",
+    ":(exclude)**/.gitignore",
+]
+
+# Several git repos that are ONE project on the journey. The group name becomes the
+# row's `repo` key and its chapter slug; it is not a directory under ~/projects.
+# dewpoint: the Python original (dewpoint-app) plus the later Node port made to
+# deploy on Vercel (dewpoint-ts).
+REPO_GROUPS = {
+    "dewpoint": ["dewpoint-app", "dewpoint-ts"],
+}
+
 # Hand-maintained stage per repo. Unknown repos get "unassigned".
+# Grouped projects are keyed by their GROUP name, not their member repos.
 STAGE = {
     "hands-on-llm": "chat",
-    "dewpoint-app": "chat",
-    "dewpoint-ts": "chat",
+    "dewpoint": "chat",
     "docs-generator": "chat",
     "llm-eng-template": "chat",
     "kri-local-rag": "local-llm",
@@ -76,6 +99,43 @@ def git(repo: Path, *args: str) -> str:
     ).stdout.strip()
 
 
+def last_real_commit(d: Path, fallback: str) -> str:
+    """Date of the newest commit touching anything outside AI_CONFIG_PATHS.
+
+    Falls back to the raw last-commit date when the exclusion leaves no commits at
+    all (no repo hits this today, but a config-only repo would).
+    """
+    out = git(d, "log", "-1", "--format=%as", "--", ".", *AI_CONFIG_PATHS)
+    return out or fallback
+
+
+def group_of(name: str) -> str:
+    """The journey row a repo belongs to -- its group name, or itself."""
+    for group, members in REPO_GROUPS.items():
+        if name in members:
+            return group
+    return name
+
+
+def merge(rows: list[dict]) -> list[dict]:
+    """Collapse each REPO_GROUPS member set into one row keyed by the group name.
+
+    Widest span across members, summed commits, stage keyed on the group. A member
+    that is absent from disk is simply never in `rows`, which is not an error.
+    """
+    merged: dict[str, dict] = {}
+    for r in rows:
+        key = group_of(r["repo"])
+        cur = merged.get(key)
+        if cur is None:
+            merged[key] = {**r, "repo": key, "stage": STAGE.get(key, "unassigned")}
+            continue
+        cur["first_commit"] = min(cur["first_commit"], r["first_commit"])
+        cur["last_commit"] = max(cur["last_commit"], r["last_commit"])
+        cur["commits"] += r["commits"]
+    return list(merged.values())
+
+
 def scan(projects: Path) -> list[dict]:
     rows = []
     for d in sorted(projects.iterdir()):
@@ -90,11 +150,12 @@ def scan(projects: Path) -> list[dict]:
             {
                 "repo": name,
                 "first_commit": dates[0],
-                "last_commit": dates[-1],
+                "last_commit": last_real_commit(d, dates[-1]),
                 "commits": int(git(d, "rev-list", "--count", "HEAD")),
                 "stage": STAGE.get(name, "unassigned"),
             }
         )
+    rows = merge(rows)
     rows.sort(key=lambda r: (r["first_commit"], r["repo"]))
     return rows
 

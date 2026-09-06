@@ -2,7 +2,7 @@
 title: kri-local-rag
 repo: kri-local-rag
 start: 2025-07-13
-end: 2026-09-06
+end: 2026-06-25
 commits: 741
 stage: local-llm
 tools: [claude-code]

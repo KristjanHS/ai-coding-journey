@@ -171,4 +171,65 @@ describe('mirrored constants', () => {
 
     expect(fromPage![1]).toBe(fromScript![1]);
   });
+
+  // `content/timeline.json` is generated, so these assert the GENERATOR's two
+  // honesty rules rather than hand-authored prose.
+  //
+  // (1) End-dates exclude AI-config-only commits. A `chore(claude):` deny-list
+  //     sweep touched 13 repos on 2026-09-06; counting it made every one of them
+  //     claim activity that day. `dewpoint`'s pinned date is the discriminating
+  //     case: it moves 14 months if the exclusion pathspec is dropped.
+  // (2) `dewpoint-app` (the Python original) and `dewpoint-ts` (the Node port
+  //     made to deploy on Vercel) are ONE project, so they collapse into a
+  //     single `dewpoint` row via the generator's REPO_GROUPS map.
+  //
+  // The pinned dates are data assertions naming a specific value on purpose: if
+  // one of these repos is legitimately reactivated, this test reds and the line
+  // has to be re-pinned. That is real work being flagged, not a false alarm.
+  describe('timeline.json honesty', () => {
+    const rows: Array<{
+      repo: string;
+      first_commit: string;
+      last_commit: string;
+      commits: number;
+      stage: string;
+    }> = JSON.parse(read(join(CONTENT, 'timeline.json')));
+
+    // Vacuity anchors: a parser that silently yields [] or a truncated array
+    // would let every assertion below pass by looping over nothing.
+    it('parses to the full 14-row corpus', () => {
+      expect(Array.isArray(rows)).toBe(true);
+      expect(rows).toHaveLength(14);
+    });
+
+    it('dates the dewpoint row past the AI-config sweep, not on it', () => {
+      const dewpoint = rows.find((r) => r.repo === 'dewpoint');
+      expect(dewpoint, 'no dewpoint row in timeline.json').toBeDefined();
+      // Drop `:(exclude).claude/**` & friends from the generator and this
+      // becomes 2026-09-06 -- the sweep date.
+      expect(dewpoint!.last_commit).toBe('2026-06-25');
+      expect(dewpoint!.first_commit).toBe('2025-07-15');
+    });
+
+    it('merges the two dewpoint repos into one row', () => {
+      expect(rows.filter((r) => r.repo.startsWith('dewpoint'))).toHaveLength(1);
+      for (const gone of ['dewpoint-app', 'dewpoint-ts']) {
+        expect(rows.some((r) => r.repo === gone), `${gone} still a row`).toBe(false);
+      }
+      // 4 commits in the Python original + 102 in the TS port.
+      expect(rows.find((r) => r.repo === 'dewpoint')!.commits).toBe(106);
+    });
+
+    it('leaves only the genuinely-active repos dated on the sweep day', () => {
+      const onSweepDay = rows.filter((r) => r.last_commit === '2026-09-06').map((r) => r.repo);
+      expect(onSweepDay.sort()).toEqual(['crash-dash', 'dotfiles']);
+    });
+
+    it('never ends a repo before it started, or in the future', () => {
+      for (const r of rows) {
+        expect(r.first_commit <= r.last_commit, `${r.repo} ends before it starts`).toBe(true);
+        expect(r.last_commit <= '2026-09-06', `${r.repo} ends in the future`).toBe(true);
+      }
+    });
+  });
 });

@@ -1,16 +1,16 @@
 ---
-title: dewpoint-ts
-repo: dewpoint-ts
+title: dewpoint
+repo: dewpoint
 start: 2025-07-15
-end: 2026-09-06
-commits: 102
+end: 2026-06-25
+commits: 106
 stage: chat
 tools: []
 deck: false
 artifact: pending
 ---
 
-# 03 · dewpoint-ts
+# 03 · dewpoint
 
 ## What I was trying to do
 
