@@ -75,8 +75,9 @@ def scan(projects: Path) -> list[dict]:
         name = d.name
         if name in EXCLUDE or name.endswith("-wt") or not (d / ".git").is_dir():
             continue
-        dates = git(d, "log", "--reverse", "--format=%as").splitlines()
-        if not dates:
+        try:
+            dates = git(d, "log", "--reverse", "--format=%as").splitlines()
+        except subprocess.CalledProcessError:  # repo with zero commits
             continue
         rows.append(
             {
@@ -92,7 +93,9 @@ def scan(projects: Path) -> list[dict]:
 
 
 def chapter_file(number: int, repo: str) -> Path:
-    return JOURNEY / f"{number:02d}-{repo}.md"
+    """Existing stub for this repo wins (whatever its number); else the positional name."""
+    existing = sorted(JOURNEY.glob(f"[0-9][0-9]-{repo}.md"))
+    return existing[0] if existing else JOURNEY / f"{number:02d}-{repo}.md"
 
 
 def stub(number: int, r: dict) -> str:
