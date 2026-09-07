@@ -79,8 +79,8 @@
   {
     "repo": "dotfiles",
     "first_commit": "2026-04-05",
-    "last_commit": "2026-09-06",
-    "commits": 711,
+    "last_commit": "2026-09-07",
+    "commits": 732,
     "stage": "config-engineering"
   },
   {
@@ -93,8 +93,8 @@
   {
     "repo": "crash-dash",
     "first_commit": "2026-06-25",
-    "last_commit": "2026-09-06",
-    "commits": 4980,
+    "last_commit": "2026-09-07",
+    "commits": 5015,
     "stage": "production-app"
   }
 ]
