@@ -35,12 +35,58 @@
       "gitStart": "2025-07-13",
       "group": "vscode-plugin",
       "id": "continue",
-      "logEnd": null,
-      "logStart": null,
-      "metrics": {},
+      "logEnd": "2025-08-16",
+      "logStart": "2025-07-04",
+      "metrics": {
+        "byProvider": {
+          "events": {
+            "gemini": 12,
+            "ollama": <redacted>
+          },
+          "tokens": {
+            "gemini": {
+              "generated": 196,
+              "prompt": <redacted>
+            },
+            "ollama": {
+              "generated": <redacted>,
+              "prompt": <redacted>
+            }
+          }
+        },
+        "costFinding": "near-zero-local",
+        "crossCheck": {
+          "agrees": true,
+          "delta": {
+            "events": 0,
+            "generatedTokens": 0,
+            "promptTokens": 0
+          },
+          "mirror": {
+            "events": <redacted>,
+            "generatedTokens": <redacted>,
+            "promptTokens": <redacted>
+          },
+          "source": "dev_data/devdata.sqlite tokens_generated"
+        },
+        "sessions": {
+          "count": 16,
+          "end": "2025-07-09",
+          "start": "2025-07-04"
+        },
+        "tokens": {
+          "end": "2025-08-16",
+          "events": <redacted>,
+          "generatedTokens": <redacted>,
+          "models": 24,
+          "promptTokens": <redacted>,
+          "start": "2025-07-04"
+        }
+      },
       "provenance": {
         "configRepo": "kri-local-rag",
-        "git": "git log -- Continue_AI_coder"
+        "git": "git log -- Continue_AI_coder",
+        "logs": "~/.continue/dev_data/0.2.0/tokensGenerated.jsonl (+ devdata.sqlite mirror cross-check), sessions/sessions.json"
       },
       "tool": "Continue (VS Code)"
     },

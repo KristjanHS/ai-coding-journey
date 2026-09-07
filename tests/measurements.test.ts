@@ -228,3 +228,59 @@ describe('cursor era metrics', () => {
     expect('cost' in cursor.metrics).toBe(false);
   });
 });
+
+// ── Era 1: Continue ───────────────────────────────────────────────────────────
+// A dead corpus too — the last token event is 2025-08-16 and the tool is long gone —
+// so these pins are stable by nature. The interesting assertions here are not the sums
+// but the two disagreements the era must keep visible: chat sessions stop five days in
+// while token events run on for six more weeks, and cost is a near-zero FINDING rather
+// than the unknown Cursor has.
+
+const cont = eras.eras.find((e) => e.id === 'continue')!;
+
+describe('continue era metrics', () => {
+  it('pins the token sums and the event/session counts', () => {
+    expect(cont.metrics.tokens.promptTokens).toBe(<redacted>);
+    expect(cont.metrics.tokens.generatedTokens).toBe(<redacted>);
+    expect(cont.metrics.tokens.events).toBe(<redacted>);
+    expect(cont.metrics.sessions.count).toBe(16);
+  });
+
+  it('agrees with the sqlite mirror, and records the delta either way', () => {
+    // The cross-check is emitted as data whether it agrees or not, so a future
+    // regeneration that diverges becomes a visible finding instead of a silent pick.
+    const check = cont.metrics.crossCheck;
+    expect(check.mirror.promptTokens).toBe(cont.metrics.tokens.promptTokens);
+    expect(check.mirror.generatedTokens).toBe(cont.metrics.tokens.generatedTokens);
+    expect(check.mirror.events).toBe(cont.metrics.tokens.events);
+    expect(Object.values(check.delta)).toEqual([0, 0, 0]);
+    expect(check.agrees).toBe(true);
+  });
+
+  it('keeps the session range and the token-event range apart', () => {
+    // They genuinely differ: the 16 chats stop 2025-07-09, autocomplete kept generating
+    // to 2025-08-16. Collapsing them into one era range would shorten or lengthen it.
+    expect([cont.metrics.sessions.start, cont.metrics.sessions.end]).toEqual([
+      '2025-07-04',
+      '2025-07-09',
+    ]);
+    expect([cont.logStart, cont.logEnd]).toEqual(['2025-07-04', '2025-08-16']);
+    expect(cont.logEnd! > cont.metrics.sessions.end).toBe(true);
+    // And the logs predate the config dir's first commit — the git spine is a floor on
+    // this era's start, the mirror image of Claude Code's pruned-log finding.
+    expect(cont.logStart! < cont.gitStart!).toBe(true);
+  });
+
+  it('states near-zero-local cost as a finding, distinct from Cursor unknown (D4)', () => {
+    expect(cont.availability.cost).toBe('near-zero-local');
+    expect(cont.metrics.costFinding).toBe('near-zero-local');
+    expect(cursor.availability.cost).not.toBe(cont.availability.cost);
+    // The evidence for the claim, not just the claim: the provider split has to show a
+    // local-inference majority, or "near-zero marginal money" is an assertion.
+    const events = cont.metrics.byProvider.events as Record<string, number>;
+    expect(events.ollama / cont.metrics.tokens.events).toBeGreaterThan(0.9);
+    expect(cont.metrics.byProvider.tokens.ollama.prompt).toBeGreaterThan(
+      cont.metrics.byProvider.tokens.gemini.prompt,
+    );
+  });
+});
