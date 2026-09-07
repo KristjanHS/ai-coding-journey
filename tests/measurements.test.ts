@@ -727,6 +727,10 @@ const handsOnLlm = (
   timeline as { repo: string; first_commit: string; last_commit: string; commits: number }[]
 ).find((r) => r.repo === 'hands-on-llm')!;
 
+const kriLocalRag = (
+  timeline as { repo: string; first_commit: string; last_commit: string; commits: number }[]
+).find((r) => r.repo === 'kri-local-rag')!;
+
 const JOURNEY_PINNED: [string, string[]][] = [
   [
     '01-hands-on-llm.md',
@@ -741,6 +745,27 @@ const JOURNEY_PINNED: [string, string[]][] = [
       `${nf(copilotMetrics.turns)} turns`,
       `${nf(copilotMetrics.sessions)} sessions`,
       `${copilotMetrics.workspacesWithChat} of ${copilotMetrics.workspacesTotal}`,
+    ],
+  ],
+  [
+    '02-kri-local-rag.md',
+    [
+      // Repo scope — timeline.json, git-derived.
+      `${nf(kriLocalRag.commits)} commits`,
+      kriLocalRag.first_commit,
+      kriLocalRag.last_commit,
+      // Tool scope — eras.json `continue`. The window is the LOG window, which
+      // starts before the repo's first commit; the chapter prints both spans so the
+      // narrower one cannot be mistaken for the repo's life.
+      contMetrics.tokens.start,
+      contMetrics.tokens.end,
+      `${nf(contMetrics.tokens.events)} events`,
+      `${nf(contMetrics.tokens.models)} models`,
+      // The split that qualifies "no hosted model in the path".
+      `${nf(contMetrics.byProvider.events.ollama)} went to Ollama and ${contMetrics.byProvider.events.gemini}`,
+      // The two token totals whose ratio the next assertion pins.
+      `${nf(contMetrics.tokens.promptTokens)} prompt tokens`,
+      `${nf(contMetrics.tokens.generatedTokens)} generated`,
     ],
   ],
   [
@@ -780,6 +805,44 @@ describe('journey deck chapters ↔ JSON mirror (inc5b)', () => {
     expect(copilot.availability.cost).toBe('absent');
     const body = readChapter('01-hands-on-llm.md');
     expect(body.includes('no token field and no cost field')).toBe(true);
+  });
+
+  it('02 states the prompt:generated ratio the JSON actually implies', () => {
+    // "roughly seventy-five times more context sent than text received" is a DERIVED
+    // claim, not a printed figure, so it needs its own pin: the words in the chapter
+    // must track the rounded ratio, and the ratio must stay in the band that word
+    // names. A re-sourced token total that moves the ratio to 60 or 90 reds here
+    // while every printed figure above still matches.
+    const ratio = contMetrics.tokens.promptTokens / contMetrics.tokens.generatedTokens;
+    expect(Math.round(ratio)).toBe(75);
+    const body = readChapter('02-kri-local-rag.md');
+    expect(body.includes('seventy-five times more context sent')).toBe(true);
+    // ...and the cost state that explains why nobody looked at the ratio.
+    expect(libEra('continue').availability.cost).toBe('near-zero-local');
+    expect(body.includes('near-zero-local')).toBe(true);
+  });
+
+  it('02 counts the full-fidelity token eras before calling itself the only free one', () => {
+    // The chapter makes a CROSS-ERA claim -- "only two log tokens at full fidelity,
+    // and this is the only one of those that also cost effectively nothing". Neither
+    // half is visible in the continue era alone, so both are counted across all five.
+    const full = libEras.filter((e) => e.availability.tokens === 'yes');
+    expect(full.length).toBe(2);
+    expect(full.filter((e) => e.availability.cost === 'near-zero-local').map((e) => e.id)).toEqual([
+      'continue',
+    ]);
+    expect(libEras.length).toBe(5);
+    const body = readChapter('02-kri-local-rag.md');
+    expect(body.includes('Of the five tool eras only two log tokens at full fidelity')).toBe(true);
+  });
+
+  it('02 claims two agreeing sources only while the cross-check agrees', () => {
+    const cc = contMetrics.crossCheck;
+    expect(cc.agrees).toBe(true);
+    expect(cc.delta.events).toBe(0);
+    expect(cc.delta.promptTokens).toBe(0);
+    expect(cc.delta.generatedTokens).toBe(0);
+    expect(readChapter('02-kri-local-rag.md').includes('they agree to the event')).toBe(true);
   });
 
   it('names all four cost states in the chapter that is about the absences', () => {

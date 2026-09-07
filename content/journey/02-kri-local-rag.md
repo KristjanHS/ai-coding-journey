@@ -6,7 +6,7 @@ end: 2026-06-25
 commits: 741
 stage: local-llm
 tools: [claude-code]
-deck: false
+deck: true
 artifact: present
 ---
 
@@ -17,6 +17,11 @@ artifact: present
 Run a retrieval system entirely on my own machine — documents in, answers out, no hosted model in the
 path. The stack is Python 3.13, Weaviate as the vector store, Ollama serving the model, and Streamlit
 as the front end.
+
+The repo holds 741 commits between 2025-07-13 and 2026-06-25, but the local-model era it belongs to is
+far narrower than that. The Continue logs covering it run 2025-07-04 to 2025-08-16 — <redacted> events
+across 24 models — and of those events <redacted> went to Ollama and 12 to Gemini. "No hosted model in the
+path" was true of the system I was building, not of every request I made while building it.
 
 The interesting part of the repo is not that it works. It is what a review found in it after a year.
 
@@ -57,6 +62,13 @@ the next person (including me) reaching for a convenient import.
 **"It works" and "it has ever run" are different claims.** The broken metadata filter passed every
 gate the repo had, because the repo had no gate that exercised it. Test coverage is not a quality
 metric here; it is the difference between code that works and code whose behaviour is unknown.
+
+**Local tokens are free, which is why I never looked at them.** Continue logged <redacted> prompt tokens
+against <redacted> generated over that window — roughly seventy-five times more context sent than text
+received. None of that was visible to me at the time: the era ran at near-zero-local cost, so nothing
+ever made me check. Of the five tool eras only two log tokens at full fidelity, and this is the only
+one of those two that also cost effectively nothing — the same locality explains both. Two sources
+hold the number — the JSONL event log and a SQLite mirror — and they agree to the event.
 
 **Complexity accretes where nobody is looking.** The review ranked 20 hotspots across roughly 2,100
 lines of core code — 2 CRITICAL, 6 HIGH, 8 MEDIUM, 4 LOW. None of them broke anything. All of them
