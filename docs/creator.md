@@ -7,6 +7,7 @@ knowledge base. The [README](../README.md) is for people **reading** the journey
 - [Prerequisites](#prerequisites)
 - [Building it](#building-it) — the one verification gate
 - [How the timeline is generated](#how-the-timeline-is-generated)
+- [The two content rules](#the-two-content-rules) — the rules themselves, then how they are enforced
 - [How the content rules are enforced](#how-the-content-rules-are-enforced)
 - [Deploying it](#deploying-it)
 - [Repository map](#repository-map)
@@ -77,10 +78,36 @@ frontmatter and validated by the Zod schema in `src/content.config.ts`.
 
 ---
 
+## The two content rules
+
+Both are binding, and both are enforced by a test suite rather than by good intentions — a chapter that
+breaks one of them cannot be published ([how that is wired](#how-the-content-rules-are-enforced)).
+
+**1 · The evidence rule.** Every chapter carries **≥1 artifact block**: a real prompt, a rule or skill
+excerpt, a defect a reviewer sub-agent caught (with the fix commit's subject), or a measured number
+*with how it was measured*. `artifact: present` and an empty `## Artifact` section cannot coexist.
+
+**2 · The anti-hype rule.**
+
+- **No claim without an artifact or a number** — "X worked" names the repo, the date and the evidence.
+- **Failures get equal billing** — `## What didn't work` sits before `## What I learned`, in every chapter.
+- **Banned vocabulary**, grepped across every file under `content/`:
+
+  `10x` · `game-changer` · `game changer` · `revolution` · `revolutionary` · `anyone can` ·
+  `in minutes` · `no code needed` · `effortless` · `magic`
+
+- **Positioning is governance and method, never "look what I built."**
+- **Public-link gate** — before the first public link, a fresh sub-agent runs a sceptical senior-engineer
+  review over `content/`; every hype finding is fixed or the sentence is deleted.
+
+> Every check above has itself been broken on purpose once, to prove it can fail. A check that cannot
+> fail proves nothing — which is itself one of the lessons the chapters keep arriving at.
+
+---
+
 ## How the content rules are enforced
 
-The [two content rules](../README.md#-the-two-content-rules) are binding *and* executable. The vitest suite
-in `tests/content.test.ts` is their machine half; `.claude/rules/content-writing.md` is their prose half.
+The two rules above are binding *and* executable. The vitest suite in `tests/content.test.ts` is their machine half; `.claude/rules/content-writing.md` is their prose half.
 The two are mirror-tested against each other, so a reworded rule reds instead of rotting quietly — the
 banned-vocabulary list and the `MIN_COMMITS` threshold are each asserted against their other copy.
 

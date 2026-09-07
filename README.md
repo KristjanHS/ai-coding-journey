@@ -10,7 +10,7 @@
 [![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
 [![Live](https://img.shields.io/badge/Live-vercel-000000?logo=vercel&logoColor=white)](https://ai-coding-journey-five.vercel.app)
 
-[What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-five-stages) · [The two rules](#-the-two-content-rules) · [Chapters](content/journey/README.md) · [Prompts](content/prompts/agent-loop.md)
+[What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-five-stages) · [The two rules](docs/creator.md#the-two-content-rules) · [Chapters](content/journey/README.md) · [Prompts](content/prompts/agent-loop.md)
 
 </div>
 
@@ -132,28 +132,13 @@ taught me, and here is the artifact you can check it against.*
 
 ## 📐 The two content rules
 
-Both are binding, and both are enforced by a test suite rather than by good intentions — a chapter that
-breaks one of them cannot be published ([how that is wired](docs/creator.md#how-the-content-rules-are-enforced)).
+Every chapter carries **≥1 artifact block** (the evidence rule), and nothing here is sold — no claim
+without an artifact or a number, failures before lessons, a banned-vocabulary list grepped across
+`content/` (the anti-hype rule). Both are binding, both are enforced by a test suite rather than by good
+intentions, and a chapter that breaks one of them cannot be published.
 
-**1 · The evidence rule.** Every chapter carries **≥1 artifact block**: a real prompt, a rule or skill
-excerpt, a defect a reviewer sub-agent caught (with the fix commit's subject), or a measured number
-*with how it was measured*. `artifact: present` and an empty `## Artifact` section cannot coexist.
-
-**2 · The anti-hype rule.**
-
-- **No claim without an artifact or a number** — "X worked" names the repo, the date and the evidence.
-- **Failures get equal billing** — `## What didn't work` sits before `## What I learned`, in every chapter.
-- **Banned vocabulary**, grepped across every file under `content/`:
-
-  `10x` · `game-changer` · `game changer` · `revolution` · `revolutionary` · `anyone can` ·
-  `in minutes` · `no code needed` · `effortless` · `magic`
-
-- **Positioning is governance and method, never "look what I built."**
-- **Public-link gate** — before the first public link, a fresh sub-agent runs a sceptical senior-engineer
-  review over `content/`; every hype finding is fixed or the sentence is deleted.
-
-> Every check above has itself been broken on purpose once, to prove it can fail. A check that cannot
-> fail proves nothing — which is itself one of the lessons the chapters keep arriving at.
+The rules in full, and how they are wired to fail a build —
+**[`docs/creator.md`](docs/creator.md#the-two-content-rules)**.
 
 ---
 
