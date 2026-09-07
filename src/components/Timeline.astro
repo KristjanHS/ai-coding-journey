@@ -54,10 +54,18 @@ const stages = RAMP.filter((stage) => bars.some((bar) => bar.stage === stage));
   .tl[data-variant='compact'] .tl-row { grid-template-columns: 1fr; }
   .tl[data-variant='full'] .tl-row { grid-template-columns: 9rem 1fr 7rem; }
   .tl-track { position: relative; height: 100%; }
-  .tl-bar {
+  /* The hit area spans the row's full height; the bar inside carries only the
+     thickness, so neighbouring bars stay separated by the row gutter. */
+  .tl-link, .tl-hit {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    min-width: 2px;
+  }
+  .tl-bar {
+    width: 100%;
     border-radius: var(--radius);
     min-width: 2px;
   }
@@ -97,7 +105,13 @@ const stages = RAMP.filter((stage) => bars.some((bar) => bar.stage === stage));
   }
   .tl-legend-item[aria-pressed='true'] { border-color: var(--fg-dim); color: var(--fg); }
   .tl-row.is-dimmed { opacity: 0.22; }
-  .tl-link { display: block; height: 100%; }
+  /* Hover is carried by an outline, not by colour: the stage hue is the bar's
+     only meaning and must not shift under the pointer. */
+  .tl-row.is-hovered .tl-bar {
+    outline: 1px solid var(--fg);
+    outline-offset: 1px;
+  }
+  .tl-card { min-height: 1.4em; }
   .tl-card, .tl-status {
     font-family: var(--font-mono);
     font-size: var(--size-0);

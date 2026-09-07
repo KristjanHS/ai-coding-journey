@@ -111,6 +111,38 @@ describe('interaction hooks in the shipped HTML', () => {
   });
 });
 
+// The bug this guards: rows were a fixed 10px (compact) while `commitThickness`
+// returns up to 22px, so the fattest bars spilled over their neighbours and the
+// stack read as one blur. Rows are now sized FROM the bar they hold.
+describe('bars never overflow their row', () => {
+  const ROWS = /class="tl-row[^"]*" style="height:(\d+)px/g;
+  const BARS = /class="tl-bar" data-tl-bar[^>]*data-repo="([^"]+)"[^>]*style="height:(\d+)px/g;
+
+  const geometry = (html: string) => {
+    const rows = [...html.matchAll(ROWS)].map((m) => Number(m[1]));
+    const bars = [...html.matchAll(BARS)].map((m) => ({ repo: m[1], px: Number(m[2]) }));
+    return { rows, bars };
+  };
+
+  it('read a row height and a bar height off both pages', () => {
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      const { rows, bars } = geometry(html);
+      expect(rows, `no row heights parsed on ${name}`).toHaveLength(CORPUS);
+      expect(bars, `no bar heights parsed on ${name}`).toHaveLength(CORPUS);
+      expect(new Set(bars.map((b) => b.px)).size, `all bars one thickness on ${name}`).toBeGreaterThan(1);
+    }
+  });
+
+  it('leaves a gutter between every bar and the next row', () => {
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      const { rows, bars } = geometry(html);
+      bars.forEach((bar, i) => {
+        expect(rows[i] - bar.px, `${bar.repo} fills its row on ${name}`).toBeGreaterThanOrEqual(4);
+      });
+    }
+  });
+});
+
 describe('accessibility floor: the text equivalent', () => {
   it('ships the sr-only table on both variants', () => {
     for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {

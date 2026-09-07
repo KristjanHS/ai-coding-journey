@@ -35,9 +35,21 @@ const STAGE_LABEL: Record<string, string> = {
 
 const label = (stage: string) => STAGE_LABEL[stage] ?? stage;
 
+// Vertical gutter between one bar and the next. Rows are sized from the bar
+// they hold PLUS this, so a 22px bar can never bleed into its neighbours'
+// rows -- the old fixed row height was shorter than the thickest bars.
+const ROW_GAP = { compact: 5, full: 6 };
+
+// Compact stacks the whole corpus into a homepage block, so the log thickness
+// is halved there; the ordering the scale encodes survives, the overlap does not.
+const COMPACT_SCALE = 0.55;
+const COMPACT_MIN_PX = 3;
+
 export default function Timeline({ variant, bars, stages, domain }: TimelineProps) {
   const full = variant === 'full';
-  const rowHeight = full ? 22 : 10;
+  const gap = full ? ROW_GAP.full : ROW_GAP.compact;
+  const barHeight = (bar: TimelineBar) =>
+    Math.round(full ? bar.thickness : Math.max(COMPACT_MIN_PX, bar.thickness * COMPACT_SCALE));
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<TimelineBar | null>(null);
 
@@ -55,26 +67,27 @@ export default function Timeline({ variant, bars, stages, domain }: TimelineProp
               data-repo={bar.repo}
               data-stage={bar.stage}
               style={{
-                left: `${bar.left}%`,
-                width: `${bar.width}%`,
-                height: `${bar.thickness}px`,
+                height: `${barHeight(bar)}px`,
                 background: `var(--stage-${bar.stage})`,
               }}
             />
           );
+          // The span, not the bar, is the pointer target: it spans the full row
+          // height, so a 3px hairline is still hoverable and clickable.
+          const span = { left: `${bar.left}%`, width: `${bar.width}%` };
           return (
             <div
-              class={`tl-row${dimmed ? ' is-dimmed' : ''}`}
+              class={`tl-row${dimmed ? ' is-dimmed' : ''}${hovered?.repo === bar.repo ? ' is-hovered' : ''}`}
               key={bar.repo}
-              style={{ height: `${rowHeight}px` }}
+              style={{ height: `${barHeight(bar) + gap}px` }}
               onMouseEnter={() => setHovered(bar)}
               onMouseLeave={() => setHovered(null)}
             >
               {full && <span class="tl-label">{bar.repo}</span>}
               <div class="tl-track">
                 {bar.href
-                  ? <a class="tl-link" href={bar.href} tabIndex={-1} data-tl-bar-link>{rect}</a>
-                  : rect}
+                  ? <a class="tl-link" href={bar.href} tabIndex={-1} data-tl-bar-link style={span}>{rect}</a>
+                  : <div class="tl-hit" style={span}>{rect}</div>}
               </div>
               {full && <span class="tl-count">{bar.commits.toLocaleString('en-US')} commits</span>}
             </div>
@@ -88,12 +101,15 @@ export default function Timeline({ variant, bars, stages, domain }: TimelineProp
         <span>{domain[1]}</span>
       </div>
 
-      {full && hovered && (
-        <p class="tl-card" aria-hidden="true">
-          <strong>{hovered.repo}</strong> · {hovered.commits.toLocaleString('en-US')} commits ·{' '}
-          {label(hovered.stage)} · {hovered.first_commit} → {hovered.last_commit}
-        </p>
-      )}
+      {/* Always rendered, so naming the hovered bar never reflows what is below it. */}
+      <p class="tl-card" data-tl-card aria-hidden="true">
+        {hovered
+          ? <>
+              <strong>{hovered.repo}</strong> · {hovered.commits.toLocaleString('en-US')} commits ·{' '}
+              {label(hovered.stage)} · {hovered.first_commit} → {hovered.last_commit}
+            </>
+          : 'hover a bar for its repo, commit count and span'}
+      </p>
 
       {full && (
         <>
