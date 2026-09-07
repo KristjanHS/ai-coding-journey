@@ -281,3 +281,25 @@ describe('case-study provenance', () => {
     expect(date, `${path}: \`date:\` is not an ISO day`).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
+
+// /measurements shipped in inc5a with no link to it from anywhere: the root
+// page's `sections` array listed four of the five top-level routes, so the page
+// was reachable only by typing the URL. This guard derives the route set from
+// src/pages/ itself, so a sixth section added tomorrow reds until it is linked.
+describe('root page links every top-level route', () => {
+  const PAGES = join('src', 'pages');
+  const routes = readdirSync(PAGES, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name);
+
+  it('finds the route directories', () => {
+    expect(routes.length, `no route dirs under ${PAGES}`).toBeGreaterThan(0);
+  });
+
+  it.each(routes)('/%s/ is linked from the root page', (route) => {
+    const root = read(join(PAGES, 'index.astro'));
+    expect(root, `${route}: no href to /${route}/ in src/pages/index.astro`).toContain(
+      `'/${route}/'`,
+    );
+  });
+});

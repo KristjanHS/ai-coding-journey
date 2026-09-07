@@ -44,6 +44,14 @@ const sections = [
     unit: ['page', 'pages'] as const,
     whenEmpty: 'arrives at inc5',
   },
+  {
+    href: '/measurements/',
+    title: 'The numbers',
+    blurb: 'Measured tokens, cost and sessions across five tool eras.',
+    count: (await getCollection('measurements')).length,
+    unit: ['page', 'pages'] as const,
+    whenEmpty: 'none yet',
+  },
 ].map((section) => ({
   ...section,
   live: section.count > 0,
