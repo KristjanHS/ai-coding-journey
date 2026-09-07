@@ -82,12 +82,11 @@ export default function Timeline({ variant, bars, stages, domain }: TimelineProp
         })}
       </div>
 
-      {full && (
-        <div class="tl-axis" aria-hidden="true">
-          <span>{domain[0]}</span>
-          <span>{domain[1]}</span>
-        </div>
-      )}
+      {/* the time axis survives in compact — bars encode time, so both variants need its endpoints */}
+      <div class="tl-axis" aria-hidden="true">
+        <span>{domain[0]}</span>
+        <span>{domain[1]}</span>
+      </div>
 
       {full && hovered && (
         <p class="tl-card" aria-hidden="true">

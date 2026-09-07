@@ -51,6 +51,17 @@ describe('compact variant on /', () => {
     expect(count(home, /data-tl-bar(?!-)/g)).toBe(CORPUS);
   });
 
+  it('keeps the time axis — bars encode time, so both variants show its endpoints', () => {
+    const rows = JSON.parse(readFileSync(join(process.cwd(), 'content', 'timeline.json'), 'utf8'));
+    const first = rows.map((r: { first_commit: string }) => r.first_commit).sort()[0];
+    const last = rows.map((r: { last_commit: string }) => r.last_commit).sort().at(-1);
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      expect(html, `no time axis on ${name}`).toContain('class="tl-axis"');
+      expect(html, `axis start missing on ${name}`).toContain(`<span>${first}</span>`);
+      expect(html, `axis end missing on ${name}`).toContain(`<span>${last}</span>`);
+    }
+  });
+
   it('drops the legend and the numeric count labels', () => {
     expect(count(home, /tl-legend-item/g)).toBe(0);
     expect(count(home, /class="tl-count"/g)).toBe(0);
