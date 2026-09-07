@@ -756,6 +756,10 @@ const kriLocalRag = (
   timeline as { repo: string; first_commit: string; last_commit: string; commits: number }[]
 ).find((r) => r.repo === 'kri-local-rag')!;
 
+const crashDash = (
+  timeline as { repo: string; first_commit: string; last_commit: string; commits: number }[]
+).find((r) => r.repo === 'crash-dash')!;
+
 const JOURNEY_PINNED: [string, string[]][] = [
   [
     '01-hands-on-llm.md',
@@ -791,6 +795,25 @@ const JOURNEY_PINNED: [string, string[]][] = [
       // The two token totals whose ratio the next assertion pins.
       `${nf(contMetrics.tokens.promptTokens)} prompt tokens`,
       `${nf(contMetrics.tokens.generatedTokens)} generated`,
+    ],
+  ],
+  [
+    '13-crash-dash.md',
+    [
+      // Repo scope — timeline.json, git-derived. The chapter's own frontmatter
+      // carries the same numbers, which is exactly why they are NOT the source here.
+      `${nf(crashDash.commits)} commits`,
+      crashDash.first_commit,
+      crashDash.last_commit,
+      // ...and the era row's OWN git window, which is near this repo's but not it.
+      `${libEra('claude-code').gitStart} to ${libEra('claude-code').gitEnd}`,
+      // Tool scope — eras.json `claude-code`. Delegation and spend are the two
+      // figures that price "I do not read implementations"; pinning them beside the
+      // repo scope above is what stops 5,018 and 15 being read as one measurement.
+      `${nf(ccSub.files)} subagent transcripts`,
+      `${ccSub.parentSessions} of its ${nf(ccMain.sessions)} main sessions`,
+      `$${usd2(ccUsd)}`,
+      `${ccCost.sessionsWithCostState} sessions`,
     ],
   ],
   [
@@ -868,6 +891,31 @@ describe('journey deck chapters ↔ JSON mirror (inc5b)', () => {
     expect(cc.delta.promptTokens).toBe(0);
     expect(cc.delta.generatedTokens).toBe(0);
     expect(readChapter('02-kri-local-rag.md').includes('they agree to the event')).toBe(true);
+  });
+
+  it('13 keeps repo scope and tool scope apart only while the two figures disagree', () => {
+    // The chapter's opening turns on 5,018 (this repo, timeline.json) NOT being 15
+    // (the era row, which counts the .claude config repo). If a re-sourced eras.json
+    // ever made the era's git figure this repo's, the sentence below stops being
+    // true and must be rewritten -- so the disagreement itself is the assertion.
+    const eraCommits = libEra('claude-code').gitCommits;
+    expect(eraCommits).toBe(15);
+    expect(eraCommits).not.toBe(crashDash.commits);
+    const body = readChapter('13-crash-dash.md');
+    expect(body.includes('counts my `.claude` config repo, not this one')).toBe(true);
+  });
+
+  it('13 calls its era the only derived-cost one only while it is the only one', () => {
+    // A CROSS-ERA claim: no figure inside the claude-code era can refute it. Counted
+    // across all five, and the three other states are named in the same sentence, so
+    // a renamed or added cost state reds here rather than rotting in prose.
+    const derived = libEras.filter((e) => e.availability.cost === 'derived');
+    expect(derived.map((e) => e.id)).toEqual(['claude-code']);
+    expect(libEras.length).toBe(5);
+    const others = [...new Set(libEras.filter((e) => e.availability.cost !== 'derived').map((e) => e.availability.cost))];
+    expect(others.sort()).toEqual(['absent', 'near-zero-local', 'unknown-server-side']);
+    const body = readChapter('13-crash-dash.md');
+    expect(body.includes('the only one of the five eras whose cost is derived')).toBe(true);
   });
 
   it('names all four cost states in the chapter that is about the absences', () => {
