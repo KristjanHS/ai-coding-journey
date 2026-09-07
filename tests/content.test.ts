@@ -244,16 +244,31 @@ describe('mirrored constants', () => {
 // on it. The population assertion is not decoration: without it a rename of the
 // directory would empty ARTIFACTS and the guard would pass over nothing.
 const CASE_STUDY = join(CONTENT, 'case-study', 'crash-dash');
-const ARTIFACTS = contentFiles(CASE_STUDY).filter((path) => !path.endsWith('index.md'));
 
+// The landing body, excluded by exact path rather than by filename: a nested
+// `<sub>/index.md` would still be a real artifact with its own route, and an
+// `endsWith('index.md')` test would drop it from the check while the route
+// shipped it.
+const LANDING = join(CASE_STUDY, 'index.md');
+const ARTIFACTS = contentFiles(CASE_STUDY).filter((path) => path !== LANDING);
+
+// The admission row says "each with its origin path AND date", so both halves
+// are asserted -- an `origin`-only guard leaves a missing `date` green in every
+// gate (Zod has it optional so index.md can omit it).
 describe('case-study provenance', () => {
   it('there are artifacts to check', () => {
     expect(ARTIFACTS.length, `no artifacts found under ${CASE_STUDY}`).toBeGreaterThan(0);
   });
 
-  it.each(ARTIFACTS)('%s: carries an `origin` frontmatter line', (path) => {
-    const origin = frontmatter(read(path), 'origin');
+  it.each(ARTIFACTS)('%s: carries `origin` and `date` frontmatter', (path) => {
+    const body = read(path);
+
+    const origin = frontmatter(body, 'origin');
     expect(origin, `${path}: no \`origin:\` in frontmatter`).toBeDefined();
     expect(origin, `${path}: empty \`origin:\``).not.toBe('');
+
+    const date = frontmatter(body, 'date');
+    expect(date, `${path}: no \`date:\` in frontmatter`).toBeDefined();
+    expect(date, `${path}: \`date:\` is not an ISO day`).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
