@@ -712,12 +712,37 @@ describe('measurements narrative ↔ JSON mirror (Stage 9)', () => {
 // chapter that quotes a measured figure must print exactly what the lib derives,
 // so a figure edited in prose without the JSON moving reds here. Every expected
 // string is COMPUTED — a fabricated figure has nothing to match.
+import timeline from '../content/timeline.json';
+
 const JOURNEY_DIR = join(process.cwd(), 'content', 'journey');
 const readChapter = (file: string) => readFileSync(join(JOURNEY_DIR, file), 'utf8');
 const usd2 = (n: number) =>
   n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+// `01`'s repo-scope figures are mirrored against timeline.json, NOT against the
+// chapter's own frontmatter: the frontmatter is copied into the chapter by hand, so
+// checking prose against it would let a wrong pair agree with itself. timeline.json
+// is regenerated from git by scripts/timeline-from-git.py.
+const handsOnLlm = (
+  timeline as { repo: string; first_commit: string; last_commit: string; commits: number }[]
+).find((r) => r.repo === 'hands-on-llm')!;
+
 const JOURNEY_PINNED: [string, string[]][] = [
+  [
+    '01-hands-on-llm.md',
+    [
+      // Repo scope — git-derived, cross-source.
+      `${nf(handsOnLlm.commits)} commits`,
+      handsOnLlm.first_commit,
+      handsOnLlm.last_commit,
+      // Tool scope — eras.json `copilot`. These count chat turns across ALL
+      // workspaces, not this repo's commits; the chapter says so in a sentence, and
+      // pinning both here is what stops the two scopes being merged into one number.
+      `${nf(copilotMetrics.turns)} turns`,
+      `${nf(copilotMetrics.sessions)} sessions`,
+      `${copilotMetrics.workspacesWithChat} of ${copilotMetrics.workspacesTotal}`,
+    ],
+  ],
   [
     '90-what-i-got-wrong.md',
     [
@@ -744,6 +769,17 @@ describe('journey deck chapters ↔ JSON mirror (inc5b)', () => {
     for (const figure of figures) {
       expect(body.includes(figure), `${file}: missing canonical figure ${figure}`).toBe(true);
     }
+  });
+
+  it('01 claims the chat era has no token and no cost figure only while the JSON agrees', () => {
+    // The chapter's tool-scope paragraph ends on an absence: the Copilot logs carry
+    // neither field, so that era can be counted but not priced. If a later sourcing
+    // pass ever recovers either field, this reds and the sentence must go.
+    const copilot = libEra('copilot');
+    expect(copilot.availability.tokens).toBe('none');
+    expect(copilot.availability.cost).toBe('absent');
+    const body = readChapter('01-hands-on-llm.md');
+    expect(body.includes('no token field and no cost field')).toBe(true);
   });
 
   it('names all four cost states in the chapter that is about the absences', () => {

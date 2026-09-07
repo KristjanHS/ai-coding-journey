@@ -6,7 +6,7 @@ end: 2026-04-11
 commits: 170
 stage: chat
 tools: [copilot, gemini-code-assist, continue, cursor, claude-code]
-deck: false
+deck: true
 artifact: present
 ---
 
@@ -26,70 +26,50 @@ checkpoints because I did not trust myself to notice a skipped prerequisite:
 > to learn and practice. Each step needs to have a check-point that validates I have understood
 > enough and I have not missed a step that is necessary to continue.
 
-Around 170 commits, nearly all of them between 2025-06-19 and 2026-04-11. The early ones are not impressive and that is the
-point — `test2 for vscode wsl 2 venv verification`, then `cwd debug`, then `removed ready`.
+The repo holds 170 commits between 2025-06-19 and 2026-04-11. The early ones are not impressive and
+that is the point — `test2 for vscode wsl 2 venv verification`, then `cwd debug`, then `removed ready`.
+
+Those 170 are a count of *this repo*. The tool I was using is counted separately and does not line up
+with it: across all my workspaces the Copilot Chat logs hold 86 turns over 7 sessions, and chat
+appears in only 6 of 18 workspaces. Those logs carry no token field and no cost field at all, so the
+chat stage is the one era where I cannot say what any of it cost — only how often I reached for it.
 
 ## What didn't work
 
-**Compiling Oobabooga against CUDA Toolkit 12.6 on Windows.** Never got it working — my note at the
-time reads *"Seda ma ei saanud Win all kunagi tööle"*. The workaround was to stop trying and keep
-two toolkits (12.1 and 12.6) installed side by side, selecting per project. Abandoning it was the
-correct call; I spent too long on it first.
-
-**GitHub Copilot Coding Agent on the free plan.** It simply does not run there. Nothing in the UI
-said so up front — I found out by trying to use it. Same class of discovery with Gemini's free tier
-truncating long answers, which I worked around by appending a line to prompts rather than by
-understanding the cap:
-
-> Give me shorter answer so it would not exceed the maximum allowable output in Gemini Code Assist
-> free tier.
-
-**A course I picked without checking its toolchain.** I got some way into a JetBrains Academy Python
-track before realising it assumed PyCharm throughout, while everything else I ran was VS Code and
-WSL. My note is one line: `WRONG IDE!`
-
-**Letting pip resolve dependencies.** Installing `xformers` repeatedly and silently upgraded Torch
-out from under a pinned CUDA build. The fix was a flag and a comment I had to write to myself:
-
-```text
---no-deps  # prevents pip from "helpfully" upgrading Torch
-```
-
-**`code .` from WSL stopped working** partway through, for reasons I never established. Recovery was
-re-adding VS Code to PATH, and when that failed, reinstalling VS Code and the Remote-WSL extension.
-I did not root-cause it.
-
-**A run that silently used no GPU at all.** Re-running the Windows setup later the same day, I
-dropped `--n-gpu-layers` from the launch command while only 1.2 GiB of VRAM was free. Ollama offloaded
-nothing and ran the whole model on CPU — `layers.offload=0`, `CPU model buffer size = 3922.02 MiB` —
-and reported no error. A second setting in that same run was rejected just as quietly:
-
-```text
-msg="quantized kv cache requested but flash attention disabled" type=heap
-```
-
-The `OLLAMA_KV_CACHE_TYPE=heap` I had set did nothing, because flash attention was off. Both were
-one log line each in a log I skimmed.
+- **Compiling Oobabooga against CUDA Toolkit 12.6 on Windows.** Never got it working; my note reads
+  *"Seda ma ei saanud Win all kunagi tööle"*. The workaround was to keep both toolkits (12.1 and 12.6)
+  side by side, selecting per project. Abandoning it was correct; I spent too long on it first.
+- **GitHub Copilot Coding Agent on the free plan.** It does not run there, and nothing in the UI said
+  so — I found out by trying. Same class of discovery with Gemini's free tier truncating long answers,
+  which I worked around by appending *"Give me shorter answer so it would not exceed the maximum
+  allowable output in Gemini Code Assist free tier"* rather than by understanding the cap.
+- **A course I picked without checking its toolchain.** I got into a JetBrains Academy Python track
+  before realising it assumed PyCharm throughout, while everything else I ran was VS Code and WSL.
+  My note: `WRONG IDE!`
+- **Letting pip resolve dependencies.** Installing `xformers` repeatedly and silently upgraded Torch
+  out from under a pinned CUDA build. The fix was a flag and a comment I had to write to myself:
+  `--no-deps  # prevents pip from "helpfully" upgrading Torch`.
+- **`code .` from WSL stopped working** partway through, for reasons I never established. Recovery was
+  re-adding VS Code to PATH, then reinstalling VS Code and the Remote-WSL extension. Never
+  root-caused.
+- **A run that silently used no GPU at all.** Re-running the Windows setup later that day, I dropped
+  `--n-gpu-layers` with only 1.2 GiB of VRAM free. Ollama offloaded nothing and ran the whole model
+  on CPU — `layers.offload=0`, `CPU model buffer size = 3922.02 MiB` — and reported no
+  error. A second setting in that run was rejected just as quietly:
+  `msg="quantized kv cache requested but flash attention disabled"`, because flash attention was off.
+  Both were one log line each in a log I skimmed.
 
 ## What I learned
 
-**Pick the model from a benchmark, not from a vibe.** Comparing coding models against HumanEval
-pass@1 alongside their 4-bit VRAM footprint made the choice mechanical. These are the published
-figures I recorded at decision time, not measurements of my own — the next section is about what
-happens when that distinction is forgotten:
+**Pick the model from a benchmark, not from a vibe.** Published figures recorded at decision time made
+the choice mechanical: DeepSeek-Coder 6.7B (88–90 % HumanEval pass@1, ≈3.5 GB at 4-bit) over
+StarCoder2 7B (78–80 %, ≈3.8 GB) and Code Llama 7B (67 %, ≈4 GB). Those are numbers I copied, not
+measurements of my own — and the 8 GB of VRAM on the machine capped the shortlist at roughly
+7-billion-parameter models before any quality argument ran.
 
-| model | HumanEval pass@1 | 4-bit VRAM |
-| --- | --- | --- |
-| DeepSeek-Coder 6.7B | 88–90 % | ≈3.5 GB |
-| StarCoder2 7B | 78–80 % | ≈3.8 GB |
-| Code Llama 7B | 67 % | ≈4 GB |
-
-The 8 GB VRAM on the machine is the real constraint: it caps local work at roughly 7-billion-parameter
-models, which decided the shortlist before any quality argument did.
-
-**I believed a benchmark I never ran.** My README states that Windows Ollama was fastest of four
-local setups. Going back through the logs to find the numbers behind it, there are none. What the
-notes actually contain is four server-startup logs, and they cannot be compared:
+**I believed a benchmark I never ran.** My README states Windows Ollama was fastest of four local
+setups. Going back for the numbers behind it, there are none — four server-startup logs that cannot
+be compared:
 
 | setup | Ollama | model | GPU offload | first `/api/generate` |
 | --- | --- | --- | --- | --- |
@@ -98,21 +78,12 @@ notes actually contain is four server-startup logs, and they cannot be compared:
 | Ollama / Windows redo | 0.6.1 | Mistral-7B-**Instruct** | **0/33 — CPU only** | 1.40 s |
 | Oobabooga / Windows | n/a | Mistral-7B-**base** | 33/33 layers | never ran |
 
-That 1.42 s against 49.47 s reads like Windows being thirty-five times faster. It is not a generation
-measurement at all — it is model load time. The Windows runner was launched with `--no-mmap`, so
-weights were read up front; the WSL runner used `mmap = true` and cold-read 3.83 GiB from disk. Both
-logs even say so directly, and I did not read them:
-
-```text
-msg="llama runner started in 1.26 seconds"
-msg="llama runner started in 49.02 seconds"
-```
-
-Subtract the load and each run generated for a fraction of a second. On top of that the two Ollama
-versions differ, the Oobabooga run used base weights rather than Instruct and produced no generation
-at all, and the fourth setup — Oobabooga under WSL — was never logged. The lesson is not about
-Ollama. It is that "X is fastest" survived in my own README for months because I never asked which
-number said so.
+1.42 s against 49.47 s reads like Windows being thirty-five times faster. It is load time, not
+generation: Windows ran with `--no-mmap` and read weights up front, WSL cold-read 3.83 GiB from disk —
+`llama runner started in 1.26 seconds` against `49.02 seconds`, and I read neither line. Subtract the
+load and each generated for a fraction of a second. The versions differ, the Oobabooga run used base
+weights and produced nothing, and the fourth setup was never logged. "X is fastest" survived in my own
+README for months because I never asked which number said so.
 
 **Pin the tool, not just the library.** After being broken by an upgrade I pinned the agent CLI the
 same way I pin a dependency, with a standing instruction not to update it globally.
