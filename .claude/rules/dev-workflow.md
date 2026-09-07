@@ -50,6 +50,18 @@ or a passing build — a green `astro build` proves the page compiled, not that 
 Drive the actual path (`make preview` over `dist/`, or `make dev`) and say what you drove versus what
 remains the user's eye.
 
+**`astro preview` and `astro dev` silently fall back to the next free port** and print the real one only
+to their own log. Another checkout of this repo (the main tree, a sibling worktree) commonly holds 4321,
+so a route sweep that curls a hard-coded port can measure *someone else's server* and come back green.
+Read the port back from the server's startup line, or pass a port you have just confirmed free, and
+assert one string that only this build produces before believing any of the route results.
+
+**Markdown plugins go through `markdown.processor`, not `markdown.remarkPlugins`.** Astro 7 replaced the
+unified processor with Sätteri; `remarkPlugins`/`rehypePlugins`/`remarkRehype` now hard-error at config
+validation unless `@astrojs/markdown-remark` is installed beside it. Write a Sätteri mdast plugin
+(`{ name, link(node, ctx) { ctx.setProperty(node, 'url', …) } }`) and pass it as
+`markdown: { processor: satteri({ mdastPlugins: [...] }) }` — see `src/md-links.mjs`.
+
 ## Release
 
 **`make ship` is the release**: `make check` against a `git archive HEAD` copy in a temp dir (node_modules
