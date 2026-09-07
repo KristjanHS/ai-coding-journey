@@ -113,6 +113,7 @@ measurements: ## regenerate content/measurements/data/eras.json from git + the l
 	@python3 scripts/measurements-codex.py
 	@python3 scripts/measurements-copilot.py
 	@python3 scripts/measurements-skills.py
+	@python3 scripts/measurements-stt.py
 
 # ── Astro site ──
 # The npm scripts these delegate to are real as of inc3 Stage 1. The guard now

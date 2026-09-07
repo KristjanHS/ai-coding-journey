@@ -322,5 +322,37 @@
       "tool": "Claude Code"
     }
   ],
-  "schema": 1
+  "schema": 1,
+  "sttFaster": {
+    "abandonedRuntimeVariants": [
+      "_docker",
+      "_32bit_cpu"
+    ],
+    "batGenerations": {
+      "bat": 8,
+      "old_bat": 7,
+      "root": 8
+    },
+    "batTotal": 23,
+    "failedDirEmpty": true,
+    "files": {
+      "aac": 120,
+      "json": 38,
+      "txt": 175
+    },
+    "isBenchmark": false,
+    "mtimeEnd": "2026-09-01",
+    "mtimeStart": "2025-12-04",
+    "repo": {
+      "commits": 274,
+      "gitEnd": "2026-09-06",
+      "gitStart": "2025-10-05"
+    },
+    "schemaFinding": "Raw faster-whisper output (segments, duration, a two-field metrics block); no per-variant timing or accuracy, so this is a generation count, not a benchmark.",
+    "schemaSampledFrom": 1,
+    "supersededGenerations": [
+      "old_bat",
+      "OLD_compare_variants.bat"
+    ]
+  }
 }

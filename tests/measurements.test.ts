@@ -406,3 +406,62 @@ describe('skills — a Claude-Code-era-only attribute (D6: git headline only)', 
     expect(withBlock.map((e) => e.id)).toEqual(['claude-code']);
   });
 });
+
+describe('stt-faster experimentation corpus (D7: counts + a one-file schema probe)', () => {
+  const stt = (eras as { sttFaster: any }).sttFaster;
+
+  it('keeps the three .bat generations split, never collapsed into one total', () => {
+    // The split IS the measurement — three stacked harness generations, none deleted.
+    // The red demo sums them, and the per-generation pins below go undefined.
+    expect(stt.batGenerations).toEqual({ root: 8, bat: 8, old_bat: 7 });
+    expect(stt.batTotal).toBe(23);
+    expect(stt.files).toEqual({ txt: 175, aac: 120, json: 38 });
+  });
+
+  it('records failed/ as empty and names the superseded generations instead', () => {
+    // There is no failure log here; the "what didn't work" evidence is what was
+    // abandoned. Stating the emptiness stops a later session hunting for it.
+    expect(stt.failedDirEmpty).toBe(true);
+    expect(stt.supersededGenerations).toContain('old_bat');
+    expect(stt.abandonedRuntimeVariants).toEqual(['_docker', '_32bit_cpu']);
+  });
+
+  it('reports the sampled schema and refuses the benchmark claim it does not support', () => {
+    // One .json was read, not 38. It is raw transcription output with no per-variant
+    // comparison, so the corpus stays a generation count.
+    expect(stt.schemaSampledFrom).toBe(1);
+    expect(stt.isBenchmark).toBe(false);
+  });
+
+  it('shows the corpus-vs-repo span delta rather than reconciling it', () => {
+    expect(stt.mtimeStart).toBe('2025-12-04');
+    expect(stt.mtimeEnd).toBe('2026-09-01');
+    expect(stt.repo.commits).toBe(274);
+    // The corpus starts after the repo does and ends just before it — both real, both shown.
+    expect(stt.mtimeStart > stt.repo.gitStart).toBe(true);
+    expect(stt.mtimeEnd < stt.repo.gitEnd).toBe(true);
+  });
+
+  it('lets no transcript text, filename or person name reach an emitted field', () => {
+    // The sanitisation guard, enforced not documented. Every string the block emits
+    // must be structural — a key-shaped token, a date, or one of the two documented
+    // prose fields. A transcript snippet or a source filename injected anywhere reds.
+    const strings: string[] = [];
+    const walk = (node: unknown) => {
+      if (typeof node === 'string') strings.push(node);
+      else if (Array.isArray(node)) node.forEach(walk);
+      else if (node && typeof node === 'object') Object.values(node).forEach(walk);
+    };
+    walk(stt);
+    const structural = /^(_?[a-z0-9][a-z0-9_]*(\.bat)?|\d{4}-\d{2}-\d{2}|OLD_compare_variants\.bat)$/;
+    const prose = [stt.schemaFinding];
+    for (const value of strings) {
+      if (prose.includes(value)) continue;
+      expect(structural.test(value), `non-structural emitted string: ${value}`).toBe(true);
+    }
+    // The prose fields carry no source filename either.
+    for (const line of prose) {
+      expect(/\.(aac|txt|json)\b/.test(line), `filename in prose: ${line}`).toBe(false);
+    }
+  });
+});
