@@ -222,15 +222,24 @@ describe('mirrored constants', () => {
       expect(rows.find((r) => r.repo === 'dewpoint')!.commits).toBe(106);
     });
 
-    it('leaves only the genuinely-active repos dated on the sweep day', () => {
-      const onSweepDay = rows.filter((r) => r.last_commit === '2026-09-06').map((r) => r.repo);
-      expect(onSweepDay.sort()).toEqual(['crash-dash', 'dotfiles']);
+    // The 2026-09-06 `chore(claude):` sweep touched AI-config in 13 repos; the
+    // AI_CONFIG_PATHS exclusions mean only the two doing real work that day may be
+    // dated on or after it. Pinned as `>=`, not `=== SWEEP_DAY`: both repos have
+    // since committed again, and a pin on the day itself goes vacuously green the
+    // moment they move on — which is also how it would look if the exclusions broke.
+    it('leaves only the genuinely-active repos dated on or after the sweep day', () => {
+      const SWEEP_DAY = '2026-09-06';
+      const since = rows.filter((r) => r.last_commit >= SWEEP_DAY).map((r) => r.repo);
+      expect(since.sort()).toEqual(['crash-dash', 'dotfiles']);
     });
 
     it('never ends a repo before it started, or in the future', () => {
+      // Read today rather than pinning it: a literal end-date bound reds every time
+      // an upstream repo commits, which is drift in the clock, not in the data.
+      const today = new Date().toISOString().slice(0, 10);
       for (const r of rows) {
         expect(r.first_commit <= r.last_commit, `${r.repo} ends before it starts`).toBe(true);
-        expect(r.last_commit <= '2026-09-06', `${r.repo} ends in the future`).toBe(true);
+        expect(r.last_commit <= today, `${r.repo} ends in the future`).toBe(true);
       }
     });
   });

@@ -73,12 +73,12 @@ describe('dateFraction (pure core, fixed domain)', () => {
 
 describe('domains derived from content/timeline.json (data pins)', () => {
   it('pins the commit domain to the current corpus', () => {
-    expect(COMMIT_DOMAIN).toEqual([2, 4980]);
+    expect(COMMIT_DOMAIN).toEqual([2, 5015]);
   });
 
   it('pins the time domain to the current corpus', () => {
     expect(TIME_DOMAIN[0]).toBe('2025-06-19');
-    expect(TIME_DOMAIN[1]).toBe('2026-09-06');
+    expect(TIME_DOMAIN[1]).toBe('2026-09-07');
   });
 
   it('reads the full 14-row corpus', () => {
