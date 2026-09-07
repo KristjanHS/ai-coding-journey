@@ -48,7 +48,7 @@ describe('vacuity anchors', () => {
 describe('compact variant on /', () => {
   it('renders the island with one bar per repo', () => {
     expect(home).toContain('data-variant="compact"');
-    expect(count(home, /data-tl-bar/g)).toBe(CORPUS);
+    expect(count(home, /data-tl-bar(?!-)/g)).toBe(CORPUS);
   });
 
   it('drops the legend and the numeric count labels', () => {
@@ -60,7 +60,7 @@ describe('compact variant on /', () => {
 describe('full variant on /journey/', () => {
   it('renders the island with one bar per repo', () => {
     expect(journey).toContain('data-variant="full"');
-    expect(count(journey, /data-tl-bar/g)).toBe(CORPUS);
+    expect(count(journey, /data-tl-bar(?!-)/g)).toBe(CORPUS);
   });
 
   it('names every stage in the legend', () => {
@@ -70,6 +70,33 @@ describe('full variant on /journey/', () => {
 
   it('labels every bar with its commit count', () => {
     expect(count(journey, /class="tl-count"/g)).toBe(CORPUS);
+  });
+});
+
+describe('interaction hooks in the shipped HTML', () => {
+  // The gate cannot see behaviour (dev-workflow.md), so these assert the static
+  // hooks that enable it; the live hover/dim/nav is Stage 5's e2e.
+  it('links every chapter bar to its chapter, and no experiment bar', () => {
+    const rows = JSON.parse(readFileSync(join(process.cwd(), 'content', 'timeline.json'), 'utf8'));
+    const chapters = rows.filter((row: { commits: number }) => row.commits >= 5).length;
+    expect(chapters).toBeGreaterThan(0);
+    expect(chapters).toBeLessThan(CORPUS);
+
+    expect(count(journey, /data-tl-bar-link/g)).toBe(chapters);
+    expect(count(journey, /<a class="tl-link" href="\/journey\/[^"]+"/g)).toBe(chapters);
+  });
+
+  it('makes every legend swatch a real button carrying its stage slug', () => {
+    for (const stage of STAGES) {
+      expect(journey, `no legend button for ${stage}`).toMatch(
+        new RegExp(`<button type="button" class="tl-legend-item" data-stage="${stage}" aria-pressed="`),
+      );
+    }
+  });
+
+  it('ships the text status line — dimming is never the only channel', () => {
+    expect(journey).toMatch(/data-tl-status/);
+    expect(journey).toContain('showing all stages');
   });
 });
 

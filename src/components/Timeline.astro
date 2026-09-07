@@ -83,7 +83,28 @@ const stages = RAMP.filter((stage) => bars.some((bar) => bar.stage === stage));
     font-size: var(--size-0);
     color: var(--fg-dim);
   }
-  .tl-legend-item { display: inline-flex; align-items: center; gap: var(--space-1); }
+  .tl-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    padding: 0 var(--space-1);
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  .tl-legend-item[aria-pressed='true'] { border-color: var(--fg-dim); color: var(--fg); }
+  .tl-row.is-dimmed { opacity: 0.22; }
+  .tl-link { display: block; height: 100%; }
+  .tl-card, .tl-status {
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+    margin: var(--space-2) 0 0;
+  }
+  .tl-card strong { color: var(--fg); }
   .tl-swatch { display: inline-block; width: 0.75rem; height: 0.75rem; border-radius: var(--radius); }
   @media (max-width: 34rem) {
     .tl[data-variant='full'] .tl-row { grid-template-columns: 7rem 1fr; }
