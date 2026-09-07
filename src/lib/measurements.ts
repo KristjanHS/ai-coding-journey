@@ -312,23 +312,23 @@ export const caveats: EraCaveats[] = [
     id: 'continue',
     tool: 'Continue (VS Code)',
     lines: [
-      'Cost is near-zero-local: local Ollama inference bills near-zero marginal money — a finding, not an unknown.',
+      'Cost near-zero-local: a local Ollama model, so the spend is a finding, not an unknown.',
     ],
   },
   {
     id: 'codex',
     tool: 'OpenAI Codex plugin',
     lines: [
-      'Token figure is a floor: the token_count event only exists from 2025-09-23, so the first weeks log nothing.',
-      'history.jsonl is a 3-line stub, not a prompt log — the counts come from the rollout jsonl instead.',
+      'A floor — the token_count event only starts 2025-09-23.',
+      'Counts come from the rollout jsonl; history.jsonl is a 3-line stub.',
     ],
   },
   {
     id: 'cursor',
     tool: 'Cursor',
     lines: [
-      'Token figure is a floor: only <redacted> of <redacted> bubbles carry a non-zero count, all of them assistant turns.',
-      'Tokens are a client-side estimate computed by Cursor; nothing here was billed.',
+      'A floor — <redacted> of <redacted> bubbles carry a count, all assistant turns.',
+      "Cursor's own client-side estimate; nothing here was billed.",
     ],
   },
 ];

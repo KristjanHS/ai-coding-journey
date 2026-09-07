@@ -14,7 +14,6 @@ import {
   eras,
   overlapLabel,
   overlappingPairs,
-  sttFaster,
   tokenHeadline,
 } from '../../lib/measurements';
 
@@ -55,50 +54,32 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
        dates against TIME_DOMAIN. data-overlap names the intersecting pairs. -->
   <h2>Overlapping eras</h2>
   <p class="lede">
-    One time axis, one lane per era. Where lanes cover the same column, the tools overlapped —
-    <code>{overlappingPairs.length}</code> pairs do.
+    One time axis, one lane per tool. Each bar spans that tool's whole measured life — the union of
+    its session logs and its config commits — so where two bars share a column, the tools were in use
+    together. <code>{overlappingPairs.length}</code> pairs overlap; none of the five eras is clean
+    succession.
   </p>
   <div class="axis" data-overlap={overlapLabel}>
-    {eraSpans.map((span) => {
-      const cross = crossById.get(span.id)!;
-      const colour = GROUP_COLOUR[span.group];
-      return (
-        <div class="lane">
-          <span class="lane-label">{span.tool}</span>
-          <div class="track">
-            {/* log range — the primary measured span */}
-            <span
-              class="band band-log"
-              style={`left:${pct(cross.logStart)}%; right:${(100 - Number(pct(cross.logEnd))).toFixed(2)}%; background:${colour};`}
-              title={`logs ${cross.logStart} → ${cross.logEnd}`}
-            />
-            {/* git range — offset, so a disagreement with the logs is visible, not smoothed */}
-            {cross.gitStart && cross.gitEnd && (
-              <span
-                class="band band-git"
-                style={`left:${pct(cross.gitStart)}%; right:${(100 - Number(pct(cross.gitEnd))).toFixed(2)}%; border-color:${colour};`}
-                title={`config commits ${cross.gitStart} → ${cross.gitEnd}`}
-              />
-            )}
-          </div>
+    {eraSpans.map((span) => (
+      <div class="lane">
+        <span class="lane-label">{span.tool}</span>
+        <div class="track">
+          <span
+            class="band"
+            style={`left:${pct(span.start)}%; right:${(100 - Number(pct(span.end))).toFixed(2)}%; background:${GROUP_COLOUR[span.group]};`}
+            title={`${span.start} → ${span.end}`}
+          />
         </div>
-      );
-    })}
+      </div>
+    ))}
     <div class="axis-scale">
       <span>{TIME_DOMAIN[0]}</span>
       <span>{TIME_DOMAIN[1]}</span>
     </div>
   </div>
   <p class="note">
-    Overlapping pairs: <code>{overlapLabel}</code>.
-  </p>
-  <p>
-    Two bands per lane, because two independent records exist and they disagree. The
-    <strong>solid</strong> band is the <em>log</em> range — the first and last timestamp in that tool's own
-    session files still on this machine. The <strong>outline</strong> band is the <em>config-commit</em>
-    range — first to last commit touching that tool's config directory. Neither band is an adoption
-    date: Claude Code's solid band sits at the far right, six weeks inside its own outline band, because
-    that is where its surviving transcripts start. Both records are shown; neither is reconciled.
+    Two independent records exist per tool — its own session logs and the commits to its config
+    directory — and they disagree. The bar is their union; the table gives both ranges, unreconciled.
   </p>
   <table class="sources">
     <thead>
@@ -155,10 +136,10 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
           <td class="num">{nf(c.cacheRead)}</td>
           <td class="cell-note">
             {c.cachedInputSubset ? (
-              <span>{nf(c.cachedInputSubset)} cached-input tokens are a subset of input — shown, never added.<br /></span>
+              <span>{nf(c.cachedInputSubset)} cached-input tokens sit inside input — shown, never added.<br /></span>
             ) : null}
             {(caveatsById.get(c.id) ?? []).map((line) => <span>{line}<br /></span>)}
-            {c.sides ? <span>Both sides are counted; the floor above uses main + subagents.</span> : null}
+            {c.sides ? <span>Both sides counted; the floor uses main + subagents.</span> : null}
           </td>
         </tr>
       ))}
@@ -204,32 +185,25 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
     </tbody>
   </table>
 
-  <!-- stt-faster experimentation corpus. -->
-  <h2>stt-faster corpus</h2>
-  <p class="note">
-    A generation count, not a benchmark ({sttFaster.schemaSampledFrom} file schema-probed):
-    <code>{sttFaster.batTotal}</code> <code>.bat</code> generations
-    ({Object.entries(sttFaster.batGenerations).map(([k, v]) => `${k}:${v}`).join(' · ')}),
-    files <code>{Object.entries(sttFaster.files).map(([k, v]) => `${k}:${v}`).join(' · ')}</code>.
-    <code>failed/</code> is empty; superseded: <code>{sttFaster.supersededGenerations.join(', ')}</code>.
-    Corpus mtimes {sttFaster.mtimeStart} → {sttFaster.mtimeEnd} sit inside the repo's git span
-    {sttFaster.repo.gitStart} → {sttFaster.repo.gitEnd} — both shown, not reconciled.
-  </p>
-
   <!-- D3: the citable narratives, one .md per era, linked to their GitHub source. -->
   <h2>Citable narratives</h2>
   <p class="lede">
     One entry per era — the single source every chapter, slide and post cites, so a figure is
     never typed twice.
   </p>
-  <ul class="narratives">
-    {narratives.map((entry) => (
-      <li>
-        <a href={`${GH}/${entry.id}.md`}>{entry.data.title}</a>
-        {entry.data.summary && <span class="summary">{entry.data.summary}</span>}
-      </li>
-    ))}
-  </ul>
+  <table class="narratives">
+    <thead>
+      <tr><th>entry</th><th>what it covers</th></tr>
+    </thead>
+    <tbody>
+      {narratives.map((entry) => (
+        <tr>
+          <td><a href={`${GH}/${entry.id}.md`}>{entry.data.title}</a></td>
+          <td class="cell-note">{entry.data.summary}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
 </Base>
 
 <style>
@@ -255,9 +229,7 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
     white-space: nowrap;
   }
   .track { position: relative; height: 1.4rem; background: var(--bg-sunk); border-radius: var(--radius); }
-  .band { position: absolute; border-radius: var(--radius); }
-  .band-log { top: 0.15rem; height: 0.5rem; }
-  .band-git { bottom: 0.15rem; height: 0.5rem; border: 1.5px solid; background: transparent; }
+  .band { position: absolute; top: 0.3rem; height: 0.8rem; border-radius: var(--radius); }
   .axis-scale {
     display: flex;
     justify-content: space-between;
@@ -283,13 +255,12 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
   .usd { color: var(--accent); font-family: var(--font-mono); }
   .cell-note { color: var(--fg-dim); font-size: var(--size-0); line-height: 1.45; }
   .sources td.num, tfoot .num { white-space: nowrap; }
+  /* The tool name is the row's identity — never let it wrap to three lines. */
+  .sources td:first-child, .costs td:first-child, .tokens td:first-child { white-space: nowrap; }
   tfoot th { font-weight: 600; color: var(--fg); border-top: 1px solid var(--rule); vertical-align: top; }
   td, th { vertical-align: top; }
 
-  .narratives { list-style: none; padding: 0; }
-  .narratives li { padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
   .narratives a { font-weight: 600; }
-  .summary { display: block; color: var(--fg-dim); font-size: var(--size-0); margin-top: var(--space-1); }
 
   table { display: block; overflow-x: auto; }
 
