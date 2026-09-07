@@ -562,7 +562,7 @@ describe('measurements lib — token headline floor (D2 as amended)', () => {
 // match and reds too. Read hermetically from disk (node:fs), never via git.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { costStates, eras as libEras } from '../src/lib/measurements';
+import { costStates, eras as libEras, skills, sttFaster } from '../src/lib/measurements';
 
 const MEAS_DIR = join(process.cwd(), 'content', 'measurements');
 const readMeas = (file: string) => readFileSync(join(MEAS_DIR, file), 'utf8');
@@ -574,16 +574,67 @@ const libEra = (id: string) => libEras.find((e) => e.id === id)!;
 const contrib = (id: string) => tokenHeadline.contributions.find((c) => c.id === id)!;
 const ccContrib = contrib('claude-code');
 const copilotMetrics = libEra('copilot').metrics;
+const contMetrics = libEra('continue').metrics;
+const codexMetrics = libEra('codex').metrics;
+const cursorMetrics = libEra('cursor').metrics;
+const ccMain = libEra('claude-code').metrics.main;
+const ccSub = libEra('claude-code').metrics.subagent;
+const ccCost = libEra('claude-code').metrics.cost;
+const ccSkills = skills!;
+const bt = '`'; // backtick, so the stt split strings mirror the .md verbatim
 const ccUsd = costStates.find((r) => r.id === 'claude-code')!.usd!;
 
 // [file, [canonical strings the file must print verbatim]] — every string derived
 // from the lib. The exact figure the JSON produces has to appear; rounded prose
 // beside it ("~224M input tokens, a floor") is free and unpinned.
 const PINNED: [string, string[]][] = [
-  ['00-copilot.md', [`${copilotMetrics.workspacesWithChat} of ${copilotMetrics.workspacesTotal}`, nf(copilotMetrics.turns)]],
-  ['01-continue.md', [nf(contrib('continue').headline), nf(libEra('continue').metrics.tokens.promptTokens)]],
-  ['02-codex.md', [nf(contrib('codex').headline), nf(libEra('codex').metrics.humanPrompts)]],
-  ['03-cursor.md', [nf(libEra('cursor').metrics.tokens.input), nf(libEra('cursor').metrics.tokens.output)]],
+  [
+    '00-copilot.md',
+    [
+      `${copilotMetrics.workspacesWithChat} of ${copilotMetrics.workspacesTotal}`,
+      nf(copilotMetrics.turns),
+      nf(copilotMetrics.sessions),
+    ],
+  ],
+  [
+    '01-continue.md',
+    [
+      nf(contrib('continue').headline),
+      nf(contMetrics.tokens.promptTokens),
+      nf(contMetrics.tokens.generatedTokens),
+      nf(contMetrics.tokens.events),
+      nf(contMetrics.sessions.count),
+    ],
+  ],
+  [
+    '02-codex.md',
+    [
+      nf(contrib('codex').headline),
+      nf(codexMetrics.humanPrompts),
+      nf(codexMetrics.environmentPrompts),
+      nf(codexMetrics.prompts),
+      nf(codexMetrics.files),
+      nf(codexMetrics.headerFormats['top-level-id']),
+      nf(codexMetrics.headerFormats['session_meta']),
+      nf(codexMetrics.tokens.input_tokens),
+      nf(codexMetrics.tokens.output_tokens),
+      nf(codexMetrics.tokens.cached_input_tokens),
+      `${codexMetrics.tokens.filesWithTokens} of ${codexMetrics.files}`,
+    ],
+  ],
+  [
+    '03-cursor.md',
+    [
+      nf(cursorMetrics.tokens.input),
+      nf(cursorMetrics.tokens.output),
+      nf(cursorMetrics.sessions),
+      nf(cursorMetrics.messages.total),
+      nf(cursorMetrics.messages.user),
+      nf(cursorMetrics.messages.assistant),
+      `${nf(cursorMetrics.pricedBubbles)} of ${nf(cursorMetrics.messages.total)}`,
+      `${(cursorMetrics.nonZeroBubbleFraction * 100).toFixed(2)}%`,
+    ],
+  ],
   [
     '04-claude-code.md',
     [
@@ -591,6 +642,25 @@ const PINNED: [string, string[]][] = [
       nf(ccContrib.sides!.main.headline),
       nf(tokenHeadline.floor),
       `$${nf(Math.round(ccUsd))}`,
+      nf(ccMain.sessions),
+      nf(ccMain.files),
+      nf(ccSub.files),
+      nf(ccSub.parentSessions),
+      nf(ccCost.sessionsWithCostState),
+      nf(ccSkills.liveSkillFiles),
+      nf(ccSkills.commits),
+    ],
+  ],
+  [
+    '05-stt-corpus.md',
+    [
+      nf(sttFaster.batTotal),
+      nf(sttFaster.files.txt),
+      nf(sttFaster.files.aac),
+      nf(sttFaster.files.json),
+      `root ${sttFaster.batGenerations.root}`,
+      `bat/${bt} ${sttFaster.batGenerations.bat}`,
+      `old_bat/${bt} ${sttFaster.batGenerations.old_bat}`,
     ],
   ],
 ];

@@ -126,7 +126,12 @@ const cc = tokenHeadline.contributions.find((c) => c.id === 'claude-code')!;
               nf(c.headline)
             )}
           </td>
-          <td class="num">{nf(c.cacheRead)}</td>
+          <td class="num">
+            {nf(c.cacheRead)}
+            {c.cachedInputSubset ? (
+              <span class="qual"><br />+ {nf(c.cachedInputSubset)} reused (subset of input, not added)</span>
+            ) : null}
+          </td>
         </tr>
       ))}
     </tbody>

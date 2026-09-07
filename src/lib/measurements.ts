@@ -159,6 +159,10 @@ export interface TokenContribution {
   state: TokenState; // 'yes' or 'floor' — the four bearing tools only
   headline: number; // three-class sum used in the primary floor
   cacheRead: number;
+  // Codex only: reuse that is a SUBSET of input_tokens (already counted inside the
+  // headline). Shown beside the row as reuse so its cacheRead of 0 does not read as
+  // "no reuse" — never added to headline or cacheRead (adding it double-counts).
+  cachedInputSubset?: number;
   // Claude Code only (D1): main and main+subagent, side by side, BOTH — never one
   // silently. `headline` above equals `sides.mainPlusSubagent.headline`.
   sides?: { main: TokenSum; mainPlusSubagent: TokenSum };
@@ -174,7 +178,13 @@ function tokenContribution(e: Era): TokenContribution {
     case 'codex':
       // input_tokens + output_tokens (cached_input / reasoning_output are SUBSETS,
       // already inside those two — adding either double-counts, so cacheRead stays 0).
-      return { ...base, headline: m.tokens.input_tokens + m.tokens.output_tokens, cacheRead: 0 };
+      // cachedInputSubset surfaces the reuse figure without adding it to any sum.
+      return {
+        ...base,
+        headline: m.tokens.input_tokens + m.tokens.output_tokens,
+        cacheRead: 0,
+        cachedInputSubset: m.tokens.cached_input_tokens,
+      };
     case 'cursor':
       return { ...base, headline: m.tokens.input + m.tokens.output, cacheRead: 0 };
     case 'claude-code': {

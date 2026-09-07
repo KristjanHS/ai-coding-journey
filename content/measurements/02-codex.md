@@ -27,6 +27,9 @@ rollouts. So the sum is a floor with a different reason from Cursor's:
 - Measured how: sum `token_count.info.total_token_usage` per session (cumulative,
   last value per session). `cached_input_tokens` is a *subset* of input and
   `reasoning_output_tokens` a subset of output — neither is added again.
+- **<redacted> cached input tokens** were reused — real reuse, but a subset
+  already inside the input count above, never added to the headline. It is not the
+  same class as Claude Code's separately-tracked `cacheRead`.
 
 Two provenance notes, so no later session re-litigates them: `~/.codex/history.jsonl`
 is a 3-line stub, not a prompt log — the counts come from the rollout jsonl
