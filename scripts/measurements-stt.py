@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fill the stt-faster experimentation corpus block in content/measurements/data/eras.json.
+"""Fill the stt-faster experimentation corpus block in sources/measurements/eras-full.json.
 
 Usage: python3 scripts/measurements-stt.py [CORPUS_DIR]
        (default: /mnt/c/Users/PC/Downloads/transcribe)
@@ -34,7 +34,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "content" / "measurements" / "data" / "eras.json"
+ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
 DEFAULT_CORPUS = Path("/mnt/c/Users/PC/Downloads/transcribe")
 REPO = Path.home() / "projects" / "stt-faster"
 ERA_ID = "claude-code"

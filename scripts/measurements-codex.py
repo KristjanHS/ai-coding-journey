@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fill the Codex era in content/measurements/data/eras.json from ~/.codex/sessions.
+"""Fill the Codex era in sources/measurements/eras-full.json from ~/.codex/sessions.
 
 Usage: python3 scripts/measurements-codex.py [CODEX_SESSIONS_ROOT]
        (default ~/.codex/sessions)
@@ -45,7 +45,7 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "content" / "measurements" / "data" / "eras.json"
+ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
 DEFAULT_ROOT = Path.home() / ".codex" / "sessions"
 ERA_ID = "codex"
 

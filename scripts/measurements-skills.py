@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fill the Claude Code era's `skills` block in content/measurements/data/eras.json.
+"""Fill the Claude Code era's `skills` block in sources/measurements/eras-full.json.
 
 Usage: python3 scripts/measurements-skills.py [SKILLS_DIR]
        (default: ~/projects/dotfiles/skills)
@@ -34,7 +34,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "content" / "measurements" / "data" / "eras.json"
+ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
 DEFAULT_SKILLS = Path.home() / "projects" / "dotfiles" / "skills"
 ERA_ID = "claude-code"
 # The original-bucket worked example: no `superpowers/` upstream ancestor, invented as a

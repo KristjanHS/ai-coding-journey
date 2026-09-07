@@ -2,12 +2,17 @@
   "eras": [
     {
       "availability": {
-        "cost": "absent",
         "counts": "yes",
         "skills": "none",
         "tokens": "none"
       },
       "configDir": null,
+      "coverage": {
+        "costFieldPresent": false,
+        "tokenFieldPresent": false,
+        "workspacesTotal": 18,
+        "workspacesWithChat": 6
+      },
       "gitCommits": null,
       "gitEnd": null,
       "gitStart": null,
@@ -15,29 +20,27 @@
       "id": "copilot",
       "logEnd": "2025-12-08",
       "logStart": "2025-06-20",
-      "metrics": {
-        "costFieldPresent": false,
-        "sessions": 7,
-        "tokenFieldPresent": false,
-        "turns": 86,
-        "workspacesTotal": 18,
-        "workspacesWithChat": 6
-      },
       "provenance": {
         "configRepo": "kri-local-rag",
         "git": null,
         "logs": "VS Code workspaceStorage/*/chatSessions/*.json (no token or cost field)"
       },
+      "share": null,
       "tool": "GitHub Copilot Chat"
     },
     {
       "availability": {
-        "cost": "near-zero-local",
         "counts": "yes",
         "skills": "none",
         "tokens": "yes"
       },
       "configDir": "Continue_AI_coder",
+      "coverage": {
+        "localProviderEventShare": 0.9883,
+        "mirrorAgrees": true,
+        "modelsSeen": 24,
+        "sessionLogEnd": "2025-07-09"
+      },
       "gitCommits": 2,
       "gitEnd": "2025-08-16",
       "gitStart": "2025-07-13",
@@ -45,67 +48,28 @@
       "id": "continue",
       "logEnd": "2025-08-16",
       "logStart": "2025-07-04",
-      "metrics": {
-        "byProvider": {
-          "events": {
-            "gemini": 12,
-            "ollama": <redacted>
-          },
-          "tokens": {
-            "gemini": {
-              "generated": 196,
-              "prompt": <redacted>
-            },
-            "ollama": {
-              "generated": <redacted>,
-              "prompt": <redacted>
-            }
-          }
-        },
-        "costFinding": "near-zero-local",
-        "crossCheck": {
-          "agrees": true,
-          "delta": {
-            "events": 0,
-            "generatedTokens": 0,
-            "promptTokens": 0
-          },
-          "mirror": {
-            "events": <redacted>,
-            "generatedTokens": <redacted>,
-            "promptTokens": <redacted>
-          },
-          "source": "dev_data/devdata.sqlite tokens_generated"
-        },
-        "sessions": {
-          "count": 16,
-          "end": "2025-07-09",
-          "start": "2025-07-04"
-        },
-        "tokens": {
-          "end": "2025-08-16",
-          "events": <redacted>,
-          "generatedTokens": <redacted>,
-          "models": 24,
-          "promptTokens": <redacted>,
-          "start": "2025-07-04"
-        }
-      },
       "provenance": {
         "configRepo": "kri-local-rag",
         "git": "git log -- Continue_AI_coder",
         "logs": "~/.continue/dev_data/0.2.0/tokensGenerated.jsonl (+ devdata.sqlite mirror cross-check), sessions/sessions.json"
       },
+      "share": 0.0009,
       "tool": "Continue (VS Code)"
     },
     {
       "availability": {
-        "cost": "unknown-server-side",
         "counts": "yes",
         "skills": "none",
         "tokens": "floor"
       },
       "configDir": ".codex",
+      "coverage": {
+        "headerFormats": 2,
+        "humanPromptShare": 0.6968,
+        "loggingStart": "2025-09-23",
+        "partialLogging": true,
+        "rolloutsWithTokenShare": 0.3722
+      },
       "gitCommits": 9,
       "gitEnd": "2025-09-09",
       "gitStart": "2025-08-28",
@@ -113,43 +77,27 @@
       "id": "codex",
       "logEnd": "2026-04-12",
       "logStart": "2025-08-28",
-      "metrics": {
-        "assistantMessages": <redacted>,
-        "environmentPrompts": 463,
-        "files": 223,
-        "headerFormats": {
-          "session_meta": 86,
-          "top-level-id": 137
-        },
-        "humanPrompts": <redacted>,
-        "prompts": <redacted>,
-        "sessions": 223,
-        "tokens": {
-          "cached_input_tokens": <redacted>,
-          "filesWithTokens": 83,
-          "input_tokens": <redacted>,
-          "loggingStart": "2025-09-23",
-          "output_tokens": <redacted>,
-          "partialLogging": true,
-          "reasoning_output_tokens": <redacted>,
-          "total_tokens": <redacted>
-        }
-      },
       "provenance": {
         "configRepo": "kri-local-rag",
         "git": "git log -- .codex",
         "logs": "~/.codex/sessions/**/rollout-*.jsonl (two header formats); history.jsonl is a 3-line stub, not a prompt log"
       },
+      "share": 0.143,
       "tool": "OpenAI Codex plugin"
     },
     {
       "availability": {
-        "cost": "unknown-server-side",
         "counts": "yes",
         "skills": "none",
         "tokens": "floor"
       },
       "configDir": ".cursor",
+      "coverage": {
+        "estimateSource": "cursor-client",
+        "isFloor": true,
+        "pricedBubbleShare": 0.0486,
+        "pricedBubblesAllAssistant": true
+      },
       "gitCommits": 41,
       "gitEnd": "2026-06-23",
       "gitStart": "2025-07-31",
@@ -157,39 +105,28 @@
       "id": "cursor",
       "logEnd": "2026-05-18",
       "logStart": "2025-07-09",
-      "metrics": {
-        "estimateSource": "cursor-client",
-        "isFloor": true,
-        "messages": {
-          "assistant": <redacted>,
-          "total": <redacted>,
-          "untyped": 623,
-          "user": <redacted>
-        },
-        "nonZeroBubbleFraction": 0.0486,
-        "pricedBubbles": <redacted>,
-        "pricedBubblesAssistant": <redacted>,
-        "sessions": <redacted>,
-        "tokens": {
-          "input": <redacted>,
-          "output": <redacted>
-        }
-      },
       "provenance": {
         "configRepo": "kri-local-rag",
         "git": "git log -- .cursor",
         "logs": "Cursor state.vscdb (cursorDiskKV), read-only immutable copy"
       },
+      "share": 0.2583,
       "tool": "Cursor"
     },
     {
       "availability": {
-        "cost": "derived",
         "counts": "yes",
         "skills": "yes",
         "tokens": "yes"
       },
       "configDir": ".claude",
+      "coverage": {
+        "cacheReuseMultiple": 16.1196,
+        "mainShareOfEra": 0.4707,
+        "modelsSeen": 6,
+        "sessionsUsingSubagentsShare": 0.4786,
+        "subagentShareOfEra": 0.5293
+      },
       "gitCommits": 15,
       "gitEnd": "2026-09-06",
       "gitStart": "2026-06-23",
@@ -197,106 +134,6 @@
       "id": "claude-code",
       "logEnd": "2026-09-07",
       "logStart": "2026-08-08",
-      "metrics": {
-        "cost": {
-          "hasUnknownModelCost": false,
-          "perModelUSD": {
-            "claude-fable-5": <redacted>,
-            "claude-fable-5-1": <redacted>,
-            "claude-haiku-4-5-<redacted>": <redacted>,
-            "claude-opus-4-8[1m]": <redacted>,
-            "claude-opus-5": <redacted>,
-            "claude-opus-5[1m]": <redacted>,
-            "claude-sonnet-5": 1.4522
-          },
-          "sessionsWithCostState": 293,
-          "totalUSD": <redacted>
-        },
-        "main": {
-          "files": 749,
-          "perModel": {
-            "<synthetic>": {
-              "cacheCreation": 0,
-              "cacheRead": 0,
-              "input": 0,
-              "output": 0
-            },
-            "claude-fable-5": {
-              "cacheCreation": <redacted>,
-              "cacheRead": <redacted>,
-              "input": <redacted>,
-              "output": <redacted>
-            },
-            "claude-fable-5-1": {
-              "cacheCreation": <redacted>,
-              "cacheRead": <redacted>,
-              "input": <redacted>,
-              "output": <redacted>
-            },
-            "claude-opus-5": {
-              "cacheCreation": <redacted>,
-              "cacheRead": <redacted>,
-              "input": <redacted>,
-              "output": <redacted>
-            }
-          },
-          "sessions": 723,
-          "tokens": {
-            "cacheCreation": <redacted>,
-            "cacheRead": <redacted>,
-            "input": <redacted>,
-            "output": <redacted>
-          }
-        },
-        "subagent": {
-          "files": 898,
-          "parentSessions": 346,
-          "perModel": {
-            "<synthetic>": {
-              "cacheCreation": 0,
-              "cacheRead": 0,
-              "input": 0,
-              "output": 0
-            },
-            "claude-fable-5": {
-              "cacheCreation": <redacted>,
-              "cacheRead": <redacted>,
-              "input": <redacted>,
-              "output": <redacted>
-            },
-            "claude-haiku-4-5-<redacted>": {
-              "cacheCreation": <redacted>,
-              "cacheRead": <redacted>,
-              "input": <redacted>,
-              "output": <redacted>
-            },
-            "claude-opus-4-8": {
-              "cacheCreation": <redacted>,
-              "cacheRead": <redacted>,
-              "input": <redacted>,
-              "output": <redacted>
-            },
-            "claude-opus-5": {
-              "cacheCreation": <redacted>,
-              "cacheRead": <redacted>,
-              "input": <redacted>,
-              "output": <redacted>
-            },
-            "claude-sonnet-5": {
-              "cacheCreation": <redacted>,
-              "cacheRead": <redacted>,
-              "input": 434,
-              "output": <redacted>
-            }
-          },
-          "tokens": {
-            "cacheCreation": <redacted>,
-            "cacheRead": <redacted>,
-            "input": <redacted>,
-            "output": <redacted>
-          }
-        }
-      },
       "onset": {
         "firstPromptProject": "kaizen",
         "firstPromptStamp": "2026-02-28T06:43:47.428000Z",
@@ -314,6 +151,7 @@
         "onset": "~/.claude.json claudeCodeFirstTokenDate + firstStartTime; ~/.claude/history.jsonl first record (dates only)",
         "skills": "git log/rev-list over skills/ in the dotfiles repo (read-only); counts and names only, no skill bodies"
       },
+      "share": 0.5978,
       "skills": {
         "caveat": "Dates are adoption-into-version-control, not authoring. The commit count covers the git era only and undercounts pre-git iteration \u2014 it is a floor.",
         "commits": 103,
@@ -333,7 +171,18 @@
       "tool": "Claude Code"
     }
   ],
-  "schema": 1,
+  "redaction": {
+    "bearingTools": 4,
+    "note": "Shares are fractions of the combined floor across the token-bearing tools. The floor itself is not published, so no absolute is recoverable from them. The full store is private.",
+    "policy": "states-dates-shares",
+    "totalTools": 5,
+    "withheld": [
+      "absolute token counts",
+      "session, message, turn and file counts",
+      "every cost figure and the cost availability state"
+    ]
+  },
+  "schema": 2,
   "sttFaster": {
     "abandonedRuntimeVariants": [
       "_docker",

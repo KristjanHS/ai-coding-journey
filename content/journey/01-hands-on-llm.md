@@ -29,10 +29,10 @@ checkpoints because I did not trust myself to notice a skipped prerequisite:
 The repo holds 170 commits between 2025-06-19 and 2026-04-11. The early ones are not impressive and
 that is the point — `test2 for vscode wsl 2 venv verification`, then `cwd debug`, then `removed ready`.
 
-Those 170 are a count of *this repo*. The tool I was using is counted separately and does not line up
-with it: across all my workspaces the Copilot Chat logs hold 86 turns over 7 sessions, and chat
-appears in only 6 of 18 workspaces. Those logs carry no token field and no cost field at all, so the
-chat stage is the one era where I cannot say what any of it cost — only how often I reached for it.
+Those 170 are a count of *this repo*. The tool I was using is recorded separately and does not line up
+with it: across all my workspaces, Copilot Chat left a chat history in only 6 of 18. Those logs carry
+no token field at all, so the chat stage is the one era with nothing to measure but its dates — not a
+small number, a missing one.
 
 ## What didn't work
 

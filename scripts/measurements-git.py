@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Derive the era ladder's git spine into content/measurements/data/eras.json.
+"""Derive the era ladder's git spine into sources/measurements/eras-full.json.
 
 Usage: python3 scripts/measurements-git.py [CONFIG_REPO]   (default ~/projects/kri-local-rag)
 
@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "content" / "measurements" / "data" / "eras.json"
+OUT = ROOT / "sources" / "measurements" / "eras-full.json"
 DEFAULT_CONFIG_REPO = Path.home() / "projects" / "kri-local-rag"
 
 SCHEMA = 1

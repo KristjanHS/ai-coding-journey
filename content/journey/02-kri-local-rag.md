@@ -63,12 +63,13 @@ the next person (including me) reaching for a convenient import.
 gate the repo had, because the repo had no gate that exercised it. Test coverage is not a quality
 metric here; it is the difference between code that works and code whose behaviour is unknown.
 
-**Local tokens are free, which is why I never looked at them.** Continue logged <redacted> prompt tokens
-against <redacted> generated over that window — roughly seventy-five times more context sent than text
-received. None of that was visible to me at the time: the era ran at near-zero-local cost, so nothing
-ever made me check. Of the five tool eras only two log tokens at full fidelity, and this is the only
-one of those two that also cost effectively nothing — the same locality explains both. Two sources
-hold the number — the JSONL event log and a SQLite mirror — and they agree to the event.
+**Local tokens are free, which is why I never looked at them.** Continue logged roughly seventy-five
+times more context sent than text received over that window — a ratio I discovered two years later, in
+a log I had never opened. None of it was visible at the time: 98.8% of those events ran against a local
+Ollama model, so nothing ever billed me and nothing ever made me check. Of the five tool eras only two
+log tokens at full fidelity, and this is the only one of those two that also ran on my own hardware —
+the same locality explains both. Two sources hold the record — the JSONL event log and a SQLite mirror
+— and they agree to the event, which is more than any other era can say.
 
 **Complexity accretes where nobody is looking.** The review ranked 20 hotspots across roughly 2,100
 lines of core code — 2 CRITICAL, 6 HIGH, 8 MEDIUM, 4 LOW. None of them broke anything. All of them

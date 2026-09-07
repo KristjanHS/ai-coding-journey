@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fill the Continue era in content/measurements/data/eras.json from ~/.continue.
+"""Fill the Continue era in sources/measurements/eras-full.json from ~/.continue.
 
 Usage: python3 scripts/measurements-continue.py [CONTINUE_ROOT]
        (default: the measured Windows-side path below)
@@ -39,7 +39,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "content" / "measurements" / "data" / "eras.json"
+ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
 DEFAULT_ROOT = Path("/mnt/c/Users/PC/.continue")
 ERA_ID = "continue"
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fill the Claude Code era in content/measurements/data/eras.json from its own logs.
+"""Fill the Claude Code era in sources/measurements/eras-full.json from its own logs.
 
 Usage: python3 scripts/measurements-cc.py [PROJECTS_ROOT]   (default ~/.claude/projects)
        python3 scripts/measurements-cc.py --onset-only       (era-start dates, no rescan)
@@ -32,10 +32,11 @@ Decision D2 / cache classes: all four token classes stay separate in the JSON. T
 headline is a view over them (input + cache_creation + output, with cache_read shown
 beside it as reuse); no lossy sum is ever baked into the data.
 
-Money comes from `cost-state` records, which are CUMULATIVE per session -- the last one
-in a session carries the running total, so summing every cost-state in a file
-double-counts. We take the last per session and sum across sessions; the same record's
-`modelUsage` gives the per-model split, cross-checked against its own total.
+Money is NOT derived here. `cost-state` records sit in these transcripts and price the
+work exactly, but a per-account spend figure is personal material under the repo's
+redaction policy, so the derivation lives in the private
+dotfiles copy (`docs/private-sources/ai-coding-journey/measurements/measurements-cc-cost.py`)
+and never in this tree. This script emits token classes and counts only.
 
 Deterministic: sorted keys, no timestamps of its own.
 """
@@ -49,7 +50,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "content" / "measurements" / "data" / "eras.json"
+ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
 DEFAULT_LOG_ROOT = Path.home() / ".claude" / "projects"
 ERA_ID = "claude-code"
 
@@ -113,12 +114,10 @@ def scan(
     paths: list[Path],
     totals: Totals,
     dates: list[str],
-    costs: dict[str, dict],
     *,
     sidechain: bool,
 ) -> None:
-    """Accumulate one set of transcripts. `costs` is keyed by session so the last
-    cost-state per session replaces, never adds to, its predecessors.
+    """Accumulate one set of transcripts.
 
     `sidechain` says which side of the parent/subagent split these files are, and it is
     load-bearing: EVERY assistant record in a subagent transcript carries
@@ -150,28 +149,6 @@ def scan(
                     stamp = record.get("timestamp")
                     if stamp:
                         dates.append(stamp[:10])
-                elif kind == "cost-state":
-                    costs[record.get("sessionId") or session] = record
-
-
-def cost_summary(costs: dict[str, dict]) -> dict:
-    total = 0.0
-    per_model: dict[str, float] = defaultdict(float)
-    unknown_model_cost = False
-    for record in costs.values():
-        total += record.get("totalCostUSD") or 0.0
-        if record.get("hasUnknownModelCost"):
-            unknown_model_cost = True
-        for model, usage in (record.get("modelUsage") or {}).items():
-            per_model[model] += (usage or {}).get("costUSD") or 0.0
-    return {
-        "totalUSD": round(total, 4),
-        "perModelUSD": {
-            model: round(value, 4) for model, value in sorted(per_model.items())
-        },
-        "sessionsWithCostState": len(costs),
-        "hasUnknownModelCost": unknown_model_cost,
-    }
 
 
 def onset() -> dict | None:
@@ -271,10 +248,8 @@ def main() -> int:
 
     dates: list[str] = []
     parent, subagent = Totals(), Totals()
-    parent_costs: dict[str, dict] = {}
-    subagent_costs: dict[str, dict] = {}
-    scan(main_files, parent, dates, parent_costs, sidechain=False)
-    scan(subagent_files, subagent, dates, subagent_costs, sidechain=True)
+    scan(main_files, parent, dates, sidechain=False)
+    scan(subagent_files, subagent, dates, sidechain=True)
 
     document = json.loads(ERAS.read_text())
     for era in document["eras"]:
@@ -285,9 +260,6 @@ def main() -> int:
         era["metrics"] = {
             "main": parent.as_json("sessions"),
             "subagent": subagent.as_json("parentSessions"),
-            # Money is only ever attributed to the main session: cost-state records live
-            # in the parent transcript and already price the work its subagents did.
-            "cost": cost_summary(parent_costs),
         }
         era["provenance"]["logs"] = "~/.claude/projects/**/*.jsonl (snapshots excluded)"
         onset_block = onset()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fill the Copilot Chat era in content/measurements/data/eras.json.
+"""Fill the Copilot Chat era in sources/measurements/eras-full.json.
 
 Usage: python3 scripts/measurements-copilot.py [WORKSPACE_STORAGE_ROOT]
        (default: the measured Windows-side path below)
@@ -32,7 +32,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "content" / "measurements" / "data" / "eras.json"
+ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
 DEFAULT_ROOT = Path("/mnt/c/Users/PC/AppData/Roaming/Code/User/workspaceStorage")
 ERA_ID = "copilot"
 

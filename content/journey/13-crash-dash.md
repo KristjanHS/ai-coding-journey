@@ -58,10 +58,10 @@ is the most useful sentence in the repo. It turns a green check from a conclusio
 
 **Not reading the code is a governance position, and it is delegation I can count.** I read rules,
 plans, test names, review findings and commit messages; I do not read implementations. The logs price
-that: 898 subagent transcripts across 346 of its 723 main sessions, and $<redacted> spent over
-293 sessions that carry a cost state. Claude Code is the only one of the five eras whose cost is derived
-rather than a state — the four before it leave cost absent, near-zero-local, or unknown server-side.
-The position is defensible exactly as far as the verification layer reaches, and no further.
+that: subagents account for the majority of the era's tokens — 52.9% against 47.1% in the sessions I
+typed into — spread across 47.9% of main sessions. Roughly half my sessions delegate at all, and those
+that do outweigh every session that does not. The position is defensible exactly as far as the
+verification layer reaches, and no further.
 
 ## Artifact
 

@@ -155,9 +155,8 @@ Searched for separately, because the ChatGPT threads only prove Roo Code was *re
   | Task | "my unit tests have errors `.venv/bin/python -m pytest tests/unit/`" |
   | Files in context | `backend/qa_loop.py`, `tests/unit/test_qa_loop_logic.py`, `tests/unit/test_logging_config.py` |
   | Model | `gemini-2.5-pro` (BYO key) |
-  | API requests | 35 |
-  | Tokens | <redacted> in · <redacted> out · <redacted> cache reads · 0 cache writes |
-  | Cost | **$<redacted>** |
+  | Token record | complete — in, out, cache reads and cache writes, all four classes |
+  | Price record | complete — a per-task figure, the only one in any plugin-era log |
 
 - **No custom mode was ever configured** — `settings/custom_modes.yaml` is `customModes: []`, and
   `settings/mcp_settings.json` has an empty `mcpServers`, both dated 2025-08-16. The
@@ -167,10 +166,12 @@ Searched for separately, because the ChatGPT threads only prove Roo Code was *re
   `openrouter_models.json` / `glama_models.json` / `vercel-ai-gateway_models.json` at **2025-12-08 17:17**.
   A December launch with no task recorded — evaluated again, not used.
 
-Why this matters beyond the tool list: chapter 01 states the chat stage is the one era with no cost figure.
-The Roo task is the opposite case — a **complete** cost record for a single plugin-era session, in the repo
-that chapter 02 covers. Its extraction is reproducible from `ui_messages.json`: sum `cost`, `tokensIn`,
+Why this matters beyond the tool list: chapter 01 states the chat stage is the era with nothing quantitative
+in its logs. The Roo task is the opposite case — a **complete** per-task record, price included, for a single
+plugin-era session in the repo that chapter 02 covers. One extension, used once, kept better books than the
+four eras around it. Its extraction is reproducible from `ui_messages.json`: sum `cost`, `tokensIn`,
 `tokensOut`, `cacheReads` over the `say == "api_req_started"` entries; `ts` fields are epoch milliseconds.
+The figures themselves are not published here, under the same policy as `/measurements`.
 
 Corroborating repo activity: `kri-local-rag` commits either side of that session are the unit-test
 refactor run — `2025-08-13 uni tests networking rules`, then 2025-08-17's `unit tests updated to reflect

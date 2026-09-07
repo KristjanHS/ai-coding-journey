@@ -1,13 +1,13 @@
 ---
-title: "Claude Code — the era with tokens, cost and sessions"
-summary: "The richest logs: token classes, derived per-model cost, session counts, and the cross-era token floor over four of five tools."
+title: "Claude Code — the era with the richest logs"
+summary: "The one era whose logs date themselves, split main from subagent traffic, and account for reuse separately — and the largest share of the floor."
 ---
 
 # Claude Code
 
-The one era where tokens, money and sessions are all derivable from the logs. It
-carries two token figures side by side, never one silently, and the only derived
-cost on the page.
+The one era where tokens, sessions and era-start dates are all derivable from the
+logs. It is also the only era that can distinguish work I drove from work it
+spawned on my behalf.
 
 ## Where the era starts
 
@@ -31,34 +31,28 @@ it instead.
 Both of the era's own records start late — git by 115 days, the logs by 161. The bar on
 `/measurements` keeps that gap open rather than widening itself to cover it.
 
-- **<redacted> tokens** main-session (input + cache-creation + output), and
-  **<redacted> tokens** for main + subagents — both reported, per the ruling
-  that neither side is folded away.
-- **723 main sessions** across 749 files; 898 subagent transcripts spread over
-  346 of those sessions.
+## The share, and how it splits
+
+- **59.8% of the cross-era floor** — the largest of the four bearing tools, and
+  larger than the other three combined.
+- **52.9% of that is subagent traffic**, against 47.1% in the sessions I typed
+  into. Sub-agents are the majority of the era by tokens, spread across
+  **47.9%** of main sessions — roughly half of all sessions delegate at all, and
+  those that do account for more than half the work.
 - Measured how: sum `message.usage.*` over `type == "assistant"` records in
   `~/.claude/projects/**/*.jsonl`, scoping the `isSidechain` filter per side
   (false for main transcripts, true for subagent transcripts), so neither side
   zeroes the other.
 
-Cache-read tokens are reuse, shown separately and never inside the headline sum.
+Both sides are reported, per the ruling that neither is folded away.
 
-## Cost is `derived`
+## Reuse is 16× the fresh traffic
 
-- **$<redacted>** total, across 293 sessions that carry a cost-state.
-- Measured how: take the last `cost-state` per session (it is cumulative), and
-  cross-check the per-model sum against the assistant-derived cost. This is the
-  only `derived` cost state — real per-model spend from the logs, distinct from
-  Continue's `near-zero-local`, Cursor's and Codex's `unknown-server-side`, and
-  Copilot's `absent`.
-
-## The cross-era token floor
-
-Across the four tools that log tokens at all — Continue, Codex, Cursor and Claude
-Code — the combined floor is **<redacted>** tokens, four of five tools. It is a
-floor: Copilot logs no token field, and both Codex and Cursor contribute floors
-of their own. The eras that produced it overlap in time rather than succeeding one
-another.
+Cache reads — context re-sent from a warm prompt cache — run at **16.1× the
+headline sum** of input, cache-creation and output. It is a ratio, not a total,
+and it is reported separately because folding reuse into a token headline is the
+single easiest way to make an AI-coding figure meaningless. A ratio above one
+says most of what the model reads it has read before.
 
 ## Skills — a Claude-Code-era attribute
 
@@ -71,3 +65,10 @@ None of the four earlier tools had skills; Claude Code is the only era with them
 - Caveat: those dates are adoption-into-version-control, not authoring — the
   103-commit figure is a floor over the git era only and undercounts pre-git
   iteration, the same shape as the Cursor token floor.
+
+## What is not published
+
+The token sums for either side, the session and transcript counts, and every
+figure about what any of it cost. The splits and the reuse ratio are the findings;
+the volumes are private, and the cost derivation was moved out of this repo's
+scripts along with them.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fill the Cursor era in content/measurements/data/eras.json from its state.vscdb.
+"""Fill the Cursor era in sources/measurements/eras-full.json from its state.vscdb.
 
 Usage: python3 scripts/measurements-cursor.py [STATE_VSCDB]
        (default: the measured Windows-side path below)
@@ -43,7 +43,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "content" / "measurements" / "data" / "eras.json"
+ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
 DEFAULT_DB = Path(
     "/mnt/c/Users/PC/AppData/Roaming/Cursor/User/globalStorage/state.vscdb"
 )

@@ -7,17 +7,18 @@ import Base from '../../layouts/Base.astro';
 import {
   TIME_DOMAIN,
   caveats,
-  costStates,
   crossCheck,
   dateFraction,
   eraSpans,
   eras,
   overlapLabel,
   overlappingPairs,
-  tokenHeadline,
+  redaction,
+  tokenShape,
+  withheld,
 } from '../../lib/measurements';
 
-const nf = (n: number) => n.toLocaleString('en-US');
+const share = (n: number) => `${(n * 100).toFixed(n < 0.01 ? 2 : 1)}%`;
 const pct = (d: string) => (dateFraction(d) * 100).toFixed(2);
 
 // Group → colour, reusing the stage ramp tokens (D5: colour is the ONLY thing group
@@ -42,12 +43,13 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
 ---
 <Base
   title="The numbers · ai-coding-journey"
-  description="Measured token, cost and session evidence across five overlapping AI-coding tool eras — floors and absences named, never estimated."
+  description="What five overlapping AI-coding tools recorded about themselves — states, dates and relative shares. Absolute volumes are withheld by policy."
 >
   <h1>The numbers</h1>
   <p class="lede">
     Five AI-coding tools, measurable to wildly different depths — and they <em>overlap</em> in time, not
-    a tidy succession. Every figure below is a floor or a named absence; nothing absent is estimated.
+    a tidy succession. Nothing absent is estimated, and nothing present is a total: this page publishes
+    <strong>states, dates and relative shares</strong> only.
   </p>
 
   <!-- Overlap view: five lanes, ONE shared time axis. Bands positioned from the real
@@ -117,86 +119,71 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
     </tbody>
   </table>
 
-  <!-- Token headline: a FLOOR over the four token-bearing tools (D2 as amended).
-       One table — the qualifiers live in the note column, never in a prose paragraph. -->
-  <h2>Token headline</h2>
-  <p class="headline">
-    <strong>{tokenHeadline.qualifier} {nf(tokenHeadline.floor)}</strong> tokens
-    <span class="qual">· {tokenHeadline.bearingCount} of {tokenHeadline.totalTools} tools log any</span>
+  <!-- Token SHAPE: shares of a floor whose total is not published. The replacement for
+       the old absolute headline — same finding (which tool dominated, and which cannot
+       answer at all), none of the volume. -->
+  <h2>Token shape</h2>
+  <p class="lede">
+    Which tool did the bulk of the work, and which cannot say. Each bar is that tool's share of the
+    combined floor across the {tokenShape.bearingCount} tools that log tokens at all — a
+    <em>relative</em> reading. The bars are log-scaled and the axis is deliberately unlabelled: they
+    encode rank and rough spread, not quantity.
   </p>
   <table class="tokens">
     <thead>
       <tr>
-        <th>tool</th><th>state</th><th class="num">headline tokens</th>
-        <th class="num">cacheRead (reuse)</th><th>what qualifies it</th>
+        <th>tool</th><th>state</th><th class="num">share of the floor</th>
+        <th>shape</th><th>what qualifies it</th>
       </tr>
     </thead>
     <tbody>
-      {tokenHeadline.contributions.map((c) => (
+      {tokenShape.rows.map((row) => (
         <tr>
-          <td>{c.tool}</td>
-          <td><code>{c.state}</code></td>
+          <td>{row.tool}</td>
+          <td><code>{row.state}</code></td>
           <td class="num">
-            {c.sides ? (
-              <>
-                {nf(c.sides.main.headline)} <span class="qual">main</span><br />
-                {nf(c.sides.mainPlusSubagent.headline)} <span class="qual">+ subagents</span>
-              </>
+            {row.share !== null ? share(row.share) : <span class="empty">—</span>}
+          </td>
+          <td class="shape">
+            {row.share !== null ? (
+              <span class="bar" style={`width:${(row.logWidth * 100).toFixed(1)}%;`} />
             ) : (
-              nf(c.headline)
+              <span class="empty">no token field</span>
             )}
           </td>
-          <td class="num">{nf(c.cacheRead)}</td>
-          <td class="cell-note">
-            {c.cachedInputSubset ? (
-              <span>{nf(c.cachedInputSubset)} cached-input tokens sit inside input — shown, never added.<br /></span>
-            ) : null}
-            {(caveatsById.get(c.id) ?? []).map((line) => <span>{line}<br /></span>)}
-            {c.sides ? <span>Both sides counted; the floor uses main + subagents.</span> : null}
-          </td>
+          <td class="cell-note">{row.qualifier}</td>
         </tr>
       ))}
     </tbody>
     <tfoot>
       <tr>
-        <th>floor · main + subagents</th>
+        <th>the four that log any</th>
         <th><code>≥</code></th>
-        <th class="num">{nf(tokenHeadline.floor)}</th>
-        <th class="num">{nf(tokenHeadline.cacheRead)}</th>
-        <th class="cell-note">
-          Sum of <code>input + cacheCreation + output</code>. <code>cacheRead</code> is reuse and
-          never enters the headline.
+        <th class="num">{share(tokenShape.shareTotal)}</th>
+        <th class="cell-note" colspan="2">
+          The shares are of a floor, so the floor is a floor too — two of the four contribute one of
+          their own. The floor's <em>value</em> is not published.
         </th>
-      </tr>
-      <tr>
-        <th>floor · main sessions only</th>
-        <th><code>≥</code></th>
-        <th class="num">{nf(tokenHeadline.floorMain)}</th>
-        <th class="num">—</th>
-        <th class="cell-note">Claude Code subagent traffic excluded.</th>
       </tr>
     </tfoot>
   </table>
 
-  <!-- Cost: four typed states (D4), each phrased in its own terms, never flattened. -->
-  <h2>Cost — four states, never flattened</h2>
-  <table class="costs">
-    <thead>
-      <tr><th>tool</th><th>state</th><th class="num">USD</th><th>what that state means here</th></tr>
-    </thead>
-    <tbody>
-      {costStates.map((row) => (
-        <tr>
-          <td>
-            <span class="dot" style={`background:${GROUP_COLOUR[eras.find((e) => e.id === row.id)!.group]};`} /> {row.tool}
-          </td>
-          <td><code>{row.state}</code></td>
-          <td class="num">{row.usd !== null ? <span class="usd">${nf(Math.round(row.usd))}</span> : <span class="empty">—</span>}</td>
-          <td class="cell-note">{row.note}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+  <!-- The redaction, rendered rather than implied. A reader who wonders where the
+       totals went is told here, in the same view as the shares that replaced them. -->
+  <h2>What this page does not publish</h2>
+  <p class="lede">
+    The measurement pass derived more than this. The rest is personal material and stays in a private
+    repo — a total for how much one person used these tools, and what it cost them, is not the finding
+    this journey is about.
+  </p>
+  <ul class="withheld">
+    {withheld.map((item) => <li>{item}</li>)}
+  </ul>
+  <p class="note">
+    {redaction.note} The redaction is a script, not a habit:
+    <code>scripts/measurements-public.py</code> reduces the private store to this one and refuses to
+    write if an absolute survives the reduction.
+  </p>
 
   <!-- D3: the citable narratives, one .md per era, linked to their GitHub source. -->
   <h2>Citable narratives</h2>
@@ -269,11 +256,20 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
   .empty { color: var(--fg-dim); }
   .dot { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; vertical-align: middle; }
 
-  .usd { color: var(--accent); font-family: var(--font-mono); }
+  /* Log-scaled, deliberately unlabelled: rank and rough spread, never a quantity. */
+  .shape { width: 30%; min-width: 6rem; }
+  .bar {
+    display: block;
+    height: 0.7rem;
+    border-radius: var(--radius);
+    background: var(--accent);
+    min-width: 2px;
+  }
+  .withheld { color: var(--fg-dim); font-size: var(--size-0); margin: var(--space-2) 0; }
   .cell-note { color: var(--fg-dim); font-size: var(--size-0); line-height: 1.45; }
   .sources td.num, tfoot .num { white-space: nowrap; }
   /* The tool name is the row's identity — never let it wrap to three lines. */
-  .sources td:first-child, .costs td:first-child, .tokens td:first-child { white-space: nowrap; }
+  .sources td:first-child, .tokens td:first-child { white-space: nowrap; }
   tfoot th { font-weight: 600; color: var(--fg); border-top: 1px solid var(--rule); vertical-align: top; }
   td, th { vertical-align: top; }
 
