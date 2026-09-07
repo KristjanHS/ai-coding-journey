@@ -20,6 +20,10 @@ const { title, lede, rows, empty } = Astro.props;
 <h1>{title}</h1>
 <p class="lede">{lede}</p>
 
+<!-- Optional landing body: /case-study/ renders its index.md through here. The
+     other sections pass no children, so the slot collapses to nothing. -->
+<slot />
+
 {rows.length > 0 ? (
   <ul class="rows">
     {rows.map((row) => (

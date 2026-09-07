@@ -1,12 +1,21 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import SectionIndex from '../../components/SectionIndex.astro';
+import { LANDING_ID } from './[...slug].astro';
 
-// Empty until inc5 — the empty branch of SectionIndex is what renders today.
-const rows = (await getCollection('case-study'))
+const entries = await getCollection('case-study');
+const landing = entries.find((entry) => entry.id === LANDING_ID);
+const Landing = landing ? (await render(landing)).Content : null;
+
+const rows = entries
+  .filter((entry) => entry.id !== LANDING_ID)
   .sort((a, b) => a.id.localeCompare(b.id))
-  .map((entry) => ({ href: `/case-study/${entry.id}/`, title: entry.data.title }));
+  .map((entry) => ({
+    href: `/case-study/${entry.id}/`,
+    title: entry.data.title,
+    meta: entry.data.origin,
+  }));
 ---
 <Base
   title="Case study · ai-coding-journey"
@@ -17,5 +26,7 @@ const rows = (await getCollection('case-study'))
     lede="The sanitised markdown layer of the app this journey ends at."
     rows={rows}
     empty="Nothing here yet — the case study arrives at inc5."
-  />
+  >
+    {Landing && <Landing />}
+  </SectionIndex>
 </Base>

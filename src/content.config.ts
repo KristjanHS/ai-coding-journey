@@ -58,9 +58,18 @@ const provisional = z.object({
   summary: z.string().optional(),
 });
 
+// inc5 pins the case-study schema: every artifact but the landing index.md carries
+// `origin` (the relative path/commit it was rewritten from) and the `date` of that
+// source. Both stay optional here because index.md carries neither — the vitest
+// provenance guard (Stage 8) is what makes `origin` mandatory for the artifacts.
 const caseStudy = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './content/case-study' }),
-  schema: provisional,
+  schema: z.object({
+    title: z.string(),
+    summary: z.string().optional(),
+    origin: z.string().optional(),
+    date: isoDate.optional(),
+  }),
 });
 
 const course = defineCollection({

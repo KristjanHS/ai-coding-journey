@@ -1,0 +1,47 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+// Ids are nested (`crash-dash/path-gated-rule`), so the param must be a rest
+// param — a plain [slug] never matches an id containing a slash and every
+// artifact 404s. The landing entry is excluded: it is the body of /case-study/
+// itself, and a route for it would publish a duplicate of that page one level
+// down. Its file is content/case-study/crash-dash/index.md, but the glob loader
+// strips the trailing `/index` from the id, so the id is the bare dir name —
+// checking for 'crash-dash/index' matches nothing and silently ships both the
+// duplicate route and an empty landing body.
+export const LANDING_ID = 'crash-dash';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('case-study');
+  return entries
+    .filter((entry) => entry.id !== LANDING_ID)
+    .map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Base title={`${entry.data.title} · case study`} description={entry.data.summary ?? entry.data.title}>
+  <p class="back"><a href="/case-study/">← Case study</a></p>
+  <h1>{entry.data.title}</h1>
+  {entry.data.summary && <p class="lede">{entry.data.summary}</p>}
+  {entry.data.origin && (
+    <p class="origin">
+      Rewritten from <code>{entry.data.origin}</code>{entry.data.date && <> · {entry.data.date}</>}
+    </p>
+  )}
+  <Content />
+</Base>
+
+<style>
+  .back { font-size: var(--size-0); }
+  .lede { color: var(--fg-dim); margin-top: 0; }
+  .origin {
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+</style>
