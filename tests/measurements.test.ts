@@ -807,6 +807,8 @@ const JOURNEY_PINNED: [string, string[]][] = [
       crashDash.last_commit,
       // ...and the era row's OWN git window, which is near this repo's but not it.
       `${libEra('claude-code').gitStart} to ${libEra('claude-code').gitEnd}`,
+      // ...and the count the whole scope distinction turns on.
+      `${libEra('claude-code').gitCommits} commits`,
       // Tool scope — eras.json `claude-code`. Delegation and spend are the two
       // figures that price "I do not read implementations"; pinning them beside the
       // repo scope above is what stops 5,018 and 15 being read as one measurement.

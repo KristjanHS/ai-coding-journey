@@ -13,11 +13,27 @@ import { fileURLToPath } from 'node:url';
 const CONTENT_DIR = resolve(process.cwd(), 'content');
 const RELATIVE_MD = /^\.\.?\//;
 
-/** `content/course/skeleton.md` → `/course/skeleton/`; null if outside content/. */
+// The site's REAL route table, not "every file under content/". `measurements`
+// has an index page and no `[slug]` route, so a link into it would rewrite to a
+// route that 404s on the built site; `case-study` is nested, strips `/index` the
+// way the glob loader does, and renders its landing entry at the section root.
+// Anything this map cannot place is refused — inventing a route is worse than
+// leaving the `.md` link alone, because the build stays green either way.
+const CASE_STUDY_LANDING = 'crash-dash'; // mirrors LANDING_ID in [...slug].astro
+const FLAT_COLLECTIONS = new Set(['journey', 'prompts', 'course']);
+
+/** `content/course/skeleton.md` → `/course/skeleton/`; null when unroutable. */
 export const routeForContentFile = (absPath) => {
   const rel = relative(CONTENT_DIR, absPath);
   if (rel.startsWith('..') || !rel.endsWith('.md')) return null;
-  return `/${rel.slice(0, -'.md'.length)}/`;
+  const [collection, ...rest] = rel.slice(0, -'.md'.length).split('/');
+  const id = rest.join('/').replace(/(^|\/)index$/, '');
+  if (FLAT_COLLECTIONS.has(collection)) return rest.length === 1 ? `/${collection}/${id}/` : null;
+  if (collection === 'case-study') {
+    if (!id) return null;
+    return id === CASE_STUDY_LANDING ? '/case-study/' : `/case-study/${id}/`;
+  }
+  return null; // `measurements` and anything new: no per-slug route to point at.
 };
 
 /** The rewrite itself, split out so it is testable without a compile. */

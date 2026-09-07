@@ -32,7 +32,31 @@ describe('md-links — one source form for GitHub and the site', () => {
     expect(visit('../course/skeleton.json')).toBe('../course/skeleton.json'); // not markdown
   });
 
-  it('refuses to route a path that escapes content/', () => {
+  it('refuses the collections that have no per-slug route', () => {
+    // measurements/ ships an index page only (src/pages/measurements/), so a
+    // rewrite here would mint a route that 404s on the built site while the build
+    // stayed green. Refusing leaves the .md link alone, which is no worse.
+    expect(routeForContentFile(resolve(CONTENT, 'measurements', '04-claude-code.md'))).toBe(null);
+    expect(visit('../measurements/04-claude-code.md')).toBe('../measurements/04-claude-code.md');
+  });
+
+  it('routes case-study the way its loader and [...slug] route actually do', () => {
+    // The glob loader strips `/index` from the id, and [...slug].astro excludes the
+    // landing id, rendering it at the section root instead.
+    expect(routeForContentFile(resolve(CONTENT, 'case-study', 'crash-dash', 'index.md'))).toBe(
+      '/case-study/',
+    );
+    expect(
+      routeForContentFile(resolve(CONTENT, 'case-study', 'crash-dash', 'path-gated-rule.md')),
+    ).toBe('/case-study/crash-dash/path-gated-rule/');
+  });
+
+  it('refuses a nested path in a flat collection', () => {
+    // journey/prompts/course render a single `[slug]`, so a nested file has no route.
+    expect(routeForContentFile(resolve(CONTENT, 'journey', 'sub', 'deep.md'))).toBe(null);
+  });
+
+  it('refuses a path that escapes content/', () => {
     expect(routeForContentFile(resolve(CONTENT, '../README.md'))).toBe(null);
     expect(rewriteMdLink('../../README.md', CLOSE)).toBe(null);
   });
