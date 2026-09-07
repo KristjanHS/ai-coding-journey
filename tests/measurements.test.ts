@@ -376,3 +376,33 @@ describe('the cross-era token headline (D2 as amended)', () => {
     expect(eras.eras).toHaveLength(5);
   });
 });
+
+describe('skills — a Claude-Code-era-only attribute (D6: git headline only)', () => {
+  const cc = eras.eras.find((e) => e.id === 'claude-code')!;
+
+  it('pins the live skill count and the commit floor, both scoped to skills/', () => {
+    // Recomputed by scripts/measurements-skills.py from git before being pinned. The
+    // red demo widens either scope — SKILL.md repo-wide, or all commits rather than
+    // those touching skills/ — and both figures below move.
+    expect(cc.skills.liveSkillFiles).toBe(29);
+    expect(cc.skills.commits).toBe(103);
+    expect(cc.skills.vcStart).toBe('2026-07-09');
+    expect(cc.skills.vcEnd).toBe('2026-08-20');
+  });
+
+  it('flags the count a floor over version-control dates, never authoring dates', () => {
+    // Without this the 103 reads as "all the iteration there was". The example is the
+    // proof it is not: authored on/before its 2026-06-18 snapshot, one commit, 2026-08-20.
+    expect(cc.skills.commitsAreFloor).toBe(true);
+    expect(cc.skills.datesAre).toBe('adopted-into-vc');
+    expect(cc.skills.example.name).toBe('detect-ai-text-cl-op');
+    expect(cc.skills.example.bucket).toBe('original');
+    expect(cc.skills.example.commits).toBe(1);
+    expect(cc.skills.example.snapshotDate < cc.skills.example.firstCommit).toBe(true);
+  });
+
+  it('gives no era before Claude Code a skills block at all', () => {
+    const withBlock = eras.eras.filter((e) => 'skills' in e);
+    expect(withBlock.map((e) => e.id)).toEqual(['claude-code']);
+  });
+});

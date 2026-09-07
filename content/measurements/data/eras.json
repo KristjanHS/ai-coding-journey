@@ -300,7 +300,24 @@
       "provenance": {
         "configRepo": "kri-local-rag",
         "git": "git log -- .claude",
-        "logs": "~/.claude/projects/**/*.jsonl (snapshots excluded)"
+        "logs": "~/.claude/projects/**/*.jsonl (snapshots excluded)",
+        "skills": "git log/rev-list over skills/ in the dotfiles repo (read-only); counts and names only, no skill bodies"
+      },
+      "skills": {
+        "caveat": "Dates are adoption-into-version-control, not authoring. The commit count covers the git era only and undercounts pre-git iteration \u2014 it is a floor.",
+        "commits": 103,
+        "commitsAreFloor": true,
+        "datesAre": "adopted-into-vc",
+        "example": {
+          "bucket": "original",
+          "commits": 1,
+          "firstCommit": "2026-08-20",
+          "name": "detect-ai-text-cl-op",
+          "snapshotDate": "2026-06-18"
+        },
+        "liveSkillFiles": 29,
+        "vcEnd": "2026-08-20",
+        "vcStart": "2026-07-09"
       },
       "tool": "Claude Code"
     }
