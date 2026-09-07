@@ -1,18 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import timeline from '../../../content/timeline.json';
+import { MIN_COMMITS, experiments } from '../../lib/timeline';
 
 const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeCompare(b.id));
-
-// Mirrors MIN_COMMITS in scripts/timeline-from-git.py: below it a repo is an
-// experiment line, not a chapter. The generator writes those lines into
-// content/journey/00-experiments.md for GitHub; the site reads the same rows
-// straight out of timeline.json rather than parsing that file back.
-const MIN_COMMITS = 5;
-const experiments = timeline
-  .filter((row) => row.commits < MIN_COMMITS)
-  .sort((a, b) => a.first_commit.localeCompare(b.first_commit));
 ---
 <Base
   title="The journey · ai-coding-journey"

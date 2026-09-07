@@ -158,18 +158,20 @@ describe('mirrored constants', () => {
   });
 
   // `MIN_COMMITS` lives in the generator and is hand-copied into the site's
-  // journey index (which uses it to build the "also tried" list). They must not
-  // drift: the two files would then disagree about what counts as a chapter.
-  it('MIN_COMMITS matches between the generator and the journey index', () => {
+  // shared timeline lib (which uses it to build the "also tried" list). They
+  // must not drift: the two files would then disagree about what counts as a
+  // chapter. The site half moved out of `src/pages/journey/index.astro` into
+  // `src/lib/timeline.ts` in inc4 Stage 2, so this regex tracks the new home.
+  it('MIN_COMMITS matches between the generator and the timeline lib', () => {
     const script = read(join('scripts', 'timeline-from-git.py'));
-    const page = read(join('src', 'pages', 'journey', 'index.astro'));
+    const lib = read(join('src', 'lib', 'timeline.ts'));
 
     const fromScript = script.match(/^MIN_COMMITS\s*=\s*(\d+)/m);
-    const fromPage = page.match(/^const MIN_COMMITS\s*=\s*(\d+);/m);
+    const fromLib = lib.match(/^export const MIN_COMMITS\s*=\s*(\d+);/m);
     expect(fromScript, 'no MIN_COMMITS in timeline-from-git.py').not.toBeNull();
-    expect(fromPage, 'no MIN_COMMITS in journey/index.astro').not.toBeNull();
+    expect(fromLib, 'no MIN_COMMITS in src/lib/timeline.ts').not.toBeNull();
 
-    expect(fromPage![1]).toBe(fromScript![1]);
+    expect(fromLib![1]).toBe(fromScript![1]);
   });
 
   // `content/timeline.json` is generated, so these assert the GENERATOR's two
