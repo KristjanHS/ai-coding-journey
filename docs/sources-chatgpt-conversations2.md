@@ -30,7 +30,7 @@ writes a header block:
 **Created:** 11/12/2025 19:54:45
 **Updated:** 11/12/2025 19:54:55
 **Exported:** 9/7/2026 20:53:02
-**Link:** [https://chatgpt.com/c/6914c9d9-...](https://chatgpt.com/c/6914c9d9-...)
+**Link:** [https://chatgpt.com/c/<conversation-uuid>](https://chatgpt.com/c/<conversation-uuid>)
 ```
 
 Corpus 1 contains exactly one file in this format (`Sep 26, 2025 12-17-17 PM Markdown Content.md`, noted
@@ -191,6 +191,11 @@ of environment debugging. Observed: the Windows hostname `DESKTOP-26A9125`, `/ho
 6 files), `C:\Users\Kristjan\…`, the GCP project id `speech2text-218910`, GitHub repo URLs carrying the
 account name, and an attachment filename embedding it. In two threads the assistant addresses the user by
 first name inside its own reasoning.
+
+**Every file carries a live thread URL.** The `Link:` header is a real `chatgpt.com/c/<uuid>` address, and
+the threads that lived in a ChatGPT project folder carry a `/g/g-p-<id>/` segment too — conversation and
+project identifiers. They must not reach `content/`, and they are a candidate for the same grep guard the
+public-store generator already runs. The sample block above is redacted for this reason.
 
 Treat **every** HIGH and MED row as requiring a scrub before any excerpt reaches `content/`. The existing
 rule applies unchanged: quote a *prompt shape*, never a thread verbatim.
