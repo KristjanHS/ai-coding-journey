@@ -1,0 +1,115 @@
+{
+  "eras": [
+    {
+      "availability": {
+        "cost": "absent",
+        "counts": "yes",
+        "skills": "none",
+        "tokens": "none"
+      },
+      "configDir": null,
+      "gitCommits": null,
+      "gitEnd": null,
+      "gitStart": null,
+      "group": "vscode-plugin",
+      "id": "copilot",
+      "logEnd": null,
+      "logStart": null,
+      "metrics": {},
+      "provenance": {
+        "configRepo": "kri-local-rag",
+        "git": null
+      },
+      "tool": "GitHub Copilot Chat"
+    },
+    {
+      "availability": {
+        "cost": "near-zero-local",
+        "counts": "yes",
+        "skills": "none",
+        "tokens": "yes"
+      },
+      "configDir": "Continue_AI_coder",
+      "gitCommits": 2,
+      "gitEnd": "2025-08-16",
+      "gitStart": "2025-07-13",
+      "group": "vscode-plugin",
+      "id": "continue",
+      "logEnd": null,
+      "logStart": null,
+      "metrics": {},
+      "provenance": {
+        "configRepo": "kri-local-rag",
+        "git": "git log -- Continue_AI_coder"
+      },
+      "tool": "Continue (VS Code)"
+    },
+    {
+      "availability": {
+        "cost": "unknown-server-side",
+        "counts": "yes",
+        "skills": "none",
+        "tokens": "none"
+      },
+      "configDir": ".codex",
+      "gitCommits": 9,
+      "gitEnd": "2025-09-09",
+      "gitStart": "2025-08-28",
+      "group": "vscode-plugin",
+      "id": "codex",
+      "logEnd": null,
+      "logStart": null,
+      "metrics": {},
+      "provenance": {
+        "configRepo": "kri-local-rag",
+        "git": "git log -- .codex"
+      },
+      "tool": "OpenAI Codex plugin"
+    },
+    {
+      "availability": {
+        "cost": "unknown-server-side",
+        "counts": "yes",
+        "skills": "none",
+        "tokens": "floor"
+      },
+      "configDir": ".cursor",
+      "gitCommits": 41,
+      "gitEnd": "2026-06-23",
+      "gitStart": "2025-07-31",
+      "group": "cursor",
+      "id": "cursor",
+      "logEnd": null,
+      "logStart": null,
+      "metrics": {},
+      "provenance": {
+        "configRepo": "kri-local-rag",
+        "git": "git log -- .cursor"
+      },
+      "tool": "Cursor"
+    },
+    {
+      "availability": {
+        "cost": "derived",
+        "counts": "yes",
+        "skills": "yes",
+        "tokens": "yes"
+      },
+      "configDir": ".claude",
+      "gitCommits": 15,
+      "gitEnd": "2026-09-06",
+      "gitStart": "2026-06-23",
+      "group": "claude-code",
+      "id": "claude-code",
+      "logEnd": null,
+      "logStart": null,
+      "metrics": {},
+      "provenance": {
+        "configRepo": "kri-local-rag",
+        "git": "git log -- .claude"
+      },
+      "tool": "Claude Code"
+    }
+  ],
+  "schema": 1
+}

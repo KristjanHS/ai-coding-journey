@@ -15,7 +15,7 @@ VITEST := node_modules/.bin/vitest
 # the shared include at the bottom must not be able to steal the default goal.
 .DEFAULT_GOAL := help
 
-.PHONY: help check lint site test timeline ship dev build preview
+.PHONY: help check lint site test timeline measurements ship dev build preview
 
 help: ## show this list of targets
 	@printf 'Usage: make <target>\n\n'
@@ -96,6 +96,17 @@ test: ## run the vitest content suite (evidence + anti-hype assertions)
 # missing chapter stubs. Writes into the tree — review and commit the result.
 timeline: ## regenerate content/timeline.json + the journey index from git
 	@python3 scripts/timeline-from-git.py
+
+# Regenerate content/measurements/data/eras.json. Same contract as `timeline`, and
+# deliberately NOT part of `make check` for the same reason: these generators read
+# moving sources outside this repo (another repo's git history, and later the log
+# trees), so a drift probe in the gate would report drift the repo cannot act on.
+# Run it on demand and commit the regenerated JSON on its own.
+#
+# Each era's generator registers here as its stage lands; the git spine runs first
+# because every log-derived range is cross-checked against it.
+measurements: ## regenerate content/measurements/data/eras.json from git + the log corpora
+	@python3 scripts/measurements-git.py
 
 # ── Astro site ──
 # The npm scripts these delegate to are real as of inc3 Stage 1. The guard now
