@@ -6,7 +6,6 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import {
   TIME_DOMAIN,
-  availabilityMatrix,
   caveats,
   costStates,
   crossCheck,
@@ -15,7 +14,6 @@ import {
   eras,
   overlapLabel,
   overlappingPairs,
-  skills,
   sttFaster,
   tokenHeadline,
 } from '../../lib/measurements';
@@ -39,7 +37,9 @@ const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/me
 
 const provenanceById = new Map(eras.map((e) => [e.id, e.provenance]));
 const crossById = new Map(crossCheck.map((c) => [c.id, c]));
-const cc = tokenHeadline.contributions.find((c) => c.id === 'claude-code')!;
+// Caveats are not a section of their own any more — each line rides in the note column
+// of the table it qualifies, so a figure can never be read without its qualifier.
+const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
 ---
 <Base
   title="The numbers · ai-coding-journey"
@@ -90,26 +90,52 @@ const cc = tokenHeadline.contributions.find((c) => c.id === 'claude-code')!;
     </div>
   </div>
   <p class="note">
-    Solid = log range · outline = config-commit range. Overlapping pairs: <code>{overlapLabel}</code>.
+    Overlapping pairs: <code>{overlapLabel}</code>.
   </p>
+  <p>
+    Two bands per lane, because two independent records exist and they disagree. The
+    <strong>solid</strong> band is the <em>log</em> range — the first and last timestamp in that tool's own
+    session files still on this machine. The <strong>outline</strong> band is the <em>config-commit</em>
+    range — first to last commit touching that tool's config directory. Neither band is an adoption
+    date: Claude Code's solid band sits at the far right, six weeks inside its own outline band, because
+    that is where its surviving transcripts start. Both records are shown; neither is reconciled.
+  </p>
+  <table class="sources">
+    <thead>
+      <tr><th>tool</th><th>what the log actually is</th><th class="num">log range</th><th class="num">config commits</th></tr>
+    </thead>
+    <tbody>
+      {eras.map((e) => {
+        const cross = crossById.get(e.id)!;
+        return (
+          <tr>
+            <td>
+              <span class="dot" style={`background:${GROUP_COLOUR[e.group]};`} /> {e.tool}
+            </td>
+            <td class="cell-note">{provenanceById.get(e.id)!.logs}</td>
+            <td class="num">{cross.logStart} → {cross.logEnd}</td>
+            <td class="num">
+              {cross.gitStart ? <>{cross.gitStart} → {cross.gitEnd}</> : <span class="empty">none — a genuine absence</span>}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
 
-  <!-- Token headline: a FLOOR over the four token-bearing tools (D2 as amended). -->
+  <!-- Token headline: a FLOOR over the four token-bearing tools (D2 as amended).
+       One table — the qualifiers live in the note column, never in a prose paragraph. -->
   <h2>Token headline</h2>
   <p class="headline">
     <strong>{tokenHeadline.qualifier} {nf(tokenHeadline.floor)}</strong> tokens
-    <span class="qual">· {tokenHeadline.bearingCount} of {tokenHeadline.totalTools} tools</span>
-  </p>
-  <p class="note">
-    Sum of <code>input + cacheCreation + output</code> across the four tools that log tokens.
-    <code>cacheRead</code> is reuse — shown separately, never inside the headline:
-    <strong>{nf(tokenHeadline.cacheRead)}</strong> cached-read tokens.
-    Claude Code contributes both figures (D1): main-session alone is
-    <strong>{tokenHeadline.qualifier} {nf(tokenHeadline.floorMain)}</strong>,
-    main + subagents is <strong>{tokenHeadline.qualifier} {nf(tokenHeadline.floor)}</strong>.
+    <span class="qual">· {tokenHeadline.bearingCount} of {tokenHeadline.totalTools} tools log any</span>
   </p>
   <table class="tokens">
     <thead>
-      <tr><th>tool</th><th>state</th><th>headline tokens</th><th>cacheRead</th></tr>
+      <tr>
+        <th>tool</th><th>state</th><th class="num">headline tokens</th>
+        <th class="num">cacheRead (reuse)</th><th>what qualifies it</th>
+      </tr>
     </thead>
     <tbody>
       {tokenHeadline.contributions.map((c) => (
@@ -126,106 +152,57 @@ const cc = tokenHeadline.contributions.find((c) => c.id === 'claude-code')!;
               nf(c.headline)
             )}
           </td>
-          <td class="num">
-            {nf(c.cacheRead)}
+          <td class="num">{nf(c.cacheRead)}</td>
+          <td class="cell-note">
             {c.cachedInputSubset ? (
-              <span class="qual"><br />+ {nf(c.cachedInputSubset)} reused (subset of input, not added)</span>
+              <span>{nf(c.cachedInputSubset)} cached-input tokens are a subset of input — shown, never added.<br /></span>
             ) : null}
+            {(caveatsById.get(c.id) ?? []).map((line) => <span>{line}<br /></span>)}
+            {c.sides ? <span>Both sides are counted; the floor above uses main + subagents.</span> : null}
           </td>
         </tr>
       ))}
     </tbody>
-  </table>
-
-  <!-- Availability matrix: five named rows. The skills column renders EMPTY for the
-       first four eras (D5/D6) — the emptiness must show, not be hidden. -->
-  <h2>What each era can yield</h2>
-  <table class="matrix">
-    <thead>
-      <tr><th>era</th><th>tokens</th><th>cost</th><th>counts</th><th>skills</th></tr>
-    </thead>
-    <tbody>
-      {availabilityMatrix.map((row) => (
-        <tr>
-          <td>
-            <span class="dot" style={`background:${GROUP_COLOUR[row.group]};`} /> {row.tool}
-          </td>
-          <td><code>{row.tokens}</code></td>
-          <td><code>{row.cost}</code></td>
-          <td><code>{row.counts}</code></td>
-          <td>
-            {row.skills ? (
-              <code>{row.skills.liveSkillFiles} live · {row.skills.commits} commits (floor)</code>
-            ) : (
-              <span class="empty">—</span>
-            )}
-          </td>
-        </tr>
-      ))}
-    </tbody>
+    <tfoot>
+      <tr>
+        <th>floor · main + subagents</th>
+        <th><code>≥</code></th>
+        <th class="num">{nf(tokenHeadline.floor)}</th>
+        <th class="num">{nf(tokenHeadline.cacheRead)}</th>
+        <th class="cell-note">
+          Sum of <code>input + cacheCreation + output</code>. <code>cacheRead</code> is reuse and
+          never enters the headline.
+        </th>
+      </tr>
+      <tr>
+        <th>floor · main sessions only</th>
+        <th><code>≥</code></th>
+        <th class="num">{nf(tokenHeadline.floorMain)}</th>
+        <th class="num">—</th>
+        <th class="cell-note">Claude Code subagent traffic excluded.</th>
+      </tr>
+    </tfoot>
   </table>
 
   <!-- Cost: four typed states (D4), each phrased in its own terms, never flattened. -->
   <h2>Cost — four states, never flattened</h2>
-  <dl class="costs">
-    {costStates.map((row) => (
-      <div class="cost-row">
-        <dt><span class="dot" style={`background:${GROUP_COLOUR[eras.find((e) => e.id === row.id)!.group]};`} /> {row.tool} <code>{row.state}</code></dt>
-        <dd>
-          {row.note}
-          {row.usd !== null && <span class="usd"> — ${nf(Math.round(row.usd))}</span>}
-        </dd>
-      </div>
-    ))}
-  </dl>
-
-  <!-- Measured-how + the git-vs-log disagreement, shown per era as a finding. -->
-  <h2>Measured how · git vs log</h2>
-  <ul class="prov">
-    {eras.map((e) => {
-      const cross = crossById.get(e.id)!;
-      const prov = provenanceById.get(e.id)!;
-      return (
-        <li>
-          <span class="prov-tool">{e.tool}</span>
-          <span class="prov-src">{prov.logs}</span>
-          {cross.disagrees ? (
-            <span class="delta">
-              git vs log disagree: start {cross.startDeltaDays! > 0 ? '+' : ''}{cross.startDeltaDays}d,
-              end {cross.endDeltaDays! > 0 ? '+' : ''}{cross.endDeltaDays}d — shown, not reconciled
-            </span>
-          ) : cross.gitStart === null ? (
-            <span class="delta">no config-commit range — a genuine absence</span>
-          ) : (
-            <span class="delta agree">git and log agree</span>
-          )}
-        </li>
-      );
-    })}
-  </ul>
-
-  <!-- Caveats that must never silently drop. -->
-  <h2>Caveats — carried, never dropped</h2>
-  {caveats.map((c) => (
-    <div class="caveat">
-      <h3>{c.tool}</h3>
-      <ul>{c.lines.map((line) => <li>{line}</li>)}</ul>
-    </div>
-  ))}
-
-  <!-- Skills: a Claude-Code-era-only attribute. -->
-  {skills && (
-    <>
-      <h2>Skills — a Claude-Code-era attribute</h2>
-      <p class="note">
-        <strong>{skills.liveSkillFiles}</strong> live <code>SKILL.md</code> files ·
-        <strong> {skills.commits}</strong> commits touching <code>skills/</code>
-        ({skills.vcStart} → {skills.vcEnd}, a <strong>floor</strong>). {skills.caveat}
-        Worked example: <code>{skills.example.name}</code> — {skills.example.bucket} bucket, authored on/before
-        its {skills.example.snapshotDate} snapshot, {skills.example.commits} commit on {skills.example.firstCommit}.
-      </p>
-    </>
-  )}
+  <table class="costs">
+    <thead>
+      <tr><th>tool</th><th>state</th><th class="num">USD</th><th>what that state means here</th></tr>
+    </thead>
+    <tbody>
+      {costStates.map((row) => (
+        <tr>
+          <td>
+            <span class="dot" style={`background:${GROUP_COLOUR[eras.find((e) => e.id === row.id)!.group]};`} /> {row.tool}
+          </td>
+          <td><code>{row.state}</code></td>
+          <td class="num">{row.usd !== null ? <span class="usd">${nf(Math.round(row.usd))}</span> : <span class="empty">—</span>}</td>
+          <td class="cell-note">{row.note}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
 
   <!-- stt-faster experimentation corpus. -->
   <h2>stt-faster corpus</h2>
@@ -303,26 +280,18 @@ const cc = tokenHeadline.contributions.find((c) => c.id === 'claude-code')!;
   .empty { color: var(--fg-dim); }
   .dot { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; vertical-align: middle; }
 
-  .costs { margin: var(--space-2) 0; }
-  .cost-row { padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
-  .cost-row dt { font-weight: 600; }
-  .cost-row dd { margin: var(--space-1) 0 0; color: var(--fg-dim); font-size: var(--size-0); }
   .usd { color: var(--accent); font-family: var(--font-mono); }
-
-  .prov { list-style: none; padding: 0; }
-  .prov li { padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
-  .prov-tool { display: block; font-weight: 600; }
-  .prov-src { display: block; font-family: var(--font-mono); font-size: var(--size-0); color: var(--fg-dim); }
-  .delta { display: block; font-family: var(--font-mono); font-size: var(--size-0); color: var(--accent); margin-top: var(--space-1); }
-  .delta.agree { color: var(--fg-dim); }
-
-  .caveat h3 { margin-bottom: var(--space-1); }
-  .caveat ul { margin-top: 0; color: var(--fg-dim); }
+  .cell-note { color: var(--fg-dim); font-size: var(--size-0); line-height: 1.45; }
+  .sources td.num, tfoot .num { white-space: nowrap; }
+  tfoot th { font-weight: 600; color: var(--fg); border-top: 1px solid var(--rule); vertical-align: top; }
+  td, th { vertical-align: top; }
 
   .narratives { list-style: none; padding: 0; }
   .narratives li { padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
   .narratives a { font-weight: 600; }
   .summary { display: block; color: var(--fg-dim); font-size: var(--size-0); margin-top: var(--space-1); }
+
+  table { display: block; overflow-x: auto; }
 
   @media (max-width: 34rem) {
     .lane { grid-template-columns: 6rem 1fr; }
