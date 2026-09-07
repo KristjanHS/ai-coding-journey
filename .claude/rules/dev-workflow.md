@@ -30,6 +30,12 @@ Each part answers something the others can't:
   that sees frontmatter *types*.
 - **`vitest run`** is the executable half of `content-writing.md` — the evidence rule and the anti-hype
   rule as assertions. Authoring guidance for those tests → `testing-project.md`.
+- **`make measurements` is never figure-neutral, and the gate makes that BLOCKING.** The scanners
+  re-read live log trees, so a regen run for an unrelated reason (adding an era, say) also moves the
+  shares and the Claude Code split by whatever was used since the last run. `measurements.test.ts`
+  mirrors those figures against the narratives, so the drift reds `make check` until
+  `content/measurements/01`–`04` and `content/journey/13-crash-dash.md` carry the new numbers —
+  update them in the same commit as the regen, never after it.
 - **the timeline is not in the gate.** `scripts/timeline-from-git.py` scans all of `~/projects`, so
   another repo's commits stale `content/timeline.json`; the old advisory drift report ran the generator on
   every gate to print a diff nobody was meant to act on. Run `make timeline` when the spine matters and
