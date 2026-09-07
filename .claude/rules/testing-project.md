@@ -16,6 +16,10 @@ verified.** Restore by re-typing, never `git checkout -- <file>` (that destroys 
 alongside it). The red state lives in the working tree only: never commit it. Record the failing output in
 the commit message.
 
+⚠ **The mutation must break the ASSERTION'S PATTERN, not merely the source text.** Renaming
+`data-tl-table` to `data-tl-table-REMOVED` still matched `/data-tl-table/`, so the demo stayed green and
+proved nothing; delete the element instead. A demo that does not red is a failed demo, never a pass.
+
 ⚠ **Scoped to NEW or CHANGED guards.** A data-only edit that leaves every assertion's text untouched — a
 regenerated `timeline.json`, a reworded chapter — owes no demo: re-running one for an existing guard
 re-proves what its own shipping demo already proved.
