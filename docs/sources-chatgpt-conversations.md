@@ -8,6 +8,7 @@ and, more importantly, **when each thread happened**, because the export destroy
 - [Dating method](#dating-method)
 - [Dated inventory](#dated-inventory)
 - [What this is evidence for](#what-this-is-evidence-for)
+- [Roo Code: the artifact trail](#roo-code-the-artifact-trail)
 - [Known gaps and traps](#known-gaps-and-traps)
 - [The one thing that would replace all of this](#the-one-thing-that-would-replace-all-of-this)
 
@@ -119,11 +120,52 @@ repomix dump of `kri-local-rag`), `Dev env troubleshooting - WSL pip venv issue`
   `stage: chat` — the Copilot Chat logs carry no token or cost field, so the chat-era prompts themselves
   are the artifact. `AI RAG solutions - RAG Local Setup Guide` is the origin document of the whole journey.
 - **A tool the content currently misses: Roo Code.** Two threads (`Code Agent models - Roo code architect
-  mode`, `... Roo vs Cursor Comparison`) show Roo Code was one of the open-source coding plugins actually
-  used, entering right at the chat→plugin boundary (~2025-07-06). `roo` appears nowhere in `content/`; the
-  chapter's `tools:` list is `[copilot, gemini-code-assist, continue, cursor, claude-code]`.
+  mode`, `... Roo vs Cursor Comparison`) research it around **2025-07-06**, but the research date is not the
+  adoption date — see [Roo Code: the artifact trail](#roo-code-the-artifact-trail) below. `roo` appears
+  nowhere in `content/`; chapter 01's `tools:` list is
+  `[copilot, gemini-code-assist, continue, cursor, claude-code]`.
 - **Sanitised prompt candidates** for `content/prompts/` — the Phase-0 learning-path prompt, the Gemini
   free-tier truncation workaround, the "beginner python dev" framing repeated across threads.
+
+## Roo Code: the artifact trail
+
+Searched for separately, because the ChatGPT threads only prove Roo Code was *researched*. Findings:
+
+- **No repo ever carried Roo config.** No `.roo/`, `.roomodes`, `.rooignore` or `.roorules` in any working
+  tree under `~/projects`, and none in any repo's git history (`--all --diff-filter=A` across every repo).
+- **Installed in VS Code (WSL), not Cursor.** `~/.vscode-server/extensions/rooveterinaryinc.roo-cline-3.36.2`
+  — nothing under `~/.cursor-server`. The `3.36.2` directory is dated **2025-12-08**, but that is the current
+  version's install date, not first use; the tasks below predate it, so the extension was installed earlier
+  and upgraded in place.
+- **Exactly one surviving task**, in `globalStorage/rooveterinaryinc.roo-cline/tasks/`. Its measured shape:
+
+  | Field | Value |
+  | --- | --- |
+  | Date | **2025-08-16**, 19:12–19:27 UTC (15.5 min) |
+  | Repo | `kri-local-rag` |
+  | Task | "my unit tests have errors `.venv/bin/python -m pytest tests/unit/`" |
+  | Files in context | `backend/qa_loop.py`, `tests/unit/test_qa_loop_logic.py`, `tests/unit/test_logging_config.py` |
+  | Model | `gemini-2.5-pro` (BYO key) |
+  | API requests | 35 |
+  | Tokens | <redacted> in · <redacted> out · <redacted> cache reads · 0 cache writes |
+  | Cost | **$<redacted>** |
+
+- **No custom mode was ever configured** — `settings/custom_modes.yaml` is `customModes: []`, and
+  `settings/mcp_settings.json` has an empty `mcpServers`, both dated 2025-08-16. The
+  `Roo code architect mode` thread was research that never became configuration.
+- **Reopened once more, unused.** Provider-model caches refresh on launch:
+  `requesty_models.json` / `unbound_models.json` at 2025-08-16, then
+  `openrouter_models.json` / `glama_models.json` / `vercel-ai-gateway_models.json` at **2025-12-08 17:17**.
+  A December launch with no task recorded — evaluated again, not used.
+
+Why this matters beyond the tool list: chapter 01 states the chat stage is the one era with no cost figure.
+The Roo task is the opposite case — a **complete** cost record for a single plugin-era session, in the repo
+that chapter 02 covers. Its extraction is reproducible from `ui_messages.json`: sum `cost`, `tokensIn`,
+`tokensOut`, `cacheReads` over the `say == "api_req_started"` entries; `ts` fields are epoch milliseconds.
+
+Corroborating repo activity: `kri-local-rag` commits either side of that session are the unit-test
+refactor run — `2025-08-13 uni tests networking rules`, then 2025-08-17's `unit tests updated to reflect
+changes in app logic` and `modern mocking approach used in unit tests`.
 
 ## Known gaps and traps
 
