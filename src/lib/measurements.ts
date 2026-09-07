@@ -36,6 +36,18 @@ export interface SkillsBlock {
   example: { name: string; bucket: string; commits: number; firstCommit: string; snapshotDate: string };
 }
 
+/** Era-start dates that survive log pruning (Claude Code only, so far). */
+export interface EraOnset {
+  firstToken: string; // first token ever spent in this tool — the era's real start
+  firstTokenStamp: string;
+  firstStart: string | null; // first launch of the binary; NOT the same event
+  firstStartStamp: string | null;
+  firstPromptStamp: string | null; // corroboration from a second file
+  firstPromptProject: string | null;
+  logsArePruned: boolean;
+  source: string;
+}
+
 export interface Era {
   id: EraId;
   tool: string;
@@ -50,6 +62,7 @@ export interface Era {
   provenance: { git: string | null; logs: string; skills?: string; configRepo: string };
   metrics: Record<string, any>;
   skills?: SkillsBlock;
+  onset?: EraOnset;
 }
 
 /** The five eras, in spec order (Copilot → Claude Code). A list, never a pair. */
@@ -77,6 +90,12 @@ export interface EraSpan {
   group: Group;
   start: string; // union start of git + log
   end: string; // union end of git + log
+  // The era's real start where a pruning-proof artifact dates it. Deliberately NOT
+  // folded into `start`: the bar is what the two records can show, and an onset that
+  // sits months to its left is the finding — a bar silently widened to cover it would
+  // hide exactly that gap.
+  onset: string | null;
+  onsetLeadDays: number | null; // start - onset, positive = the bar starts late
 }
 
 /** Per-era displayed span (git ∪ log), derived — never hardcoded. */
@@ -86,6 +105,8 @@ export const eraSpans: EraSpan[] = eras.map((e) => ({
   group: e.group,
   start: minDate(e.gitStart, e.logStart),
   end: maxDate(e.gitEnd, e.logEnd),
+  onset: e.onset?.firstToken ?? null,
+  onsetLeadDays: e.onset ? days(minDate(e.gitStart, e.logStart)) - days(e.onset.firstToken) : null,
 }));
 
 // DERIVED from the spans, so a regenerated eras.json widens the axis instead of

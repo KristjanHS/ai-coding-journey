@@ -2,6 +2,13 @@
 """Fill the Claude Code era in content/measurements/data/eras.json from its own logs.
 
 Usage: python3 scripts/measurements-cc.py [PROJECTS_ROOT]   (default ~/.claude/projects)
+       python3 scripts/measurements-cc.py --onset-only       (era-start dates, no rescan)
+
+`--onset-only` refreshes just the `onset` block. It exists because the transcript scan
+and the onset dates age at different rates: the scan's totals move every session (and
+DROP as Claude Code prunes old transcripts), while the onset dates are fixed history.
+Re-running the full scan to correct a start date would drag an unrelated data refresh
+into the same commit.
 
 The richest of the five eras: token classes, money and session counts all derive from the
 jsonl transcripts. stdlib only. Field paths follow ~/projects/token-monitor's parser by
@@ -38,12 +45,21 @@ from __future__ import annotations
 import json
 import sys
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ERAS = ROOT / "content" / "measurements" / "data" / "eras.json"
 DEFAULT_LOG_ROOT = Path.home() / ".claude" / "projects"
 ERA_ID = "claude-code"
+
+# Onset sources. The transcripts under DEFAULT_LOG_ROOT are pruned by Claude Code
+# itself, so `logStart` is a floor on the era and cannot date its beginning. These two
+# files survive that pruning and do: the config carries the first-token stamp, the
+# prompt history carries the first prompt ever typed. Only dates are read out of them --
+# never the account identifiers that sit in the same config.
+CONFIG_JSON = Path.home() / ".claude.json"
+HISTORY_JSONL = Path.home() / ".claude" / "history.jsonl"
 
 # message.usage.* on `type == "assistant"` records. Kept as four separate classes all
 # the way into the JSON (see the module docstring).
@@ -158,7 +174,84 @@ def cost_summary(costs: dict[str, dict]) -> dict:
     }
 
 
+def onset() -> dict | None:
+    """Date the era from the two artifacts log pruning does not touch.
+
+    `claudeCodeFirstTokenDate` is the first token ever spent in Claude Code on this
+    account; `firstStartTime` is when the binary first ran, which is NOT the same event
+    -- here they are six months apart, an installed-but-unused stretch. The first record
+    of history.jsonl corroborates the token stamp from a second file: a first prompt
+    minutes after the first token is two independent sources agreeing.
+    """
+    if not CONFIG_JSON.exists():
+        return None
+    try:
+        config = json.loads(CONFIG_JSON.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None
+    first_token = config.get("claudeCodeFirstTokenDate")
+    first_start = config.get("firstStartTime")
+    if not first_token:
+        return None
+
+    first_prompt = first_prompt_project = None
+    if HISTORY_JSONL.exists():
+        try:
+            with HISTORY_JSONL.open(errors="replace") as handle:
+                record = json.loads(handle.readline() or "{}")
+            stamp = record.get("timestamp")
+            if stamp:
+                first_prompt = (
+                    datetime.fromtimestamp(stamp / 1000, tz=timezone.utc)
+                    .isoformat()
+                    .replace("+00:00", "Z")
+                )
+                # basename only: the full path is a local machine detail.
+                project = record.get("project")
+                first_prompt_project = Path(project).name if project else None
+        except (json.JSONDecodeError, OSError, TypeError, ValueError):
+            pass
+
+    return {
+        "firstToken": first_token[:10],
+        "firstTokenStamp": first_token,
+        "firstStart": first_start[:10] if first_start else None,
+        "firstStartStamp": first_start,
+        "firstPromptStamp": first_prompt,
+        "firstPromptProject": first_prompt_project,
+        "logsArePruned": True,
+        "source": (
+            "~/.claude.json claudeCodeFirstTokenDate + firstStartTime; "
+            "~/.claude/history.jsonl first record (dates only)"
+        ),
+    }
+
+
+def write_onset_only() -> int:
+    block = onset()
+    if block is None:
+        print(f"error: no onset dates in {CONFIG_JSON}", file=sys.stderr)
+        return 1
+    document = json.loads(ERAS.read_text())
+    for era in document["eras"]:
+        if era["id"] == ERA_ID:
+            era["onset"] = block
+            era["provenance"]["onset"] = block["source"]
+            break
+    else:
+        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+        return 1
+    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    print(
+        f"claude-code onset: first start {block['firstStart']}, "
+        f"first token {block['firstToken']}"
+    )
+    return 0
+
+
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "--onset-only":
+        return write_onset_only()
     log_root = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_LOG_ROOT
     if not log_root.is_dir():
         print(f"error: {log_root} is not a directory", file=sys.stderr)
@@ -197,6 +290,10 @@ def main() -> int:
             "cost": cost_summary(parent_costs),
         }
         era["provenance"]["logs"] = "~/.claude/projects/**/*.jsonl (snapshots excluded)"
+        onset_block = onset()
+        if onset_block:
+            era["onset"] = onset_block
+            era["provenance"]["onset"] = onset_block["source"]
         break
     else:
         print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)

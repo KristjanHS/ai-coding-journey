@@ -297,10 +297,21 @@
           }
         }
       },
+      "onset": {
+        "firstPromptProject": "kaizen",
+        "firstPromptStamp": "2026-02-28T06:43:47.428000Z",
+        "firstStart": "2025-08-16",
+        "firstStartStamp": "2025-08-16T18:19:28.712Z",
+        "firstToken": "2026-02-28",
+        "firstTokenStamp": "2026-02-28T06:41:21.939647Z",
+        "logsArePruned": true,
+        "source": "~/.claude.json claudeCodeFirstTokenDate + firstStartTime; ~/.claude/history.jsonl first record (dates only)"
+      },
       "provenance": {
         "configRepo": "kri-local-rag",
         "git": "git log -- .claude",
         "logs": "~/.claude/projects/**/*.jsonl (snapshots excluded)",
+        "onset": "~/.claude.json claudeCodeFirstTokenDate + firstStartTime; ~/.claude/history.jsonl first record (dates only)",
         "skills": "git log/rev-list over skills/ in the dotfiles repo (read-only); counts and names only, no skill bodies"
       },
       "skills": {

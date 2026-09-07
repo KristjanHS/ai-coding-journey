@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import eras from '../content/measurements/data/eras.json';
+import { eraSpans as spans } from '../src/lib/measurements';
 
 // Hermetic over the COMMITTED eras.json — this suite never shells out to git. The
 // generator (`make measurements`) is what talks to the config repo; these assertions
@@ -169,6 +170,30 @@ describe('claude-code era metrics', () => {
     expect(cc.metrics.cost.totalUSD).toBeCloseTo(<redacted>, 3);
     expect(cc.metrics.cost.sessionsWithCostState).toBe(293);
     expect(cc.availability.cost).toBe('derived');
+  });
+
+  it('dates the era from artifacts that survive log pruning, not from the logs', () => {
+    // Both of the era's own records start MONTHS after it did, so a page dating Claude
+    // Code from logStart or gitStart is wrong by a season.
+    const onset = cc.onset!;
+    expect(onset.firstToken).toBe('2026-02-28');
+    expect(onset.firstTokenStamp.startsWith('2026-02-28T06:41:21')).toBe(true);
+    expect(onset.firstToken < cc.gitStart!).toBe(true);
+    expect(onset.firstToken < cc.logStart!).toBe(true);
+    expect(onset.firstPromptStamp!.slice(0, 10)).toBe(onset.firstToken);
+    // First launch is a different event from first token; collapsing them dates the era
+    // to 2025.
+    expect(onset.firstStart).toBe('2025-08-16');
+    expect(onset.firstStart! < onset.firstToken).toBe(true);
+    expect(onset.logsArePruned).toBe(true);
+  });
+
+  it('keeps the drawn bar apart from the onset instead of widening it', () => {
+    // Folding the onset into `start` collapses the lead to 0 and hides the gap.
+    const span = spans.find((s) => s.id === 'claude-code')!;
+    expect(span.onset).toBe('2026-02-28');
+    expect(span.start).toBe(cc.gitStart);
+    expect(span.onsetLeadDays).toBe(115);
   });
 
   it('dates the log range forwards and records that it starts after the git range', () => {

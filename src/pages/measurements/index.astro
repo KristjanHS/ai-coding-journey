@@ -69,6 +69,13 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
             style={`left:${pct(span.start)}%; right:${(100 - Number(pct(span.end))).toFixed(2)}%; background:${GROUP_COLOUR[span.group]};`}
             title={`${span.start} → ${span.end}`}
           />
+          {span.onset && (
+            <span
+              class="onset"
+              style={`left:${pct(span.onset)}%;`}
+              title={`first token ${span.onset} — ${span.onsetLeadDays} days before either record starts`}
+            />
+          )}
         </div>
       </div>
     ))}
@@ -77,6 +84,12 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
       <span>{TIME_DOMAIN[1]}</span>
     </div>
   </div>
+  <p class="note">
+    The tick left of the Claude Code bar is that era's <em>real</em> start — its first billed token,
+    <code>{eraSpans.find((s) => s.onset)?.onset}</code>, dated from a config field that survives log
+    pruning. The bar begins {eraSpans.find((s) => s.onset)?.onsetLeadDays} days later because neither
+    record reaches back that far; the gap is shown, not closed.
+  </p>
   <p class="note">
     Two independent records exist per tool — its own session logs and the commits to its config
     directory — and they disagree. The bar is their union; the table gives both ranges, unreconciled.
@@ -229,6 +242,10 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
     white-space: nowrap;
   }
   .track { position: relative; height: 1.4rem; background: var(--bg-sunk); border-radius: var(--radius); }
+  .onset {
+    position: absolute; top: 0.1rem; height: 1.2rem; width: 2px;
+    background: var(--stage-production-app); transform: translateX(-1px);
+  }
   .band { position: absolute; top: 0.3rem; height: 0.8rem; border-radius: var(--radius); }
   .axis-scale {
     display: flex;
