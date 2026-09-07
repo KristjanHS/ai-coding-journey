@@ -633,6 +633,9 @@ const PINNED: [string, string[]][] = [
       nf(cursorMetrics.messages.assistant),
       `${nf(cursorMetrics.pricedBubbles)} of ${nf(cursorMetrics.messages.total)}`,
       `${(cursorMetrics.nonZeroBubbleFraction * 100).toFixed(2)}%`,
+      // ...and the two counts that fraction is OF, so the denominator cannot drift
+      // away from the claim the way "of its assistant messages" did in review.
+      `${nf(cursorMetrics.pricedBubbles)} of ${nf(cursorMetrics.messages.total)}`,
     ],
   ],
   [
@@ -724,6 +727,9 @@ const JOURNEY_PINNED: [string, string[]][] = [
       // Cursor's session count and the priced fraction that makes its tokens a floor.
       `${nf(cursorMetrics.sessions)} sessions`,
       `${(cursorMetrics.nonZeroBubbleFraction * 100).toFixed(2)}%`,
+      // ...and the two counts that fraction is OF, so the denominator cannot drift
+      // away from the claim the way "of its assistant messages" did in review.
+      `${nf(cursorMetrics.pricedBubbles)} of ${nf(cursorMetrics.messages.total)}`,
       // Codex logged tokens only from this date — the reason its total is a floor.
       `${codexMetrics.tokens.loggingStart}`,
       // The one era with a derived figure rather than a state.
@@ -742,7 +748,9 @@ describe('journey deck chapters ↔ JSON mirror (inc5b)', () => {
 
   it('names all four cost states in the chapter that is about the absences', () => {
     // The chapter's whole argument is that three of the four answers are states,
-    // not numbers. Flattening any of them out of the prose reds this.
+    // not numbers. This is a presence floor, not proof each state is used
+    // meaningfully: one enumerating sentence satisfies it. What it does catch is a
+    // state being renamed in the lib, or dropped from the chapter entirely.
     const body = readChapter('90-what-i-got-wrong.md');
     const states = [...new Set(costStates.map((r) => r.state))];
     expect(states.length).toBe(4);

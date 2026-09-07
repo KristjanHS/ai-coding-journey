@@ -22,9 +22,10 @@ evidence of the mistake, because most of what it found is absence.
 Assuming the tools were keeping the receipts. They were not, and each one failed differently.
 
 GitHub Copilot Chat wrote no token field and no cost field at all: what survives is 86 turns across 7
-sessions, found in 6 of 18 VS Code workspaces. Cursor logged <redacted> sessions but prices only 4.86% of
-its assistant messages, so its token totals are a floor and its spend is unknown-server-side. The Codex
-plugin started logging tokens partway through, on 2025-09-23, so its total is a floor too.
+sessions, found in 6 of 18 VS Code workspaces. Cursor logged <redacted> sessions but prices only 4.86% of its
+message bubbles — <redacted> of <redacted>, every one of them an assistant turn — so its token totals are a floor
+and its spend is unknown-server-side. The Codex plugin started logging tokens partway through, on
+2025-09-23, so its total is a floor too.
 
 Only Claude Code carries enough per-session state to derive an actual figure: $<redacted>.
 

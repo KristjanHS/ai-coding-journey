@@ -18,7 +18,7 @@ Make the agent's own token spend visible while it worked. The dotfiles tree said
 do; nothing in it said what a session was costing, and the cost is the binding constraint — a run that
 exhausts its context window stops mid-task and takes the reasoning with it.
 
-So this repo, 44 commits over three weeks, is instrumentation: hooks that read the real token count out
+So this repo, forty-odd commits over three weeks, is instrumentation: hooks that read the real token count out
 of the session transcript, a statusline that shows it, and rules that load only when the path they
 govern is touched.
 
