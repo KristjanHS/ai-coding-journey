@@ -1,0 +1,299 @@
+---
+// inc5a D3: ONE bespoke /measurements/ route, hand-written like /journey/. No [slug]
+// detail route and no generated list route — every figure is read from the typed lib,
+// which reads the generated eras.json. Server-rendered, no client JS, no island.
+import Base from '../../layouts/Base.astro';
+import {
+  TIME_DOMAIN,
+  availabilityMatrix,
+  caveats,
+  costStates,
+  crossCheck,
+  dateFraction,
+  eraSpans,
+  eras,
+  overlapLabel,
+  overlappingPairs,
+  skills,
+  sttFaster,
+  tokenHeadline,
+} from '../../lib/measurements';
+
+const nf = (n: number) => n.toLocaleString('en-US');
+const pct = (d: string) => (dateFraction(d) * 100).toFixed(2);
+
+// Group → colour, reusing the stage ramp tokens (D5: colour is the ONLY thing group
+// controls; the five lanes never collapse to three).
+const GROUP_COLOUR: Record<string, string> = {
+  'vscode-plugin': 'var(--stage-chat)',
+  cursor: 'var(--stage-config-engineering)',
+  'claude-code': 'var(--stage-production-app)',
+};
+
+const provenanceById = new Map(eras.map((e) => [e.id, e.provenance]));
+const crossById = new Map(crossCheck.map((c) => [c.id, c]));
+const cc = tokenHeadline.contributions.find((c) => c.id === 'claude-code')!;
+---
+<Base
+  title="The numbers · ai-coding-journey"
+  description="Measured token, cost and session evidence across five overlapping AI-coding tool eras — floors and absences named, never estimated."
+>
+  <h1>The numbers</h1>
+  <p class="lede">
+    Five AI-coding tools, measurable to wildly different depths — and they <em>overlap</em> in time, not
+    a tidy succession. Every figure below is a floor or a named absence; nothing absent is estimated.
+  </p>
+
+  <!-- Overlap view: five lanes, ONE shared time axis. Bands positioned from the real
+       dates against TIME_DOMAIN. data-overlap names the intersecting pairs. -->
+  <h2>Overlapping eras</h2>
+  <p class="lede">
+    One time axis, one lane per era. Where lanes cover the same column, the tools overlapped —
+    <code>{overlappingPairs.length}</code> pairs do.
+  </p>
+  <div class="axis" data-overlap={overlapLabel}>
+    {eraSpans.map((span) => {
+      const cross = crossById.get(span.id)!;
+      const colour = GROUP_COLOUR[span.group];
+      return (
+        <div class="lane">
+          <span class="lane-label">{span.tool}</span>
+          <div class="track">
+            {/* log range — the primary measured span */}
+            <span
+              class="band band-log"
+              style={`left:${pct(cross.logStart)}%; right:${(100 - Number(pct(cross.logEnd))).toFixed(2)}%; background:${colour};`}
+              title={`logs ${cross.logStart} → ${cross.logEnd}`}
+            />
+            {/* git range — offset, so a disagreement with the logs is visible, not smoothed */}
+            {cross.gitStart && cross.gitEnd && (
+              <span
+                class="band band-git"
+                style={`left:${pct(cross.gitStart)}%; right:${(100 - Number(pct(cross.gitEnd))).toFixed(2)}%; border-color:${colour};`}
+                title={`config commits ${cross.gitStart} → ${cross.gitEnd}`}
+              />
+            )}
+          </div>
+        </div>
+      );
+    })}
+    <div class="axis-scale">
+      <span>{TIME_DOMAIN[0]}</span>
+      <span>{TIME_DOMAIN[1]}</span>
+    </div>
+  </div>
+  <p class="note">
+    Solid = log range · outline = config-commit range. Overlapping pairs: <code>{overlapLabel}</code>.
+  </p>
+
+  <!-- Token headline: a FLOOR over the four token-bearing tools (D2 as amended). -->
+  <h2>Token headline</h2>
+  <p class="headline">
+    <strong>{tokenHeadline.qualifier} {nf(tokenHeadline.floor)}</strong> tokens
+    <span class="qual">· {tokenHeadline.bearingCount} of {tokenHeadline.totalTools} tools</span>
+  </p>
+  <p class="note">
+    Sum of <code>input + cacheCreation + output</code> across the four tools that log tokens.
+    <code>cacheRead</code> is reuse — shown separately, never inside the headline:
+    <strong>{nf(tokenHeadline.cacheRead)}</strong> cached-read tokens.
+    Claude Code contributes both figures (D1): main-session alone is
+    <strong>{tokenHeadline.qualifier} {nf(tokenHeadline.floorMain)}</strong>,
+    main + subagents is <strong>{tokenHeadline.qualifier} {nf(tokenHeadline.floor)}</strong>.
+  </p>
+  <table class="tokens">
+    <thead>
+      <tr><th>tool</th><th>state</th><th>headline tokens</th><th>cacheRead</th></tr>
+    </thead>
+    <tbody>
+      {tokenHeadline.contributions.map((c) => (
+        <tr>
+          <td>{c.tool}</td>
+          <td><code>{c.state}</code></td>
+          <td class="num">
+            {c.sides ? (
+              <>
+                {nf(c.sides.main.headline)} <span class="qual">main</span><br />
+                {nf(c.sides.mainPlusSubagent.headline)} <span class="qual">+ subagents</span>
+              </>
+            ) : (
+              nf(c.headline)
+            )}
+          </td>
+          <td class="num">{nf(c.cacheRead)}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <!-- Availability matrix: five named rows. The skills column renders EMPTY for the
+       first four eras (D5/D6) — the emptiness must show, not be hidden. -->
+  <h2>What each era can yield</h2>
+  <table class="matrix">
+    <thead>
+      <tr><th>era</th><th>tokens</th><th>cost</th><th>counts</th><th>skills</th></tr>
+    </thead>
+    <tbody>
+      {availabilityMatrix.map((row) => (
+        <tr>
+          <td>
+            <span class="dot" style={`background:${GROUP_COLOUR[row.group]};`} /> {row.tool}
+          </td>
+          <td><code>{row.tokens}</code></td>
+          <td><code>{row.cost}</code></td>
+          <td><code>{row.counts}</code></td>
+          <td>
+            {row.skills ? (
+              <code>{row.skills.liveSkillFiles} live · {row.skills.commits} commits (floor)</code>
+            ) : (
+              <span class="empty">—</span>
+            )}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <!-- Cost: four typed states (D4), each phrased in its own terms, never flattened. -->
+  <h2>Cost — four states, never flattened</h2>
+  <dl class="costs">
+    {costStates.map((row) => (
+      <div class="cost-row">
+        <dt><span class="dot" style={`background:${GROUP_COLOUR[eras.find((e) => e.id === row.id)!.group]};`} /> {row.tool} <code>{row.state}</code></dt>
+        <dd>
+          {row.note}
+          {row.usd !== null && <span class="usd"> — ${nf(Math.round(row.usd))}</span>}
+        </dd>
+      </div>
+    ))}
+  </dl>
+
+  <!-- Measured-how + the git-vs-log disagreement, shown per era as a finding. -->
+  <h2>Measured how · git vs log</h2>
+  <ul class="prov">
+    {eras.map((e) => {
+      const cross = crossById.get(e.id)!;
+      const prov = provenanceById.get(e.id)!;
+      return (
+        <li>
+          <span class="prov-tool">{e.tool}</span>
+          <span class="prov-src">{prov.logs}</span>
+          {cross.disagrees ? (
+            <span class="delta">
+              git vs log disagree: start {cross.startDeltaDays! > 0 ? '+' : ''}{cross.startDeltaDays}d,
+              end {cross.endDeltaDays! > 0 ? '+' : ''}{cross.endDeltaDays}d — shown, not reconciled
+            </span>
+          ) : cross.gitStart === null ? (
+            <span class="delta">no config-commit range — a genuine absence</span>
+          ) : (
+            <span class="delta agree">git and log agree</span>
+          )}
+        </li>
+      );
+    })}
+  </ul>
+
+  <!-- Caveats that must never silently drop. -->
+  <h2>Caveats — carried, never dropped</h2>
+  {caveats.map((c) => (
+    <div class="caveat">
+      <h3>{c.tool}</h3>
+      <ul>{c.lines.map((line) => <li>{line}</li>)}</ul>
+    </div>
+  ))}
+
+  <!-- Skills: a Claude-Code-era-only attribute. -->
+  {skills && (
+    <>
+      <h2>Skills — a Claude-Code-era attribute</h2>
+      <p class="note">
+        <strong>{skills.liveSkillFiles}</strong> live <code>SKILL.md</code> files ·
+        <strong> {skills.commits}</strong> commits touching <code>skills/</code>
+        ({skills.vcStart} → {skills.vcEnd}, a <strong>floor</strong>). {skills.caveat}
+        Worked example: <code>{skills.example.name}</code> — {skills.example.bucket} bucket, authored on/before
+        its {skills.example.snapshotDate} snapshot, {skills.example.commits} commit on {skills.example.firstCommit}.
+      </p>
+    </>
+  )}
+
+  <!-- stt-faster experimentation corpus. -->
+  <h2>stt-faster corpus</h2>
+  <p class="note">
+    A generation count, not a benchmark ({sttFaster.schemaSampledFrom} file schema-probed):
+    <code>{sttFaster.batTotal}</code> <code>.bat</code> generations
+    ({Object.entries(sttFaster.batGenerations).map(([k, v]) => `${k}:${v}`).join(' · ')}),
+    files <code>{Object.entries(sttFaster.files).map(([k, v]) => `${k}:${v}`).join(' · ')}</code>.
+    <code>failed/</code> is empty; superseded: <code>{sttFaster.supersededGenerations.join(', ')}</code>.
+    Corpus mtimes {sttFaster.mtimeStart} → {sttFaster.mtimeEnd} sit inside the repo's git span
+    {sttFaster.repo.gitStart} → {sttFaster.repo.gitEnd} — both shown, not reconciled.
+  </p>
+</Base>
+
+<style>
+  .lede { color: var(--fg-dim); margin-top: 0; }
+  .note { color: var(--fg-dim); font-size: var(--size-0); }
+  code { background: var(--bg-sunk); border-radius: var(--radius); padding: 0 0.25em; }
+
+  /* Overlap axis: one lane per era, all sharing the same horizontal time scale. */
+  .axis { margin: var(--space-3) 0; }
+  .lane {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: var(--space-2);
+    align-items: center;
+    padding: var(--space-1) 0;
+  }
+  .lane-label {
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .track { position: relative; height: 1.4rem; background: var(--bg-sunk); border-radius: var(--radius); }
+  .band { position: absolute; border-radius: var(--radius); }
+  .band-log { top: 0.15rem; height: 0.5rem; }
+  .band-git { bottom: 0.15rem; height: 0.5rem; border: 1.5px solid; background: transparent; }
+  .axis-scale {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-1);
+    margin-left: calc(9rem + var(--space-2));
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+  }
+
+  .headline { font-size: var(--size-3); margin: var(--space-2) 0; }
+  .headline strong { color: var(--accent); }
+  .qual { font-family: var(--font-mono); font-size: var(--size-0); color: var(--fg-dim); }
+
+  table { border-collapse: collapse; width: 100%; margin: var(--space-2) 0; font-size: var(--size-0); }
+  th, td { text-align: left; padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--rule); }
+  th { font-family: var(--font-mono); color: var(--fg-dim); font-weight: normal; }
+  td.num, .num { font-family: var(--font-mono); text-align: right; }
+  .empty { color: var(--fg-dim); }
+  .dot { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; vertical-align: middle; }
+
+  .costs { margin: var(--space-2) 0; }
+  .cost-row { padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
+  .cost-row dt { font-weight: 600; }
+  .cost-row dd { margin: var(--space-1) 0 0; color: var(--fg-dim); font-size: var(--size-0); }
+  .usd { color: var(--accent); font-family: var(--font-mono); }
+
+  .prov { list-style: none; padding: 0; }
+  .prov li { padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
+  .prov-tool { display: block; font-weight: 600; }
+  .prov-src { display: block; font-family: var(--font-mono); font-size: var(--size-0); color: var(--fg-dim); }
+  .delta { display: block; font-family: var(--font-mono); font-size: var(--size-0); color: var(--accent); margin-top: var(--space-1); }
+  .delta.agree { color: var(--fg-dim); }
+
+  .caveat h3 { margin-bottom: var(--space-1); }
+  .caveat ul { margin-top: 0; color: var(--fg-dim); }
+
+  @media (max-width: 34rem) {
+    .lane { grid-template-columns: 6rem 1fr; }
+    .axis-scale { margin-left: calc(6rem + var(--space-2)); }
+  }
+</style>

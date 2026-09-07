@@ -465,3 +465,90 @@ describe('stt-faster experimentation corpus (D7: counts + a one-file schema prob
     }
   });
 });
+
+// ── inc5a Stage 8: the derived LIB views (D8 — pin the lib, NOT built dist/) ────
+// These assert over src/lib/measurements.ts, the same data the /measurements/ page
+// renders. A pure render regression is out of scope by D8; a build break still reds
+// through `astro build` in the gate.
+import {
+  allCaveatLines,
+  availabilityMatrix,
+  caveats,
+  eraSpans,
+  overlaps,
+  overlappingPairs,
+  tokenHeadline,
+} from '../src/lib/measurements';
+
+describe('measurements lib — overlap view (D8: derived, not dist/)', () => {
+  it('has at least two era spans that intersect in time', () => {
+    // The structural guard against a false "sequential" claim: if the axis laid the
+    // eras end-to-end, no two spans would share a column and this reds.
+    const cursor = eraSpans.find((s) => s.id === 'cursor')!;
+    const codex = eraSpans.find((s) => s.id === 'codex')!;
+    expect(overlaps(cursor, codex)).toBe(true);
+    expect(overlappingPairs.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('names the Cursor∩Codex overlap in the derived pairs list', () => {
+    const hasCursorCodex = overlappingPairs.some(
+      (p) =>
+        (p.a === 'cursor' && p.b === 'codex') || (p.a === 'codex' && p.b === 'cursor'),
+    );
+    expect(hasCursorCodex).toBe(true);
+  });
+});
+
+describe('measurements lib — caveats never silently drop (D8)', () => {
+  it('carries the Cursor floor and client-side-estimate caveats', () => {
+    // Flatten first so removing the whole Cursor entry reds this as a clean assertion,
+    // not a crash on a missing entry — the caveat's absence is the failure, either way.
+    const cursorLines = caveats.filter((c) => c.id === 'cursor').flatMap((c) => c.lines);
+    expect(cursorLines.some((l) => /floor/i.test(l))).toBe(true);
+    expect(cursorLines.some((l) => /client-side estimate/i.test(l))).toBe(true);
+  });
+
+  it('carries the Continue near-zero-local finding', () => {
+    const cont = caveats.find((c) => c.id === 'continue')!;
+    expect(cont.lines.some((l) => /near-zero-local/i.test(l))).toBe(true);
+    // and it survives into the flattened page-wide list the presence check would use
+    expect(allCaveatLines.some((l) => /near-zero-local/i.test(l))).toBe(true);
+  });
+});
+
+describe('measurements lib — availability matrix (D5/D6)', () => {
+  it('names all five eras in spec order', () => {
+    expect(availabilityMatrix.map((r) => r.id)).toEqual([...EXPECTED_IDS]);
+  });
+
+  it('renders the skills row empty for eras 0–3 and populated only for Claude Code', () => {
+    const withSkills = availabilityMatrix.filter((r) => r.skills !== null);
+    expect(withSkills.map((r) => r.id)).toEqual(['claude-code']);
+    // the emptiness must be representable, not hidden: the first four are literally null
+    for (const row of availabilityMatrix.slice(0, 4)) {
+      expect(row.skills, `${row.id} skills`).toBeNull();
+    }
+  });
+});
+
+describe('measurements lib — token headline floor (D2 as amended)', () => {
+  it('is a floor over exactly the four token-bearing tools', () => {
+    expect(tokenHeadline.contributions.map((c) => c.id)).toEqual([
+      'continue',
+      'codex',
+      'cursor',
+      'claude-code',
+    ]);
+    expect(tokenHeadline.bearingCount).toBe(4);
+    expect(tokenHeadline.totalTools).toBe(5);
+  });
+
+  it('keeps cacheRead OUT of the headline sum', () => {
+    // The floor is exactly the sum of the three-class contributions; cacheRead is real
+    // and large but must not be inside it. Folding it in would break this identity.
+    const summed = tokenHeadline.contributions.reduce((a, c) => a + c.headline, 0);
+    expect(tokenHeadline.floor).toBe(summed);
+    expect(tokenHeadline.cacheRead).toBeGreaterThan(0);
+    expect(tokenHeadline.floor + tokenHeadline.cacheRead).not.toBe(tokenHeadline.floor);
+  });
+});

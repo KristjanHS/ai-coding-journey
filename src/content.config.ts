@@ -68,4 +68,13 @@ const course = defineCollection({
   schema: provisional,
 });
 
-export const collections = { journey, prompts, 'case-study': caseStudy, course };
+// inc5a: the citable narrative for each measured era lands here as one .md per era
+// (D3 — a bespoke /measurements/ index links them; no generated [slug] route). The
+// glob stays a shallow `*.md` on purpose: content/measurements/data/eras.json is the
+// generated numbers, read by src/lib/measurements.ts, and must never enter the loader.
+const measurements = defineCollection({
+  loader: glob({ pattern: '*.md', base: './content/measurements' }),
+  schema: provisional,
+});
+
+export const collections = { journey, prompts, 'case-study': caseStudy, course, measurements };
