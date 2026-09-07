@@ -13,7 +13,7 @@ Turn the journey into something teachable. The chapters are a record of one pers
 to be a route someone else can walk, which means it cannot be a tour of what I built. It has to be about
 the decisions — what to govern, what to measure, when to stop.
 
-The skeleton at [`/course/skeleton/`](/course/skeleton/) is the result: seven modules, one learning
+The skeleton at [`/course/skeleton/`](../course/skeleton.md) is the result: seven modules, one learning
 outcome each, and for every module the chapters it draws its evidence from.
 
 ## What didn't work
