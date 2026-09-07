@@ -101,12 +101,112 @@
       "gitStart": "2026-06-23",
       "group": "claude-code",
       "id": "claude-code",
-      "logEnd": null,
-      "logStart": null,
-      "metrics": {},
+      "logEnd": "2026-09-07",
+      "logStart": "2026-08-08",
+      "metrics": {
+        "cost": {
+          "hasUnknownModelCost": false,
+          "perModelUSD": {
+            "claude-fable-5": <redacted>,
+            "claude-fable-5-1": <redacted>,
+            "claude-haiku-4-5-<redacted>": <redacted>,
+            "claude-opus-4-8[1m]": <redacted>,
+            "claude-opus-5": <redacted>,
+            "claude-opus-5[1m]": <redacted>,
+            "claude-sonnet-5": 1.4522
+          },
+          "sessionsWithCostState": 293,
+          "totalUSD": <redacted>
+        },
+        "main": {
+          "files": 749,
+          "perModel": {
+            "<synthetic>": {
+              "cacheCreation": 0,
+              "cacheRead": 0,
+              "input": 0,
+              "output": 0
+            },
+            "claude-fable-5": {
+              "cacheCreation": <redacted>,
+              "cacheRead": <redacted>,
+              "input": <redacted>,
+              "output": <redacted>
+            },
+            "claude-fable-5-1": {
+              "cacheCreation": <redacted>,
+              "cacheRead": <redacted>,
+              "input": <redacted>,
+              "output": <redacted>
+            },
+            "claude-opus-5": {
+              "cacheCreation": <redacted>,
+              "cacheRead": <redacted>,
+              "input": <redacted>,
+              "output": <redacted>
+            }
+          },
+          "sessions": 723,
+          "tokens": {
+            "cacheCreation": <redacted>,
+            "cacheRead": <redacted>,
+            "input": <redacted>,
+            "output": <redacted>
+          }
+        },
+        "subagent": {
+          "files": 898,
+          "parentSessions": 346,
+          "perModel": {
+            "<synthetic>": {
+              "cacheCreation": 0,
+              "cacheRead": 0,
+              "input": 0,
+              "output": 0
+            },
+            "claude-fable-5": {
+              "cacheCreation": <redacted>,
+              "cacheRead": <redacted>,
+              "input": <redacted>,
+              "output": <redacted>
+            },
+            "claude-haiku-4-5-<redacted>": {
+              "cacheCreation": <redacted>,
+              "cacheRead": <redacted>,
+              "input": <redacted>,
+              "output": <redacted>
+            },
+            "claude-opus-4-8": {
+              "cacheCreation": <redacted>,
+              "cacheRead": <redacted>,
+              "input": <redacted>,
+              "output": <redacted>
+            },
+            "claude-opus-5": {
+              "cacheCreation": <redacted>,
+              "cacheRead": <redacted>,
+              "input": <redacted>,
+              "output": <redacted>
+            },
+            "claude-sonnet-5": {
+              "cacheCreation": <redacted>,
+              "cacheRead": <redacted>,
+              "input": 434,
+              "output": <redacted>
+            }
+          },
+          "tokens": {
+            "cacheCreation": <redacted>,
+            "cacheRead": <redacted>,
+            "input": <redacted>,
+            "output": <redacted>
+          }
+        }
+      },
       "provenance": {
         "configRepo": "kri-local-rag",
-        "git": "git log -- .claude"
+        "git": "git log -- .claude",
+        "logs": "~/.claude/projects/**/*.jsonl (snapshots excluded)"
       },
       "tool": "Claude Code"
     }

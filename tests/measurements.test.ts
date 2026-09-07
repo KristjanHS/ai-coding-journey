@@ -106,3 +106,77 @@ describe('git-derived spine', () => {
     expect(by.cursor!.gitEnd! >= by['claude-code']!.gitStart!).toBe(true);
   });
 });
+
+// ── Era 4: Claude Code ────────────────────────────────────────────────────────
+// The one era with tokens, money and sessions all derivable. Pins here are
+// RECOMPUTED fixtures: `make measurements` derived them from the live log tree, and a
+// regeneration is EXPECTED to move them — the corpus grows daily and old transcripts
+// age out. A red here after a regen means "update the pin with the new measurement",
+// which is the point: the narrative in content/measurements/*.md is mirrored against
+// these, so a figure can never drift silently.
+
+const cc = eras.eras.find((e) => e.id === 'claude-code')!;
+const CLASSES = ['input', 'cacheCreation', 'cacheRead', 'output'] as const;
+
+describe('claude-code era metrics', () => {
+  it('pins the session and transcript counts', () => {
+    expect(cc.metrics.main.sessions).toBe(723);
+    expect(cc.metrics.main.files).toBe(749);
+    // 898 subagent transcripts, spread across 346 of the main sessions — the subagent
+    // side's distinct sessionId count is the PARENT count, not a subagent count.
+    expect(cc.metrics.subagent.files).toBe(898);
+    expect(cc.metrics.subagent.parentSessions).toBe(346);
+  });
+
+  it('keeps the parent and subagent sides distinct and both non-empty (D1)', () => {
+    // The D1 ruling prints both figures side by side, so neither side may be zero by
+    // construction. This is the falsifier for the sidechain filter: every assistant
+    // record in a subagent transcript carries isSidechain: true, so a filter applied
+    // with the same sense to both sides zeroes this one.
+    for (const klass of CLASSES) {
+      expect(cc.metrics.main.tokens[klass], `main ${klass}`).toBeGreaterThan(0);
+      expect(cc.metrics.subagent.tokens[klass], `subagent ${klass}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('reconciles per-model token sums against each side total', () => {
+    for (const side of ['main', 'subagent'] as const) {
+      const models = Object.values(cc.metrics[side].perModel);
+      for (const klass of CLASSES) {
+        const summed = models.reduce((total, m) => total + m[klass], 0);
+        expect(summed, `${side} ${klass}`).toBe(cc.metrics[side].tokens[klass]);
+      }
+    }
+  });
+
+  it('keeps the four token classes separate, cache_read never folded in', () => {
+    // D2's cache-class ruling lives in the DATA here: the headline (input +
+    // cacheCreation + output) must be reconstructible, which it only is while
+    // cacheRead is its own field. cacheRead dominates — that is exactly why.
+    const t = cc.metrics.main.tokens;
+    const headline = t.input + t.cacheCreation + t.output;
+    expect(t.cacheRead).toBeGreaterThan(headline);
+    expect(headline).toBeGreaterThan(0);
+  });
+
+  it('reconciles per-model cost against the session cost total', () => {
+    const summed = Object.values(cc.metrics.cost.perModelUSD).reduce((a, b) => a + b, 0);
+    expect(Math.abs(summed - cc.metrics.cost.totalUSD)).toBeLessThan(0.01);
+    expect(cc.metrics.cost.hasUnknownModelCost).toBe(false);
+  });
+
+  it('pins the derived cost and marks the era cost-derivable', () => {
+    expect(cc.metrics.cost.totalUSD).toBeCloseTo(<redacted>, 3);
+    expect(cc.metrics.cost.sessionsWithCostState).toBe(293);
+    expect(cc.availability.cost).toBe('derived');
+  });
+
+  it('dates the log range forwards and records that it starts after the git range', () => {
+    expect(cc.logStart! <= cc.logEnd!).toBe(true);
+    // A real cross-check disagreement, shown rather than smoothed away: the .claude/
+    // config dir dates the era from 2026-06-23, but the oldest surviving transcript is
+    // later — Claude Code prunes its own logs, so the log range is a floor on the era,
+    // not its start.
+    expect(cc.logStart! > cc.gitStart!).toBe(true);
+  });
+});
