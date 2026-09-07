@@ -50,26 +50,52 @@ check: ## THE gate: markdownlint + astro build + vitest, all blocking
 	@$(MAKE) --no-print-directory site
 	@$(MAKE) --no-print-directory test
 
-# The release: refuse a dirty tree, run THE gate, push. The push IS the deploy —
-# Vercel's git integration builds and publishes every push to `main` once the
-# repo is imported on vercel.com (README §Deploying it). There is deliberately no
-# `vercel deploy` CLI call here: it would be a SECOND publish of the same commit,
-# it needs a linked .vercel/ and an authenticated CLI that a fresh clone does not
-# have, and it would bypass the build Vercel runs anyway.
+# The release: verify HEAD, push HEAD. The push IS the deploy — Vercel's git
+# integration builds and publishes every push to `main` once the repo is imported
+# on vercel.com (README §Deploying it). There is deliberately no `vercel deploy`
+# CLI call here: it would be a SECOND publish of the same commit, it needs a
+# linked .vercel/ and an authenticated CLI that a fresh clone does not have, and
+# it would bypass the build Vercel runs anyway.
 #
-# No separate build step either — `check` already runs `astro build` (see the
-# `site` target), so dist/ is proven green before the push. A second build would
-# verify nothing the gate did not.
+# HEAD-only, like ~/projects/crash-dash's `make ship`: the gate runs against a
+# `git archive HEAD` copy in a temp dir, never the live tree. What gets verified
+# is exactly what gets pushed, so uncommitted work can neither reach the release
+# nor colour its verdict. That is why there is NO dirty-tree gate — blocking on
+# one would buy nothing and force a stash mid-development. Uncommitted tracked
+# files are reported as a heads-up; they never refuse.
+#
+# node_modules is SYMLINKED into the copy rather than reinstalled: the gate needs
+# the toolchain, not a fresh install. A HEAD that bumps package.json is therefore
+# checked against the tree's installed deps — run `npm install` first when that
+# is what changed.
+#
+# The push names the pinned SHA (`<sha>:refs/heads/<branch>`), not the moving
+# `HEAD`: a sibling session committing while the gate runs cannot ride an
+# unverified commit out on this release.
+#
+# No separate build step — `check` already runs `astro build` (see the `site`
+# target), so dist/ is proven green before the push. A second build would verify
+# nothing the gate did not.
 #
 # ⚠ Until the repo is imported on vercel.com, a push publishes nothing but the
 # GitHub-rendered markdown. Confirm the deployment after a release; a green push
 # is not a green site.
-ship: ## the release: clean tree + make check (builds dist/) + push — the push is the Vercel deploy
-	@[ -z "$$(git status --porcelain)" ] || { \
-	  echo "error: working tree dirty — commit or stash before shipping" >&2; \
-	  git status --short >&2; exit 1; }
-	@$(MAKE) --no-print-directory check
-	git push
+ship: ## the release: make check against HEAD (uncommitted work ignored) + push HEAD
+	@set -e; \
+	sha=$$(git rev-parse HEAD); short=$$(git rev-parse --short HEAD); \
+	branch=$$(git rev-parse --abbrev-ref HEAD); \
+	[ "$$branch" != "HEAD" ] || { \
+	  echo "error: detached HEAD — ship pushes $$short to a named branch; check one out first." >&2; \
+	  exit 1; }; \
+	dirty=$$(git status --porcelain --untracked-files=no | wc -l | tr -d ' '); \
+	[ "$$dirty" = 0 ] || printf 'note: %s uncommitted tracked file(s) — NOT in this release (payload is %s; commit them to include them)\n' "$$dirty" "$$short"; \
+	dir=$$(mktemp -d -t journey-head-XXXXXX); \
+	trap 'rm -rf "$$dir"' EXIT INT TERM; \
+	git archive "$$sha" | tar -x -C "$$dir"; \
+	ln -s "$(CURDIR)/node_modules" "$$dir/node_modules"; \
+	printf 'gate ................. %s (HEAD copy)\n' "$$short"; \
+	$(MAKE) --no-print-directory -C "$$dir" check; \
+	git push origin "$$sha:refs/heads/$$branch"
 
 # markdownlint-cli2 reads .markdownlint-cli2.jsonc for both rules and ignores
 # (node_modules, sources, docs/plans/archive, .claude) — never re-list them here.

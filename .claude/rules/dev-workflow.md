@@ -52,9 +52,14 @@ remains the user's eye.
 
 ## Release
 
-**`make ship` is the release**: refuse a dirty tree → `make check` → `git push`. **The push IS the
-deploy** — Vercel's git integration builds and publishes every push to `main` once the repo is imported on
-vercel.com. There is deliberately no `vercel` CLI call in the recipe (it would publish the same commit
+**`make ship` is the release**: `make check` against a `git archive HEAD` copy in a temp dir (node_modules
+symlinked in) → `git push origin <sha>:refs/heads/<branch>`. **HEAD-only, like crash-dash's**: what is
+verified is exactly what is pushed, so uncommitted work can neither reach the release nor colour its
+verdict — which is why there is deliberately **no dirty-tree gate**; dirty tracked files print a heads-up
+and nothing more. Two corollaries: a HEAD that bumps `package.json` is checked against the *tree's*
+installed deps (run `npm install` first), and `dist/` is built in the temp copy, not in the tree. **The
+push IS the deploy** — Vercel's git integration builds and publishes every push to `main` once the repo
+is imported on vercel.com. There is deliberately no `vercel` CLI call in the recipe (it would publish the same commit
 twice and needs a linked `.vercel/`), and no separate build step (`check` already runs `astro build`, so
 `dist/` is proven before the push).
 

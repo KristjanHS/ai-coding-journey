@@ -39,8 +39,8 @@ in `docs/creator.md`; never reintroduce it into the README.
   the content tests (evidence rule, banned words): a check that cannot fail proves nothing.
 - **Token budget is the binding resource.** Thin increments (≤1 session, visible on GitHub the same day);
   bulk reads (OneNote digests, crash-dash `.md` sweeps) go to a sub-agent; only its brief returns.
-- Stay on `main`; release with `make ship` (clean tree + gate + push). **The push IS the deploy** —
-  Vercel's git integration publishes every push to `main` once the repo is imported; there is no `vercel`
+- Stay on `main`; release with `make ship` (gate against a HEAD copy + push HEAD — uncommitted work is
+  ignored, never a blocker). **The push IS the deploy** — Vercel's git integration publishes every push to `main` once the repo is imported; there is no `vercel`
   CLI call and no second build. A green push is not a green site. No worktrees unless asked. Public
   repo — never commit `sources/`, `.env*`, or anything naming a colleague or a private deployment URL.
 

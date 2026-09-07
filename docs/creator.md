@@ -33,7 +33,7 @@ make            # list every target
 make check      # THE gate — run it once per step
 make timeline   # regenerate timeline.json + the index, then commit the regen
 make dev        # Astro dev server on localhost:4321
-make ship       # clean tree + gate + push — the push is the deploy
+make ship       # gate HEAD + push HEAD (uncommitted work ignored) — the push is the deploy
 ```
 
 `make check` is three parts, all blocking:
@@ -129,7 +129,9 @@ repo, **Add New… → Project → Import** `ai-coding-journey`, leave every bui
 [ai-coding-journey-five.vercel.app](https://ai-coding-journey-five.vercel.app).
 
 There is nothing left to run: Vercel's git integration builds and publishes **every push to `main`**, so
-`make ship` (clean tree → gate → push) is the whole release. `make ship` deliberately does not call the
+`make ship` (gate a `git archive HEAD` copy → push that same commit) is the whole release. It is HEAD-only:
+uncommitted work in the tree can neither reach the release nor red its gate, so there is no dirty-tree
+block — only a heads-up naming how many tracked files were left out. `make ship` deliberately does not call the
 `vercel` CLI — that would publish the same commit twice and would need a linked `.vercel/` directory a
 fresh clone does not have. Nor is there a GitHub Actions workflow: Vercel builds on its own
 infrastructure, so a push costs no Actions minutes.
