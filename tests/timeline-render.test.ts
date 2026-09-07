@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -116,6 +116,44 @@ describe('accessibility floor: the text equivalent', () => {
     for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
       expect(html, `no sr-only timeline table on ${name}`).toMatch(/class="sr-only" data-tl-table/);
       expect(count(html, /data-tl-table-row/g), `wrong row count on ${name}`).toBe(CORPUS);
+    }
+  });
+});
+
+// inc5b Stage 1: the generated index is built by enumerating REPOS, so a chapter
+// that belongs to no repo (the reserved 90- band) is invisible to the generator
+// unless index() walks the tree for it. This asserts the shipped README.md, not
+// dist/ — it guards the generator's output, which is a tracked source file.
+describe('generated journey index lists non-repo chapters', () => {
+  const JOURNEY_DIR = join(process.cwd(), 'content', 'journey');
+  const readme = () => readFileSync(join(JOURNEY_DIR, 'README.md'), 'utf8');
+
+  // Files with a `[0-9][0-9]-` prefix, minus the round-up (no frontmatter, own rows).
+  const chapterFiles = () =>
+    readdirSync(JOURNEY_DIR)
+      .filter((f) => /^\d\d-.+\.md$/.test(f) && f !== '00-experiments.md')
+      .sort();
+
+  const noRepoChapters = () =>
+    chapterFiles().filter((f) => {
+      const fm = /^---\n([\s\S]*?\n)---\n/.exec(readFileSync(join(JOURNEY_DIR, f), 'utf8'));
+      return fm !== null && !/^repo: *\S/m.test(fm[1]);
+    });
+
+  // Vacuity anchor on the CORPUS the walker read, never on the population it
+  // drains: the walk found the chapter files, parsed their frontmatter, and the
+  // README really is the generated table with a known repo row in it.
+  it('walked the chapter corpus and read the generated table', () => {
+    expect(chapterFiles().length).toBeGreaterThanOrEqual(CORPUS - 1);
+    expect(chapterFiles().length - noRepoChapters().length).toBeGreaterThan(0);
+    expect(readme()).toContain('| # | repo | start | end | commits | stage | chapter |');
+    expect(readme()).toContain('| 01 | hands-on-llm |');
+  });
+
+  it('gives every non-repo chapter a row linking its file', () => {
+    const index = readme();
+    for (const f of noRepoChapters()) {
+      expect(index, `${f} is missing from the generated index`).toContain(`[${f}](${f})`);
     }
   });
 });

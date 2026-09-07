@@ -7,7 +7,9 @@ Deterministic for a fixed set of repos: rerunning rewrites timeline.json and the
 byte-identically. Chapter stubs and 00-experiments.md are created only when absent, but
 the four GENERATED frontmatter fields (start/end/commits/stage) are re-synced into every
 existing chapter on each run, so a regen surfaces upstream commit drift as a reviewable
-diff in the tree. Author-owned frontmatter (title/tools/deck/artifact,
+diff in the tree. Chapters that carry no `repo:` key (the reserved 90- band: chapters
+that belong to no repo) are never opened -- main() enumerates repos, not chapter files --
+but they are listed in the index so it is not silently incomplete. Author-owned frontmatter (title/tools/deck/artifact,
 and any other key) and the chapter body are never touched.
 Hand-maintain STAGE and EXCLUDE below; never hand-edit the generated files.
 """
@@ -238,6 +240,25 @@ def experiments(rows: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def no_repo_chapters() -> list[Path]:
+    """Chapter files carrying no `repo:` frontmatter key, sorted by filename.
+
+    main() enumerates repos and resolves each through chapter_file(), so a chapter
+    that belongs to no repo is invisible to every other part of this script -- and
+    would be silently missing from the generated index. 00-experiments.md is the
+    sub-5-commit round-up: it carries no frontmatter at all and already has its own
+    rows, so it is excluded by name rather than by the no-repo test.
+    """
+    out = []
+    for path in sorted(JOURNEY.glob("[0-9][0-9]-*.md")):
+        if path.name == EXPERIMENTS.name:
+            continue
+        m = re.match(r"---\n(.*?\n)---\n", path.read_text(), re.S)
+        if m and not re.search(r"^repo: *\S", m.group(1), re.M):
+            out.append(path)
+    return out
+
+
 def index(chapters: list[tuple[int, dict]], small: list[dict]) -> str:
     out = [
         "# Journey index\n",
@@ -255,6 +276,13 @@ def index(chapters: list[tuple[int, dict]], small: list[dict]) -> str:
         out.append(
             f"| 00 | {r['repo']} | {r['first_commit']} | {r['last_commit']} | "
             f"{r['commits']} | {r['stage']} | [00-experiments.md](00-experiments.md) |"
+        )
+    # Non-repo chapters last: the numbered repo rows and the 00 experiment rows both
+    # come from git, these come from the tree. Every git-derived column renders as an
+    # em dash -- there is no repo to derive it from.
+    for path in no_repo_chapters():
+        out.append(
+            f"| {path.name[:2]} | — | — | — | — | — | [{path.name}]({path.name}) |"
         )
     return "\n".join(out) + "\n"
 

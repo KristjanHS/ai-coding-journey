@@ -19,9 +19,14 @@ const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeComp
     {chapters.map((entry) => (
       <li>
         <a href={`/journey/${entry.id}/`}>{entry.data.title}</a>
-        <span class="stage">{entry.data.stage}</span>
-        <span class="commits">{entry.data.commits.toLocaleString('en-US')} commits</span>
-        <span class="span">{entry.data.start} → {entry.data.end}</span>
+        {/* A non-repo chapter (90- band) carries none of the git-derived keys. */}
+        {entry.data.stage && <span class="stage">{entry.data.stage}</span>}
+        {entry.data.commits !== undefined && (
+          <span class="commits">{entry.data.commits.toLocaleString('en-US')} commits</span>
+        )}
+        {entry.data.start && entry.data.end && (
+          <span class="span">{entry.data.start} → {entry.data.end}</span>
+        )}
       </li>
     ))}
   </ol>

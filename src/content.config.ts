@@ -20,11 +20,19 @@ const journey = defineCollection({
   loader: glob({ pattern: ['*.md', '!00-experiments.md', '!README.md'], base: './content/journey' }),
   schema: z.object({
     title: z.string(),
-    repo: z.string(),
-    start: isoDate,
-    end: isoDate,
-    commits: z.number().int(),
-    stage: z.enum(['chat', 'local-llm', 'first-agent', 'config-engineering', 'production-app']),
+    // inc5b: the five git-derived keys are optional because the spine needs two
+    // chapters that belong to no repo (the reserved 90- band). Author-owned keys
+    // below stay required — a chapter with no title/tools/deck/artifact is a bug
+    // in every case, repo-backed or not. timeline-from-git.py never opens a
+    // repo-less file (main() enumerates repos, not chapter files), so these keys
+    // are absent by construction there, not merely unvalidated.
+    repo: z.string().optional(),
+    start: isoDate.optional(),
+    end: isoDate.optional(),
+    commits: z.number().int().optional(),
+    stage: z
+      .enum(['chat', 'local-llm', 'first-agent', 'config-engineering', 'production-app'])
+      .optional(),
     tools: z.array(z.string()),
     deck: z.boolean(),
     // Both states are real: scripts/timeline-from-git.py emits `pending` for a
