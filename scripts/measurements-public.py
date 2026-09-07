@@ -27,7 +27,7 @@ What crosses:
   dates        git ranges, log ranges, the onset block (dates only, already public)
   shares       each token-bearing era's fraction of the combined floor, 4 decimals
   ratios       coverage and split fractions -- "4.86% of bubbles carry a count",
-               never "<redacted> of <redacted>"
+               never the raw pair behind it
   small counts structural, non-volume: workspaces seen, header formats, models,
                config commits (already public in the timeline), skill files
 

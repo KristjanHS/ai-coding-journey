@@ -21,7 +21,7 @@ What the two key shapes mean:
     bubbleId:<composer>:<bubble>     one message; `type` 1 = user, 2 = assistant
 
 Nearly every bubble carries a `tokenCount: {inputTokens, outputTokens}` object, but only
-<redacted> of <redacted> carry a NON-ZERO one -- under 5%, and every one of those is an assistant
+under 5% of bubbles carry a NON-ZERO one, and every one of those is an assistant
 turn. (The recon brief quoted ~19%; the recompute does not reproduce it and the measured
 figure is reported rather than forced.) Cursor also computes these client-side, so they
 are an estimate, not anything billed. Both facts ship as data flags

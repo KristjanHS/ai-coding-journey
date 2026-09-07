@@ -19,8 +19,8 @@ path. The stack is Python 3.13, Weaviate as the vector store, Ollama serving the
 as the front end.
 
 The repo holds 741 commits between 2025-07-13 and 2026-06-25, but the local-model era it belongs to is
-far narrower than that. The Continue logs covering it run 2025-07-04 to 2025-08-16 — <redacted> events
-across 24 models — and of those events <redacted> went to Ollama and 12 to Gemini. "No hosted model in the
+far narrower than that. The Continue logs covering it run 2025-07-04 to 2025-08-16, across 24 models,
+and 98.8% of those token events went to Ollama — the rest to Gemini. "No hosted model in the
 path" was true of the system I was building, not of every request I made while building it.
 
 The interesting part of the repo is not that it works. It is what a review found in it after a year.
