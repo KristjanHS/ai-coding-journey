@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+// Course ids are flat (`skeleton`) — no nesting, so a plain [slug] is enough
+// here, unlike /case-study/ where the ids carry a directory.
+export async function getStaticPaths() {
+  const entries = await getCollection('course');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Base title={`${entry.data.title} · course`} description={entry.data.summary ?? entry.data.title}>
+  <p class="back"><a href="/course/">← Course</a></p>
+  <h1>{entry.data.title}</h1>
+  {entry.data.summary && <p class="lede">{entry.data.summary}</p>}
+  <Content />
+</Base>
+
+<style>
+  .back { font-size: var(--size-0); }
+  .lede { color: var(--fg-dim); margin-top: 0; }
+</style>
