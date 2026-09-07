@@ -23,6 +23,8 @@ Adapted from crash-dash's rule of the same name; project-specific doc names stri
 
 `docs/plans` is a symlink into `~/projects/dotfiles/docs/plans/ai-coding-journey/`, gitignored here — commit
 a plan doc in the *dotfiles* repo, pathspec'd to that dir, and lint it: only `docs/plans/archive` is ignored.
+Because `make check` runs markdownlint through the symlink, an agent-authored plan doc reds the gate on
+MD060/MD040/MD004 — lint it before the burst, not after.
 
 ## Cite plan docs by stem, not path
 
