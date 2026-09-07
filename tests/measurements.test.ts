@@ -703,3 +703,51 @@ describe('measurements narrative ↔ JSON mirror (Stage 9)', () => {
     }
   });
 });
+
+// ── inc5b: the deck chapters ↔ JSON mirror ────────────────────────────────────
+// Same contract as the Stage-9 block above, applied to content/journey/. A deck
+// chapter that quotes a measured figure must print exactly what the lib derives,
+// so a figure edited in prose without the JSON moving reds here. Every expected
+// string is COMPUTED — a fabricated figure has nothing to match.
+const JOURNEY_DIR = join(process.cwd(), 'content', 'journey');
+const readChapter = (file: string) => readFileSync(join(JOURNEY_DIR, file), 'utf8');
+const usd2 = (n: number) =>
+  n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const JOURNEY_PINNED: [string, string[]][] = [
+  [
+    '90-what-i-got-wrong.md',
+    [
+      // Copilot's recoverable remnant: turns, and the workspace ratio behind them.
+      `${nf(copilotMetrics.turns)} turns`,
+      `${copilotMetrics.workspacesWithChat} of ${copilotMetrics.workspacesTotal}`,
+      // Cursor's session count and the priced fraction that makes its tokens a floor.
+      `${nf(cursorMetrics.sessions)} sessions`,
+      `${(cursorMetrics.nonZeroBubbleFraction * 100).toFixed(2)}%`,
+      // Codex logged tokens only from this date — the reason its total is a floor.
+      `${codexMetrics.tokens.loggingStart}`,
+      // The one era with a derived figure rather than a state.
+      `$${usd2(ccUsd)}`,
+    ],
+  ],
+];
+
+describe('journey deck chapters ↔ JSON mirror (inc5b)', () => {
+  it.each(JOURNEY_PINNED)('%s prints every quoted figure exactly as the JSON derives it', (file, figures) => {
+    const body = readChapter(file);
+    for (const figure of figures) {
+      expect(body.includes(figure), `${file}: missing canonical figure ${figure}`).toBe(true);
+    }
+  });
+
+  it('names all four cost states in the chapter that is about the absences', () => {
+    // The chapter's whole argument is that three of the four answers are states,
+    // not numbers. Flattening any of them out of the prose reds this.
+    const body = readChapter('90-what-i-got-wrong.md');
+    const states = [...new Set(costStates.map((r) => r.state))];
+    expect(states.length).toBe(4);
+    for (const state of states) {
+      expect(body.includes(state), `cost state not named: ${state}`).toBe(true);
+    }
+  });
+});
