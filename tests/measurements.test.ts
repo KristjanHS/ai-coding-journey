@@ -552,3 +552,84 @@ describe('measurements lib — token headline floor (D2 as amended)', () => {
     expect(tokenHeadline.floor + tokenHeadline.cacheRead).not.toBe(tokenHeadline.floor);
   });
 });
+
+// ── inc5a Stage 9: the citable narrative ↔ JSON mirror tests ───────────────────
+// content/measurements/*.md is the single source every chapter/slide/post cites.
+// A headline figure printed there must equal what the lib derives from eras.json,
+// or it reds — the MIN_COMMITS-mirror pattern applied to prose. The canonical
+// strings below are COMPUTED from src/lib/measurements.ts, never restated as
+// literals, so a figure fabricated in the .md with no JSON backing has nothing to
+// match and reds too. Read hermetically from disk (node:fs), never via git.
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { costStates, eras as libEras } from '../src/lib/measurements';
+
+const MEAS_DIR = join(process.cwd(), 'content', 'measurements');
+const readMeas = (file: string) => readFileSync(join(MEAS_DIR, file), 'utf8');
+const measFiles = () => readdirSync(MEAS_DIR).filter((f) => f.endsWith('.md'));
+const corpus = () => measFiles().map(readMeas).join('\n');
+
+const nf = (n: number) => n.toLocaleString('en-US');
+const libEra = (id: string) => libEras.find((e) => e.id === id)!;
+const contrib = (id: string) => tokenHeadline.contributions.find((c) => c.id === id)!;
+const ccContrib = contrib('claude-code');
+const copilotMetrics = libEra('copilot').metrics;
+const ccUsd = costStates.find((r) => r.id === 'claude-code')!.usd!;
+
+// [file, [canonical strings the file must print verbatim]] — every string derived
+// from the lib. The exact figure the JSON produces has to appear; rounded prose
+// beside it ("~224M input tokens, a floor") is free and unpinned.
+const PINNED: [string, string[]][] = [
+  ['00-copilot.md', [`${copilotMetrics.workspacesWithChat} of ${copilotMetrics.workspacesTotal}`, nf(copilotMetrics.turns)]],
+  ['01-continue.md', [nf(contrib('continue').headline), nf(libEra('continue').metrics.tokens.promptTokens)]],
+  ['02-codex.md', [nf(contrib('codex').headline), nf(libEra('codex').metrics.humanPrompts)]],
+  ['03-cursor.md', [nf(libEra('cursor').metrics.tokens.input), nf(libEra('cursor').metrics.tokens.output)]],
+  [
+    '04-claude-code.md',
+    [
+      nf(ccContrib.sides!.mainPlusSubagent.headline),
+      nf(ccContrib.sides!.main.headline),
+      nf(tokenHeadline.floor),
+      `$${nf(Math.round(ccUsd))}`,
+    ],
+  ],
+];
+
+describe('measurements narrative ↔ JSON mirror (Stage 9)', () => {
+  it.each(PINNED)('%s prints every headline figure exactly as the JSON derives it', (file, figures) => {
+    const body = readMeas(file);
+    for (const figure of figures) {
+      expect(body.includes(figure), `${file}: missing canonical figure ${figure}`).toBe(true);
+    }
+  });
+
+  it('gives every measurement file a "measured how" line', () => {
+    // Anti-hype rule: a number without how it was measured is not evidence. Deleting
+    // a "Measured how:" line from any file reds this.
+    const files = measFiles();
+    expect(files.length).toBeGreaterThanOrEqual(5);
+    for (const file of files) {
+      expect(/measured how/i.test(readMeas(file)), `${file}: no measured-how line`).toBe(true);
+    }
+  });
+
+  it('states the eras overlap, naming the Cursor∩Codex pair in prose', () => {
+    // The structural finding the prose must carry, not only the axis: at least one
+    // file says the eras overlap AND names both Cursor and Codex in that context.
+    const stated = measFiles()
+      .map(readMeas)
+      .some((b) => /overlap|concurrent/i.test(b) && /cursor/i.test(b) && /codex/i.test(b));
+    expect(stated).toBe(true);
+  });
+
+  it('names all four distinct cost states in the prose', () => {
+    // Derived from the lib, not restated: near-zero-local is a FINDING, not an
+    // unknown — the four must each be named so the page cannot flatten them.
+    const states = [...new Set(costStates.map((r) => r.state))];
+    expect(states.length).toBe(4);
+    const text = corpus();
+    for (const state of states) {
+      expect(text.includes(state), `cost state not named in prose: ${state}`).toBe(true);
+    }
+  });
+});

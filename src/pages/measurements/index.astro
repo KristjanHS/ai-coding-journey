@@ -2,6 +2,7 @@
 // inc5a D3: ONE bespoke /measurements/ route, hand-written like /journey/. No [slug]
 // detail route and no generated list route — every figure is read from the typed lib,
 // which reads the generated eras.json. Server-rendered, no client JS, no island.
+import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import {
   TIME_DOMAIN,
@@ -29,6 +30,12 @@ const GROUP_COLOUR: Record<string, string> = {
   cursor: 'var(--stage-config-engineering)',
   'claude-code': 'var(--stage-production-app)',
 };
+
+// D3: the citable narrative is one content/measurements/*.md per era, linked from
+// this bespoke index (no [slug] route). Markdown-first — the entries read on GitHub
+// as the product, so the link points at the public source file.
+const narratives = (await getCollection('measurements')).sort((a, b) => a.id.localeCompare(b.id));
+const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/measurements';
 
 const provenanceById = new Map(eras.map((e) => [e.id, e.provenance]));
 const crossById = new Map(crossCheck.map((c) => [c.id, c]));
@@ -226,6 +233,21 @@ const cc = tokenHeadline.contributions.find((c) => c.id === 'claude-code')!;
     Corpus mtimes {sttFaster.mtimeStart} → {sttFaster.mtimeEnd} sit inside the repo's git span
     {sttFaster.repo.gitStart} → {sttFaster.repo.gitEnd} — both shown, not reconciled.
   </p>
+
+  <!-- D3: the citable narratives, one .md per era, linked to their GitHub source. -->
+  <h2>Citable narratives</h2>
+  <p class="lede">
+    One entry per era — the single source every chapter, slide and post cites, so a figure is
+    never typed twice.
+  </p>
+  <ul class="narratives">
+    {narratives.map((entry) => (
+      <li>
+        <a href={`${GH}/${entry.id}.md`}>{entry.data.title}</a>
+        {entry.data.summary && <span class="summary">{entry.data.summary}</span>}
+      </li>
+    ))}
+  </ul>
 </Base>
 
 <style>
@@ -291,6 +313,11 @@ const cc = tokenHeadline.contributions.find((c) => c.id === 'claude-code')!;
 
   .caveat h3 { margin-bottom: var(--space-1); }
   .caveat ul { margin-top: 0; color: var(--fg-dim); }
+
+  .narratives { list-style: none; padding: 0; }
+  .narratives li { padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
+  .narratives a { font-weight: 600; }
+  .summary { display: block; color: var(--fg-dim); font-size: var(--size-0); margin-top: var(--space-1); }
 
   @media (max-width: 34rem) {
     .lane { grid-template-columns: 6rem 1fr; }
