@@ -13,12 +13,20 @@
       "gitStart": null,
       "group": "vscode-plugin",
       "id": "copilot",
-      "logEnd": null,
-      "logStart": null,
-      "metrics": {},
+      "logEnd": "2025-12-08",
+      "logStart": "2025-06-20",
+      "metrics": {
+        "costFieldPresent": false,
+        "sessions": 7,
+        "tokenFieldPresent": false,
+        "turns": 86,
+        "workspacesTotal": 18,
+        "workspacesWithChat": 6
+      },
       "provenance": {
         "configRepo": "kri-local-rag",
-        "git": null
+        "git": null,
+        "logs": "VS Code workspaceStorage/*/chatSessions/*.json (no token or cost field)"
       },
       "tool": "GitHub Copilot Chat"
     },
@@ -95,7 +103,7 @@
         "cost": "unknown-server-side",
         "counts": "yes",
         "skills": "none",
-        "tokens": "none"
+        "tokens": "floor"
       },
       "configDir": ".codex",
       "gitCommits": 9,
@@ -103,12 +111,34 @@
       "gitStart": "2025-08-28",
       "group": "vscode-plugin",
       "id": "codex",
-      "logEnd": null,
-      "logStart": null,
-      "metrics": {},
+      "logEnd": "2026-04-12",
+      "logStart": "2025-08-28",
+      "metrics": {
+        "assistantMessages": <redacted>,
+        "environmentPrompts": 463,
+        "files": 223,
+        "headerFormats": {
+          "session_meta": 86,
+          "top-level-id": 137
+        },
+        "humanPrompts": <redacted>,
+        "prompts": <redacted>,
+        "sessions": 223,
+        "tokens": {
+          "cached_input_tokens": <redacted>,
+          "filesWithTokens": 83,
+          "input_tokens": <redacted>,
+          "loggingStart": "2025-09-23",
+          "output_tokens": <redacted>,
+          "partialLogging": true,
+          "reasoning_output_tokens": <redacted>,
+          "total_tokens": <redacted>
+        }
+      },
       "provenance": {
         "configRepo": "kri-local-rag",
-        "git": "git log -- .codex"
+        "git": "git log -- .codex",
+        "logs": "~/.codex/sessions/**/rollout-*.jsonl (two header formats); history.jsonl is a 3-line stub, not a prompt log"
       },
       "tool": "OpenAI Codex plugin"
     },

@@ -284,3 +284,95 @@ describe('continue era metrics', () => {
     );
   });
 });
+
+// ── Eras 0 + 2: Copilot and Codex ─────────────────────────────────────────────
+// The two eras the plan expected to be counts-only. Copilot is: no token field, no cost
+// field, and its recomputed 86 turns did reproduce the brief's figure (the suspected
+// collision with a Continue number was benign). Codex did NOT stay counts-only — see
+// the token block below and the D2 amendment in the plan.
+
+const copilot = eras.eras.find((e) => e.id === 'copilot')!;
+const codex = eras.eras.find((e) => e.id === 'codex')!;
+
+describe('copilot era metrics', () => {
+  it('pins the recomputed session, turn and workspace counts', () => {
+    expect(copilot.metrics.sessions).toBe(7);
+    expect(copilot.metrics.turns).toBe(86);
+    expect(copilot.metrics.workspacesWithChat).toBe(6);
+    expect(copilot.metrics.workspacesWithChat).toBeLessThan(copilot.metrics.workspacesTotal);
+  });
+
+  it('records the absence of tokens and cost as data, and dates the era', () => {
+    expect(copilot.metrics.tokenFieldPresent).toBe(false);
+    expect(copilot.metrics.costFieldPresent).toBe(false);
+    expect(copilot.availability.tokens).toBe('none');
+    // D4: `absent` is the free tier billing nothing — NOT Cursor's server-side unknown.
+    expect(copilot.availability.cost).toBe('absent');
+    expect(copilot.availability.cost).not.toBe(cursor.availability.cost);
+    expect([copilot.logStart, copilot.logEnd]).toEqual(['2025-06-20', '2025-12-08']);
+  });
+});
+
+describe('codex era metrics', () => {
+  it('counts BOTH rollout header formats', () => {
+    // The finding that overturned the plan's Era 2 givens: reading only the old
+    // top-level {id} header sees 137 files and calls that the session count. A parser
+    // that regresses to one shape reds here, because the format split is pinned.
+    expect(codex.metrics.files).toBe(223);
+    expect(codex.metrics.sessions).toBe(223);
+    expect(codex.metrics.headerFormats['top-level-id']).toBe(137);
+    expect(codex.metrics.headerFormats['session_meta']).toBe(86);
+    const formats = Object.values(codex.metrics.headerFormats) as number[];
+    expect(formats.reduce((a, b) => a + b, 0)).toBe(codex.metrics.files);
+  });
+
+  it('separates injected context turns from human prompts', () => {
+    expect(codex.metrics.prompts).toBe(<redacted>);
+    expect(codex.metrics.environmentPrompts).toBe(463);
+    expect(codex.metrics.humanPrompts).toBe(<redacted>);
+    expect(codex.metrics.humanPrompts + codex.metrics.environmentPrompts).toBe(codex.metrics.prompts);
+  });
+
+  it('carries a token floor with its own partial-logging reason (D2 as amended)', () => {
+    // Codex joins the headline as the fourth token-bearing tool, but its floor has a
+    // DIFFERENT reason from Cursor's: the token_count event only exists from
+    // 2025-09-23, so the first weeks of the era contribute nothing.
+    expect(codex.availability.tokens).toBe('floor');
+    expect(codex.metrics.tokens.partialLogging).toBe(true);
+    expect(codex.metrics.tokens.loggingStart).toBe('2025-09-23');
+    expect(codex.metrics.tokens.loggingStart! > codex.logStart!).toBe(true);
+    expect(codex.metrics.tokens.filesWithTokens).toBe(83);
+    expect(codex.metrics.tokens.filesWithTokens).toBeLessThan(codex.metrics.files);
+    expect(codex.metrics.tokens.input_tokens).toBe(<redacted>);
+    expect(codex.metrics.tokens.output_tokens).toBe(<redacted>);
+  });
+
+  it('keeps cached input as a SUBSET of input, never an extra class', () => {
+    // OpenAI's cached_input_tokens is already inside input_tokens, and
+    // reasoning_output_tokens inside output_tokens — adding either to a headline
+    // double-counts. The identity below is what the measured data actually satisfies
+    // (total = input + output, both subsets excluded), and it is the falsifier for
+    // treating either subset as a fifth class.
+    const t = codex.metrics.tokens;
+    expect(t.cached_input_tokens).toBeLessThan(t.input_tokens);
+    expect(t.reasoning_output_tokens).toBeLessThan(t.output_tokens);
+    expect(t.input_tokens + t.output_tokens).toBe(t.total_tokens);
+  });
+
+  it('leaves cost unknown and never derives money from the tokens (D4)', () => {
+    expect(codex.availability.cost).toBe('unknown-server-side');
+    expect('cost' in codex.metrics).toBe(false);
+  });
+});
+
+describe('the cross-era token headline (D2 as amended)', () => {
+  it('is a floor over exactly four of the five tools', () => {
+    const bearing = eras.eras.filter((e) => e.availability.tokens !== 'none');
+    expect(bearing.map((e) => e.id)).toEqual(['continue', 'codex', 'cursor', 'claude-code']);
+    // Two of the four are floors, for two different reasons — the label the page prints
+    // ("4 of 5 tools", "≥") is only honest while both remain true.
+    const floors = bearing.filter((e) => e.availability.tokens === 'floor');
+    expect(floors.map((e) => e.id)).toEqual(['codex', 'cursor']);
+    expect(eras.eras).toHaveLength(5);
+  });
+});
