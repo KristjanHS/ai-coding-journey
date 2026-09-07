@@ -79,12 +79,30 @@
       "gitStart": "2025-07-31",
       "group": "cursor",
       "id": "cursor",
-      "logEnd": null,
-      "logStart": null,
-      "metrics": {},
+      "logEnd": "2026-05-18",
+      "logStart": "2025-07-09",
+      "metrics": {
+        "estimateSource": "cursor-client",
+        "isFloor": true,
+        "messages": {
+          "assistant": <redacted>,
+          "total": <redacted>,
+          "untyped": 623,
+          "user": <redacted>
+        },
+        "nonZeroBubbleFraction": 0.0486,
+        "pricedBubbles": <redacted>,
+        "pricedBubblesAssistant": <redacted>,
+        "sessions": <redacted>,
+        "tokens": {
+          "input": <redacted>,
+          "output": <redacted>
+        }
+      },
       "provenance": {
         "configRepo": "kri-local-rag",
-        "git": "git log -- .cursor"
+        "git": "git log -- .cursor",
+        "logs": "Cursor state.vscdb (cursorDiskKV), read-only immutable copy"
       },
       "tool": "Cursor"
     },

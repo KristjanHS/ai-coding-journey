@@ -180,3 +180,51 @@ describe('claude-code era metrics', () => {
     expect(cc.logStart! > cc.gitStart!).toBe(true);
   });
 });
+
+// ── Era 3: Cursor ─────────────────────────────────────────────────────────────
+// Recomputed fixtures again, but from a DEAD corpus: state.vscdb was last written
+// 2026-05-18 and Cursor is no longer in use, so unlike the Claude Code pins these are
+// not expected to move. A red here means the generator changed, not the world.
+
+const cursor = eras.eras.find((e) => e.id === 'cursor')!;
+
+describe('cursor era metrics', () => {
+  it('pins the session and message counts and the user/assistant split', () => {
+    expect(cursor.metrics.sessions).toBe(<redacted>);
+    expect(cursor.metrics.messages.total).toBe(<redacted>);
+    expect(cursor.metrics.messages.user).toBe(<redacted>);
+    expect(cursor.metrics.messages.assistant).toBe(<redacted>);
+    expect(cursor.metrics.messages.untyped).toBe(623);
+    const { user, assistant, untyped, total } = cursor.metrics.messages;
+    expect(user + assistant + untyped).toBe(total);
+  });
+
+  it('pins the client-side token floor', () => {
+    expect(cursor.metrics.tokens.input).toBe(<redacted>);
+    expect(cursor.metrics.tokens.output).toBe(<redacted>);
+  });
+
+  it('carries both caveats as data, so the page cannot print the sum bare', () => {
+    // The figure above is a FLOOR (only <redacted> of <redacted> bubbles carry a non-zero
+    // tokenCount, and every one of them is an assistant turn) and an ESTIMATE (Cursor
+    // computes it client-side; nothing here was billed). Dropping either flag from the
+    // generator reds this — they are the page's obligation to render, in data form.
+    expect(cursor.metrics.isFloor).toBe(true);
+    expect(cursor.metrics.estimateSource).toBe('cursor-client');
+    expect(cursor.metrics.pricedBubbles).toBe(<redacted>);
+    expect(cursor.metrics.pricedBubblesAssistant).toBe(cursor.metrics.pricedBubbles);
+    expect(cursor.metrics.nonZeroBubbleFraction).toBeCloseTo(0.0486, 4);
+    expect(cursor.metrics.nonZeroBubbleFraction).toBeLessThan(0.1);
+  });
+
+  it('pins the log range and leaves cost unknown rather than estimating it (D4)', () => {
+    expect([cursor.logStart, cursor.logEnd]).toEqual(['2025-07-09', '2026-05-18']);
+    expect(cursor.logStart! <= cursor.logEnd!).toBe(true);
+    // D4: no model name and no cost field exists anywhere in state.vscdb, so the era
+    // states its absence in its own terms. A metrics.cost object appearing here would
+    // mean someone estimated money from a token count — ground-truth-forbidden.
+    expect(cursor.availability.cost).toBe('unknown-server-side');
+    expect(cursor.availability.tokens).toBe('floor');
+    expect('cost' in cursor.metrics).toBe(false);
+  });
+});
