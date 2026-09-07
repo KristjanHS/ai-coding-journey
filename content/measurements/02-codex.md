@@ -25,7 +25,7 @@ Codex *does* log tokens — the brief's "grepped, zero" was wrong — but only f
 **37% of rollouts**. So its share of the cross-era floor is itself a floor, with
 a different cause from Cursor's:
 
-- **14.3% of the cross-era floor**, second largest of the four bearing tools.
+- **14.8% of the cross-era floor**, second largest of the four bearing tools.
 - Measured how: sum `token_count.info.total_token_usage` per session (cumulative,
   last value per session). `cached_input_tokens` is a *subset* of input and
   `reasoning_output_tokens` a subset of output — neither is added again, which is

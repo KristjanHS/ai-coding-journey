@@ -14,8 +14,8 @@ The policy, in one line: **publish states, dates and shares; never an absolute v
 and never a money figure.**
 
 Why the boundary exists at all. The finding this repo needs from the measurement pass is
-that four of five tools keep no usable receipts and that the eras OVERLAP rather than
-succeed one another. Neither claim needs a token total, and both survive intact without
+that most of these tools keep no usable receipts -- one of them, the chat era, kept
+nothing at all -- and that the eras OVERLAP rather than succeed one another. Neither claim needs a token total, and both survive intact without
 one. What a token total would add is a public statement about how much personal
 AI-coding happened and when -- which is nobody's business, and reads differently from
 the finding it sits next to. The absolute store stays private; this file is the only
@@ -24,7 +24,9 @@ thing that crosses into the tree.
 What crosses:
 
   states       availability.tokens (yes/floor/none), counts, skills
-  dates        git ranges, log ranges, the onset block (dates only, already public)
+  dates        git ranges, log ranges, the onset block (dates only, already public),
+               and an era's authored date BRACKET plus the method that produced it --
+               `dateMethod` is what lets the page label an estimate as one
   shares       each token-bearing era's fraction of the combined floor, 4 decimals
   ratios       coverage and split fractions -- "4.86% of bubbles carry a count",
                never the raw pair behind it
@@ -167,6 +169,13 @@ def coverage(era: dict) -> dict:
                     }
                 ),
             }
+        case "chat":
+            # The era left no local record at all, so it has no coverage ratio. The one
+            # number it does carry is a hardware ceiling, not a usage volume: how much
+            # VRAM the home machine had, which is what bounded every local-model answer
+            # of the period. Every count this corpus supports (threads, files) is a
+            # statement about how much personal AI use happened, and stays private.
+            return {"vramCeilingGiB": m["vramCeilingGiB"]}
         case _:
             return {}
 
@@ -188,6 +197,12 @@ def public_era(era: dict, share: float | None) -> dict:
         "gitEnd": era["gitEnd"],
         "logStart": era["logStart"],
         "logEnd": era["logEnd"],
+        # An era with neither record spans its authored bracket instead. `dateMethod`
+        # crosses for EVERY era, not just that one: the page's badge is read from it, so
+        # a "measured" range and an estimated bracket can never render alike.
+        "dateLow": era.get("dateLow"),
+        "dateHigh": era.get("dateHigh"),
+        "dateMethod": era["dateMethod"],
         "provenance": provenance,
         "coverage": coverage(era),
         # None for Copilot: it logs no token field, so it has no share of the floor.

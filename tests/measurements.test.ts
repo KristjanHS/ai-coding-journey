@@ -8,6 +8,7 @@ import {
   allCaveatLines,
   availabilityMatrix,
   caveats,
+  TIME_DOMAIN,
   eraSpans,
   eras,
   overlaps,
@@ -36,9 +37,10 @@ const document = eras_ as unknown as {
   sttFaster: Record<string, any>;
 };
 
-const SPEC_ORDER = ['copilot', 'continue', 'codex', 'cursor', 'claude-code'];
+// Chronological by onset: the chat era precedes every tool that left a record.
+const SPEC_ORDER = ['chat', 'copilot', 'continue', 'codex', 'cursor', 'claude-code'];
 const TOKEN_STATES = new Set(['yes', 'floor', 'none']);
-const GROUPS = new Set(['vscode-plugin', 'cursor', 'claude-code']);
+const GROUPS = new Set(['chat', 'vscode-plugin', 'cursor', 'claude-code']);
 
 const byId = (id: string) => document.eras.find((e) => e.id === id)!;
 
@@ -124,8 +126,43 @@ describe('redaction boundary — the public store carries no volume and no money
 
 // ── (2) Shape ─────────────────────────────────────────────────────────────────
 describe('eras.json shape', () => {
-  it('is a list of exactly the five eras, in spec order', () => {
+  it('is a list of exactly the named eras, in spec order', () => {
     expect(document.eras.map((e) => e.id)).toEqual(SPEC_ORDER);
+  });
+
+  it('carries the chat era, which no generator can ever fill', () => {
+    // Seeded in scripts/measurements-git.py's ERAS rather than by a scanner: no scanner
+    // could find it, because the tool wrote nothing to this machine. If a regeneration
+    // ever drops it, the ladder loses the era chapter 01 is about.
+    const era = byId('chat');
+    expect(era.logStart, 'a log range would mean the era left a record').toBeNull();
+    expect(era.gitStart, 'a git range would mean it had a config dir').toBeNull();
+    expect(era.share, 'no token field, so no share — and never a zero').toBeNull();
+  });
+
+  it('says of every era how its dates were arrived at, and only calls one an estimate', () => {
+    // The badge on /measurements/ reads this field. A bracket rendering like a measured
+    // range is the worst failure this page has, so the distinction lives in the data.
+    for (const era of document.eras) {
+      expect(['estimated', 'measured'], `${era.id}`).toContain(era.dateMethod);
+      const bracketed = era.dateLow !== null;
+      expect(bracketed, `${era.id}: a bracket is exactly what "estimated" means`).toBe(
+        era.dateMethod === 'estimated',
+      );
+      if (bracketed) expect(era.dateLow <= era.dateHigh, `${era.id}`).toBe(true);
+    }
+    expect(document.eras.filter((e) => e.dateMethod === 'estimated').map((e) => e.id)).toEqual([
+      'chat',
+    ]);
+  });
+
+  it('publishes the chat era hardware ceiling and no count of how much it was used', () => {
+    // Reading A of the inc5c usage-volume ruling: a VRAM ceiling is a fact about the
+    // machine; a thread, file or message count is a fact about how much one person used
+    // a chatbot, and belongs in the private store with the token totals.
+    const coverage = byId('chat').coverage;
+    expect(coverage.vramCeilingGiB).toBe(8);
+    expect(Object.keys(coverage)).toEqual(['vramCeilingGiB']);
   });
 
   it('carries a typed availability matrix on every era', () => {
@@ -143,7 +180,7 @@ describe('eras.json shape', () => {
   });
 
   it('never lets a group stand in for the five separate eras', () => {
-    // D5: `group` is a colour tag. Three groups over five eras — if a refactor ever
+    // D5: `group` is a colour tag. Fewer groups than eras — if a refactor ever
     // collapses the list to its groups, this reds.
     expect(new Set(document.eras.map((e) => e.group)).size).toBeLessThan(document.eras.length);
     for (const era of document.eras) expect(GROUPS.has(era.group)).toBe(true);
@@ -175,7 +212,8 @@ describe('git-derived spine', () => {
   it('orders every era range forwards in time', () => {
     for (const era of document.eras) {
       if (era.gitStart) expect(era.gitStart <= era.gitEnd).toBe(true);
-      expect(era.logStart <= era.logEnd).toBe(true);
+      // Null for an era that kept no log — an absence to skip, not a range to order.
+      if (era.logStart) expect(era.logStart <= era.logEnd).toBe(true);
     }
   });
 
@@ -242,7 +280,7 @@ describe('continue era — exact, local, and the smallest share', () => {
     expect(era.coverage.modelsSeen).toBe(24);
   });
 
-  it('agrees with the sqlite mirror — the only clean cross-check in five eras', () => {
+  it('agrees with the sqlite mirror — the only clean cross-check in the ladder', () => {
     expect(era.coverage.mirrorAgrees).toBe(true);
   });
 
@@ -423,6 +461,29 @@ describe('stt-faster experimentation corpus (D7: counts + a one-file schema prob
 });
 
 // ── The derived LIB views (D8 — pin the lib, NOT built dist/) ─────────────────
+describe('measurements lib — the shared time axis', () => {
+  it('spans from the earliest era bound to the latest, both derived from the data', () => {
+    // Pinned because every band's position is a fraction of THIS domain: a domain that
+    // silently stopped covering an era would push that band off the axis rather than
+    // fail. The start is the chat era's bracket low — the ladder's earliest date, and
+    // earlier than any record-derived range.
+    expect(TIME_DOMAIN[0]).toBe('2025-06-14');
+    expect(TIME_DOMAIN[0]).toBe(byId('chat').dateLow);
+    for (const span of eraSpans) {
+      expect(span.start >= TIME_DOMAIN[0], `${span.id} starts left of the axis`).toBe(true);
+      expect(span.end <= TIME_DOMAIN[1], `${span.id} ends right of the axis`).toBe(true);
+    }
+  });
+
+  it('gives the recordless era a span at all, from its bracket alone', () => {
+    // eraSpans used to union git ∪ log only; an era with neither produced no span and
+    // never rendered. The bracket is the third source.
+    const span = eraSpans.find((s) => s.id === 'chat')!;
+    expect([span.start, span.end]).toEqual([byId('chat').dateLow, byId('chat').dateHigh]);
+    expect(span.dateMethod).toBe('estimated');
+  });
+});
+
 describe('measurements lib — overlap view (D8: derived, not dist/)', () => {
   it('has at least two era spans that intersect in time', () => {
     const intersecting = eraSpans.some((a, i) => eraSpans.slice(i + 1).some((b) => overlaps(a, b)));
@@ -443,7 +504,10 @@ describe('measurements lib — token shape replaces the absolute headline', () =
     expect(tokenShape.rows.map((r) => r.id)).toEqual(SPEC_ORDER);
     expect(tokenShape.bearingRows.length).toBe(4);
     expect(tokenShape.bearingCount).toBe(4);
-    expect(tokenShape.totalTools).toBe(5);
+    // Six eras, four that log a token at all. Copilot and the chat era are the two
+    // absences, and they are absences of different kinds: one tool logged and left the
+    // field out, the other never wrote a file.
+    expect(tokenShape.totalTools).toBe(6);
   });
 
   it('sums the bearing shares to the whole floor', () => {
@@ -504,7 +568,7 @@ describe('measurements lib — caveats never silently drop (D8)', () => {
 });
 
 describe('measurements lib — availability matrix (D5/D6)', () => {
-  it('names all five eras in spec order', () => {
+  it('names every era in spec order', () => {
     expect(availabilityMatrix.map((r) => r.id)).toEqual(SPEC_ORDER);
   });
 

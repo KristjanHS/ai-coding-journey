@@ -8,7 +8,7 @@ summary: "The Cursor era: a quarter of the cross-era floor, carried by 4.86% of 
 Cursor holds the second-largest share on the page and the two heaviest caveats.
 Both render beside the number, never after it.
 
-- **25.8% of the cross-era floor**, across the longest single span of any era.
+- **26.7% of the cross-era floor**, across the longest single span of any era.
 - Measured how: copy `state.vscdb` to a read-only scratchpad
   (`mode=ro&immutable=1`), then aggregate SQL only — sum `tokenCount.*` over the
   `bubbleId:` rows and count `composerData:` rows for sessions.

@@ -8,11 +8,42 @@
       },
       "configDir": null,
       "coverage": {
+        "vramCeilingGiB": 8
+      },
+      "dateHigh": "2025-07-06",
+      "dateLow": "2025-06-14",
+      "dateMethod": "estimated",
+      "gitCommits": null,
+      "gitEnd": null,
+      "gitStart": null,
+      "group": "chat",
+      "id": "chat",
+      "logEnd": null,
+      "logStart": null,
+      "provenance": {
+        "configRepo": "kri-local-rag",
+        "git": null,
+        "logs": "no local log of any kind \u2014 the web app kept nothing on this machine"
+      },
+      "share": null,
+      "tool": "ChatGPT (pre-agent)"
+    },
+    {
+      "availability": {
+        "counts": "yes",
+        "skills": "none",
+        "tokens": "none"
+      },
+      "configDir": null,
+      "coverage": {
         "costFieldPresent": false,
         "tokenFieldPresent": false,
         "workspacesTotal": 18,
         "workspacesWithChat": 6
       },
+      "dateHigh": null,
+      "dateLow": null,
+      "dateMethod": "measured",
       "gitCommits": null,
       "gitEnd": null,
       "gitStart": null,
@@ -41,6 +72,9 @@
         "modelsSeen": 24,
         "sessionLogEnd": "2025-07-09"
       },
+      "dateHigh": null,
+      "dateLow": null,
+      "dateMethod": "measured",
       "gitCommits": 2,
       "gitEnd": "2025-08-16",
       "gitStart": "2025-07-13",
@@ -53,7 +87,7 @@
         "git": "git log -- Continue_AI_coder",
         "logs": "~/.continue/dev_data/0.2.0/tokensGenerated.jsonl (+ devdata.sqlite mirror cross-check), sessions/sessions.json"
       },
-      "share": 0.0009,
+      "share": 0.001,
       "tool": "Continue (VS Code)"
     },
     {
@@ -70,6 +104,9 @@
         "partialLogging": true,
         "rolloutsWithTokenShare": 0.3722
       },
+      "dateHigh": null,
+      "dateLow": null,
+      "dateMethod": "measured",
       "gitCommits": 9,
       "gitEnd": "2025-09-09",
       "gitStart": "2025-08-28",
@@ -82,7 +119,7 @@
         "git": "git log -- .codex",
         "logs": "~/.codex/sessions/**/rollout-*.jsonl (two header formats); history.jsonl is a 3-line stub, not a prompt log"
       },
-      "share": 0.143,
+      "share": 0.1478,
       "tool": "OpenAI Codex plugin"
     },
     {
@@ -98,6 +135,9 @@
         "pricedBubbleShare": 0.0486,
         "pricedBubblesAllAssistant": true
       },
+      "dateHigh": null,
+      "dateLow": null,
+      "dateMethod": "measured",
       "gitCommits": 41,
       "gitEnd": "2026-06-23",
       "gitStart": "2025-07-31",
@@ -110,7 +150,7 @@
         "git": "git log -- .cursor",
         "logs": "Cursor state.vscdb (cursorDiskKV), read-only immutable copy"
       },
-      "share": 0.2583,
+      "share": 0.267,
       "tool": "Cursor"
     },
     {
@@ -121,12 +161,15 @@
       },
       "configDir": ".claude",
       "coverage": {
-        "cacheReuseMultiple": 16.1196,
-        "mainShareOfEra": 0.4707,
+        "cacheReuseMultiple": 16.4589,
+        "mainShareOfEra": 0.4627,
         "modelsSeen": 6,
-        "sessionsUsingSubagentsShare": 0.4786,
-        "subagentShareOfEra": 0.5293
+        "sessionsUsingSubagentsShare": 0.4807,
+        "subagentShareOfEra": 0.5373
       },
+      "dateHigh": null,
+      "dateLow": null,
+      "dateMethod": "measured",
       "gitCommits": 15,
       "gitEnd": "2026-09-06",
       "gitStart": "2026-06-23",
@@ -151,7 +194,7 @@
         "onset": "~/.claude.json claudeCodeFirstTokenDate + firstStartTime; ~/.claude/history.jsonl first record (dates only)",
         "skills": "git log/rev-list over skills/ in the dotfiles repo (read-only); counts and names only, no skill bodies"
       },
-      "share": 0.5978,
+      "share": 0.5842,
       "skills": {
         "caveat": "Dates are adoption-into-version-control, not authoring. The commit count covers the git era only and undercounts pre-git iteration \u2014 it is a floor.",
         "commits": 103,
@@ -175,7 +218,7 @@
     "bearingTools": 4,
     "note": "Shares are fractions of the combined floor across the token-bearing tools. The floor itself is not published, so no absolute is recoverable from them. The full store is private.",
     "policy": "states-dates-shares",
-    "totalTools": 5,
+    "totalTools": 6,
     "withheld": [
       "absolute token counts",
       "session, message, turn and file counts",

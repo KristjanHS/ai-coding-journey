@@ -22,9 +22,10 @@ const share = (n: number) => `${(n * 100).toFixed(n < 0.01 ? 2 : 1)}%`;
 const pct = (d: string) => (dateFraction(d) * 100).toFixed(2);
 
 // Group → colour, reusing the stage ramp tokens (D5: colour is the ONLY thing group
-// controls; the five lanes never collapse to three).
+// controls; the lanes never collapse to their groups).
 const GROUP_COLOUR: Record<string, string> = {
-  'vscode-plugin': 'var(--stage-chat)',
+  chat: 'var(--stage-chat)',
+  'vscode-plugin': 'var(--stage-first-agent)',
   cursor: 'var(--stage-config-engineering)',
   'claude-code': 'var(--stage-production-app)',
 };
@@ -43,13 +44,14 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
 ---
 <Base
   title="The numbers · ai-coding-journey"
-  description="What five overlapping AI-coding tools recorded about themselves — states, dates and relative shares. Absolute volumes are withheld by policy."
+  description="What six overlapping AI-coding eras recorded about themselves — states, dates and relative shares. Absolute volumes are withheld by policy."
 >
   <h1>The numbers</h1>
   <p class="lede">
-    Five AI-coding tools, measurable to wildly different depths — and they <em>overlap</em> in time, not
-    a tidy succession. Nothing absent is estimated, and nothing present is a total: this page publishes
-    <strong>states, dates and relative shares</strong> only.
+    <code>{eras.length}</code> AI-coding eras, measurable to wildly different depths — one of them not
+    at all — and they <em>overlap</em> in time, not a tidy succession. Nothing absent is estimated, and
+    nothing present is a total: this page publishes <strong>states, dates and relative shares</strong>
+    only.
   </p>
 
   <!-- Overlap view: five lanes, ONE shared time axis. Bands positioned from the real
@@ -58,18 +60,25 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
   <p class="lede">
     One time axis, one lane per tool. Each bar spans that tool's whole measured life — the union of
     its session logs and its config commits — so where two bars share a column, the tools were in use
-    together. <code>{overlappingPairs.length}</code> pairs overlap; none of the five eras is clean
-    succession.
+    together. <code>{overlappingPairs.length}</code> pairs overlap; none of the
+    <code>{eras.length}</code> eras is clean succession. The first bar is the exception the badge
+    marks: the chat era left no record on this machine, so its bar is a
+    <strong>bracket</strong> — bounded by the earliest thread that cites a dated artifact and by the
+    export that carried the threads off — not a range read from one.
   </p>
   <div class="axis" data-overlap={overlapLabel}>
     {eraSpans.map((span) => (
       <div class="lane">
-        <span class="lane-label">{span.tool}</span>
+        <span class="lane-label">
+          {span.tool}
+          {span.dateMethod === 'estimated' && <span class="badge">est.</span>}
+        </span>
         <div class="track">
           <span
             class="band"
             style={`left:${pct(span.start)}%; right:${(100 - Number(pct(span.end))).toFixed(2)}%; background:${GROUP_COLOUR[span.group]};`}
-            title={`${span.start} → ${span.end}`}
+            title={`${span.start} → ${span.end} (${span.dateMethod})`}
+            data-date-method={span.dateMethod}
           />
           {span.onset && (
             <span
@@ -98,7 +107,7 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
   </p>
   <table class="sources">
     <thead>
-      <tr><th>tool</th><th>what the log actually is</th><th class="num">log range</th><th class="num">config commits</th></tr>
+      <tr><th>tool</th><th>what the log actually is</th><th class="num">log range</th><th class="num">config commits</th><th>dated by</th></tr>
     </thead>
     <tbody>
       {eras.map((e) => {
@@ -109,9 +118,14 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
               <span class="dot" style={`background:${GROUP_COLOUR[e.group]};`} /> {e.tool}
             </td>
             <td class="cell-note">{provenanceById.get(e.id)!.logs}</td>
-            <td class="num">{cross.logStart} → {cross.logEnd}</td>
+            <td class="num">
+              {cross.logStart ? <>{cross.logStart} → {cross.logEnd}</> : <span class="empty">none — a genuine absence</span>}
+            </td>
             <td class="num">
               {cross.gitStart ? <>{cross.gitStart} → {cross.gitEnd}</> : <span class="empty">none — a genuine absence</span>}
+            </td>
+            <td>
+              <span class="badge" data-date-method={e.dateMethod}>{e.dateMethod}</span>
             </td>
           </tr>
         );
@@ -209,6 +223,21 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
 <style>
   .lede { color: var(--fg-dim); margin-top: 0; }
   .note { color: var(--fg-dim); font-size: var(--size-0); }
+  /* The estimated/measured badge. Read from `dateMethod`, never from a literal — an
+     estimate that rendered like a measurement would be the page's worst possible bug. */
+  .badge {
+    font-family: var(--font-mono);
+    font-size: var(--size--1, 0.75rem);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 0 0.35em;
+    color: var(--fg-dim);
+  }
+  .badge[data-date-method='estimated'] {
+    border-style: dashed;
+    color: var(--stage-chat);
+  }
+  .band[data-date-method='estimated'] { opacity: 0.55; }
   code { background: var(--bg-sunk); border-radius: var(--radius); padding: 0 0.25em; }
 
   /* Overlap axis: one lane per era, all sharing the same horizontal time scale. */

@@ -10,7 +10,7 @@ it the one era whose token state is `yes` in the strong sense — the record is
 *exact*, not a floor — and the one that contributes almost nothing to the
 cross-era floor.
 
-- **0.09% of the cross-era floor** — the smallest share of the four
+- **0.10% of the cross-era floor** — the smallest share of the four
   token-bearing tools, three orders of magnitude below the largest. On the
   page's log-scaled bar it is visible; on a linear one it would not be.
 - **98.8% of token events ran on the local Ollama provider**, the rest on a
@@ -24,7 +24,7 @@ cross-era floor.
 
 Two independent stores — a JSONL append log and a SQLite mirror — record the same
 events, and they agree exactly: zero delta on events, prompt tokens and generated
-tokens alike. That is the only clean agreement anywhere in the five eras, and it
+tokens alike. That is the only clean agreement anywhere in the ladder, and it
 is worth naming precisely because every other era's two records disagree.
 
 ## Two ranges, kept apart

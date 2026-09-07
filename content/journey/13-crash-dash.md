@@ -58,8 +58,8 @@ is the most useful sentence in the repo. It turns a green check from a conclusio
 
 **Not reading the code is a governance position, and it is delegation I can count.** I read rules,
 plans, test names, review findings and commit messages; I do not read implementations. The logs price
-that: subagents account for the majority of the era's tokens — 52.9% against 47.1% in the sessions I
-typed into — spread across 47.9% of main sessions. Roughly half my sessions delegate at all, and those
+that: subagents account for the majority of the era's tokens — 53.7% against 46.3% in the sessions I
+typed into — spread across 48.1% of main sessions. Roughly half my sessions delegate at all, and those
 that do outweigh every session that does not. The position is defensible exactly as far as the
 verification layer reaches, and no further.
 

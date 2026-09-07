@@ -10,18 +10,25 @@
 // therefore relative or categorical by construction. There is nothing to unredact: an
 // absolute cannot be recovered from a share whose denominator is unpublished.
 //
-// The binding shape rule (inc5a D5): the eras are a five-entry LIST, never a hardcoded
-// pair or a three-band collapse. Nothing here hardcodes the count or a fixed pair —
-// every view maps over `eras`. `group` is a colour/section tag only; it never reduces
-// the five rows to their three groups.
+// The binding shape rule (inc5a D5): the eras are a LIST, never a hardcoded pair or a
+// three-band collapse. Nothing here hardcodes the count or a fixed pair — every view
+// maps over `eras`. `group` is a colour/section tag only; it never reduces the rows to
+// their groups.
+//
+// One era (`chat`) has neither a git range nor a log: ChatGPT's web app wrote nothing to
+// the machine. Its span comes from an authored date BRACKET, and `dateMethod` marks it
+// `estimated` where every other era is `measured`. The two are different kinds of claim
+// and no view here may flatten them into one.
 import data from '../../content/measurements/data/eras.json';
 
 // ── Raw JSON shapes ───────────────────────────────────────────────────────────
 // `coverage` differs per era by construction (each tool measures to a different depth),
 // so it stays loosely typed here — tests/measurements.test.ts pins the per-era shapes.
-export type EraId = 'copilot' | 'continue' | 'codex' | 'cursor' | 'claude-code';
+export type EraId = 'chat' | 'copilot' | 'continue' | 'codex' | 'cursor' | 'claude-code';
 export type TokenState = 'yes' | 'floor' | 'none';
-export type Group = 'vscode-plugin' | 'cursor' | 'claude-code';
+export type Group = 'chat' | 'vscode-plugin' | 'cursor' | 'claude-code';
+/** How an era's span was arrived at. `estimated` is a bracket, never a record. */
+export type DateMethod = 'estimated' | 'measured';
 
 export interface Availability {
   tokens: TokenState;
@@ -61,8 +68,13 @@ export interface Era {
   gitCommits: number | null;
   gitStart: string | null;
   gitEnd: string | null;
-  logStart: string;
-  logEnd: string;
+  /** Null for an era that kept no log at all — an absence, never an empty string. */
+  logStart: string | null;
+  logEnd: string | null;
+  /** Authored bracket, present only where neither git nor a log dates the era. */
+  dateLow: string | null;
+  dateHigh: string | null;
+  dateMethod: DateMethod;
   provenance: { git: string | null; logs: string; skills?: string; configRepo: string };
   coverage: Record<string, any>;
   /** Fraction of the combined cross-era floor. `null` for a tool that logs no tokens. */
@@ -80,7 +92,7 @@ export interface Redaction {
   note: string;
 }
 
-/** The five eras, in spec order (Copilot → Claude Code). A list, never a pair. */
+/** The eras, in spec order (ChatGPT → Claude Code). A list, never a pair. */
 export const eras = data.eras as unknown as Era[];
 
 /** The redaction declaration — rendered on the page, never silently assumed. */
@@ -90,9 +102,12 @@ export const redaction = (data as { redaction: Redaction }).redaction;
 export const sttFaster = (data as { sttFaster: Record<string, any> }).sttFaster;
 
 // ── Time axis over the REAL spans ─────────────────────────────────────────────
-// Each era's displayed span is the UNION of its git range and its log range — the
-// two disagree (that is a shown finding, below), so the axis must cover both. Copilot
-// has no git range (gitStart/gitEnd null), so the union folds to the log range alone.
+// Each era's displayed span is the UNION of its git range, its log range and its
+// authored bracket — the first two disagree (that is a shown finding, below), so the
+// axis must cover both. Copilot has no git range (gitStart/gitEnd null), so the union
+// folds to the log range alone; the chat era has neither, so it folds to the bracket.
+// `minDate`/`maxDate` already filter nulls, so a third source is an extra argument
+// rather than a new abstraction (inc5c refactor ruling).
 export type Domain<T> = readonly [T, T];
 
 function minDate(...dates: (string | null)[]): string {
@@ -114,6 +129,9 @@ export interface EraSpan {
   // hide exactly that gap.
   onset: string | null;
   onsetLeadDays: number | null; // start - onset, positive = the bar starts late
+  // Read from the data, never a hardcoded string: the page's badge must be able to say
+  // "estimated" only where the store says the dates are.
+  dateMethod: DateMethod;
 }
 
 /** Per-era displayed span (git ∪ log), derived — never hardcoded. */
@@ -121,10 +139,13 @@ export const eraSpans: EraSpan[] = eras.map((e) => ({
   id: e.id,
   tool: e.tool,
   group: e.group,
-  start: minDate(e.gitStart, e.logStart),
-  end: maxDate(e.gitEnd, e.logEnd),
+  start: minDate(e.gitStart, e.logStart, e.dateLow),
+  end: maxDate(e.gitEnd, e.logEnd, e.dateHigh),
   onset: e.onset?.firstToken ?? null,
-  onsetLeadDays: e.onset ? days(minDate(e.gitStart, e.logStart)) - days(e.onset.firstToken) : null,
+  onsetLeadDays: e.onset
+    ? days(minDate(e.gitStart, e.logStart, e.dateLow)) - days(e.onset.firstToken)
+    : null,
+  dateMethod: e.dateMethod,
 }));
 
 // DERIVED from the spans, so a regenerated eras.json widens the axis instead of
@@ -205,6 +226,7 @@ function logWidth(share: number | null): number {
 }
 
 const SHARE_QUALIFIER: Record<EraId, string> = {
+  chat: 'A browser tab logged nothing locally — the era has no share to take.',
   copilot: 'No token field exists in these logs — an absence, not a zero.',
   continue: 'Exact: every token event is logged, and a SQLite mirror agrees to the event.',
   codex: 'A floor — the token_count event only starts 2025-09-23, in a third of the rollouts.',
@@ -244,17 +266,20 @@ export interface CrossCheckRow {
   tool: string;
   gitStart: string | null;
   gitEnd: string | null;
-  logStart: string;
-  logEnd: string;
+  logStart: string | null;
+  logEnd: string | null;
   startDeltaDays: number | null; // log - git, positive = log starts later
   endDeltaDays: number | null;
   disagrees: boolean; // any non-zero delta; false only when git ranges git == log
 }
 
 export const crossCheck: CrossCheckRow[] = eras.map((e) => {
-  const hasGit = e.gitStart !== null && e.gitEnd !== null;
-  const startDeltaDays = hasGit ? days(e.logStart) - days(e.gitStart!) : null;
-  const endDeltaDays = hasGit ? days(e.logEnd) - days(e.gitEnd!) : null;
+  // Both records must exist for a delta to mean anything. An era missing either has no
+  // disagreement to report — which is not the same as agreeing, and renders as neither.
+  const hasBoth =
+    e.gitStart !== null && e.gitEnd !== null && e.logStart !== null && e.logEnd !== null;
+  const startDeltaDays = hasBoth ? days(e.logStart!) - days(e.gitStart!) : null;
+  const endDeltaDays = hasBoth ? days(e.logEnd!) - days(e.gitEnd!) : null;
   return {
     id: e.id,
     tool: e.tool,
@@ -264,11 +289,11 @@ export const crossCheck: CrossCheckRow[] = eras.map((e) => {
     logEnd: e.logEnd,
     startDeltaDays,
     endDeltaDays,
-    disagrees: hasGit ? startDeltaDays !== 0 || endDeltaDays !== 0 : false,
+    disagrees: hasBoth ? startDeltaDays !== 0 || endDeltaDays !== 0 : false,
   };
 });
 
-// ── Availability matrix: five named rows; skills empty for eras 0–3 (D5/D6) ────
+// ── Availability matrix: one named row per era; skills empty before Claude Code ──
 export interface MatrixRow {
   id: EraId;
   tool: string;

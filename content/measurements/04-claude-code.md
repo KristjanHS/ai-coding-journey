@@ -33,11 +33,11 @@ Both of the era's own records start late — git by 115 days, the logs by 161. T
 
 ## The share, and how it splits
 
-- **59.8% of the cross-era floor** — the largest of the four bearing tools, and
+- **58.4% of the cross-era floor** — the largest of the four bearing tools, and
   larger than the other three combined.
-- **52.9% of that is subagent traffic**, against 47.1% in the sessions I typed
+- **53.7% of that is subagent traffic**, against 46.3% in the sessions I typed
   into. Sub-agents are the majority of the era by tokens, spread across
-  **47.9%** of main sessions — roughly half of all sessions delegate at all, and
+  **48.1%** of main sessions — roughly half of all sessions delegate at all, and
   those that do account for more than half the work.
 - Measured how: sum `message.usage.*` over `type == "assistant"` records in
   `~/.claude/projects/**/*.jsonl`, scoping the `isSidechain` filter per side
@@ -48,7 +48,7 @@ Both sides are reported, per the ruling that neither is folded away.
 
 ## Reuse is 16× the fresh traffic
 
-Cache reads — context re-sent from a warm prompt cache — run at **16.1× the
+Cache reads — context re-sent from a warm prompt cache — run at **16.5× the
 headline sum** of input, cache-creation and output. It is a ratio, not a total,
 and it is reported separately because folding reuse into a token headline is the
 single easiest way to make an AI-coding figure meaningless. A ratio above one
