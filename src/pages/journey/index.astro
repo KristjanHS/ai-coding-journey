@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import Timeline from '../../components/Timeline.astro';
 import { MIN_COMMITS, experiments } from '../../lib/timeline';
 
 const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeCompare(b.id));
@@ -11,6 +12,8 @@ const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeComp
 >
   <h1>The journey</h1>
   <p class="lede">One chapter per repo, oldest first.</p>
+
+  <Timeline variant="full" />
 
   <ol class="chapters">
     {chapters.map((entry) => (

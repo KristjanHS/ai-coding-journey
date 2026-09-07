@@ -52,6 +52,15 @@ const { title, description } = Astro.props;
 
     --measure: 68ch;
     --radius: 3px;
+
+    /* stage ramp — an ordinal progression chat -> production-app, used by the
+       timeline island. Five NEW tokens, not a second colour system; the last
+       one is --accent. Each clears 3:1 against --bg (WCAG non-text floor). */
+    --stage-chat: #6b7280;
+    --stage-local-llm: #3f7d8c;
+    --stage-first-agent: #4f7a3a;
+    --stage-config-engineering: #b07d2b;
+    --stage-production-app: #9a4b1f;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -62,10 +71,30 @@ const { title, description } = Astro.props;
       --bg-sunk: #1c1f25;
       --rule: #2c3038;
       --accent: #e8956a;
+
+      --stage-chat: #9aa0ad;
+      --stage-local-llm: #5fa8b8;
+      --stage-first-agent: #7bb060;
+      --stage-config-engineering: #d6a24e;
+      --stage-production-app: #e8956a;
     }
   }
 
   *, *::before, *::after { box-sizing: border-box; }
+
+  /* The one global a11y utility: content that is read but not drawn. The
+     timeline's canonical non-visual reading is a table hidden this way. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
 
   body {
     margin: 0;

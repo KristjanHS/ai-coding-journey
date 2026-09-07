@@ -1,0 +1,92 @@
+---
+// Server half of the island: joins the generated rows to their chapter slugs
+// and precomputes bar geometry, so Timeline.tsx stays a pure renderer.
+import { getCollection } from 'astro:content';
+
+import Timeline from './Timeline.tsx';
+import type { TimelineBar } from './Timeline.tsx';
+import { TIME_DOMAIN, commitThickness, dateFraction, rows } from '../lib/timeline';
+
+interface Props {
+  variant: 'compact' | 'full';
+}
+const { variant } = Astro.props;
+
+const hrefByRepo = new Map(
+  (await getCollection('journey')).map((entry) => [entry.data.repo, `/journey/${entry.id}/`]),
+);
+
+// A one-day repo would otherwise render zero-width and read as missing data.
+const MIN_WIDTH_PCT = 0.6;
+
+const bars: TimelineBar[] = rows.map((row) => {
+  const left = dateFraction(row.first_commit) * 100;
+  return {
+    repo: row.repo,
+    stage: row.stage,
+    commits: row.commits,
+    first_commit: row.first_commit,
+    last_commit: row.last_commit,
+    left,
+    width: Math.max(dateFraction(row.last_commit) * 100 - left, MIN_WIDTH_PCT),
+    thickness: commitThickness(row.commits),
+    href: hrefByRepo.get(row.repo) ?? null,
+  };
+});
+
+// Legend order is the stage ramp, not first-seen order.
+const RAMP = ['chat', 'local-llm', 'first-agent', 'config-engineering', 'production-app'];
+const stages = RAMP.filter((stage) => bars.some((bar) => bar.stage === stage));
+---
+<Timeline
+  client:visible
+  variant={variant}
+  bars={bars}
+  stages={stages}
+  domain={[TIME_DOMAIN[0], TIME_DOMAIN[1]]}
+/>
+
+<style is:global>
+  /* Global, not scoped: Astro's scoping attribute never reaches an island's
+     client-rendered DOM, so every selector here is `tl-` prefixed instead. */
+  .tl { margin: var(--space-4) 0; }
+  .tl-row { display: grid; align-items: center; gap: var(--space-2); }
+  .tl[data-variant='compact'] .tl-row { grid-template-columns: 1fr; }
+  .tl[data-variant='full'] .tl-row { grid-template-columns: 9rem 1fr 7rem; }
+  .tl-track { position: relative; height: 100%; }
+  .tl-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: var(--radius);
+    min-width: 2px;
+  }
+  .tl-label, .tl-count, .tl-axis {
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+  }
+  .tl-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tl-count { text-align: right; }
+  .tl-axis {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-1);
+  }
+  .tl-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin-top: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+  }
+  .tl-legend-item { display: inline-flex; align-items: center; gap: var(--space-1); }
+  .tl-swatch { display: inline-block; width: 0.75rem; height: 0.75rem; border-radius: var(--radius); }
+  @media (max-width: 34rem) {
+    .tl[data-variant='full'] .tl-row { grid-template-columns: 7rem 1fr; }
+    .tl[data-variant='full'] .tl-count { display: none; }
+  }
+</style>
