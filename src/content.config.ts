@@ -90,15 +90,19 @@ const journey = defineCollection({
   }),
 });
 
-// The prompts collection: sanitised, reusable prompts lifted from OneNote.
+// The context-artifact collection: a prompt is one of FIVE kinds of thing you put
+// in front of a model, and `kind` is what makes the other four sayable at all.
 // `captured` is a free-form span ("2025-12-07/2026-06-21"), not a single date —
-// the source undates individual prompts, so no ISO shape is imposed on it.
-const prompts = defineCollection({
-  loader: glob({ pattern: '*.md', base: './content/prompts' }),
+// the source undates individual entries, so no ISO shape is imposed on it.
+export const ARTIFACT_KINDS = ['prompt', 'rule', 'skill', 'hook', 'memory'] as const;
+
+const artifacts = defineCollection({
+  loader: glob({ pattern: '*.md', base: './content/artifacts' }),
   schema: z.object({
     title: z.string(),
     source: z.string(),
     captured: z.string(),
+    kind: z.enum(ARTIFACT_KINDS),
   }),
 });
 
@@ -116,7 +120,7 @@ const provisional = z.object({
 // inc5 pins the case-study schema: every artifact but the landing index.md carries
 // `origin` (the relative path/commit it was rewritten from) and the `date` of that
 // source. Both stay optional here because index.md carries neither — the vitest
-// provenance guard (Stage 8) is what makes `origin` mandatory for the artifacts.
+// provenance guard (Stage 8) is what makes `origin` mandatory for those pages.
 const caseStudy = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './content/case-study' }),
   schema: z.object({
@@ -141,4 +145,4 @@ const measurements = defineCollection({
   schema: provisional,
 });
 
-export const collections = { journey, prompts, 'case-study': caseStudy, course, measurements };
+export const collections = { journey, artifacts, 'case-study': caseStudy, course, measurements };

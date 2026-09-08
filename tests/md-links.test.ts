@@ -52,7 +52,7 @@ describe('md-links — one source form for GitHub and the site', () => {
   });
 
   it('refuses a nested path in a flat collection', () => {
-    // journey/prompts/course render a single `[slug]`, so a nested file has no route.
+    // journey/artifacts/course render a single `[slug]`, so a nested file has no route.
     expect(routeForContentFile(resolve(CONTENT, 'journey', 'sub', 'deep.md'))).toBe(null);
   });
 

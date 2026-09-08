@@ -1,6 +1,7 @@
 ---
 title: The chat-only era
 source: ChatGPT corpus
+kind: prompt
 captured: 2025-06-14/2025-07-06
 ---
 

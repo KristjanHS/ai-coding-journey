@@ -21,11 +21,11 @@ const sections = [
     whenEmpty: 'none yet',
   },
   {
-    href: '/prompts/',
-    title: 'Prompts',
-    blurb: 'Reusable prompts, reproduced as they were typed.',
-    count: (await getCollection('prompts')).length,
-    unit: ['prompt', 'prompts'] as const,
+    href: '/artifacts/',
+    title: 'Context artifacts',
+    blurb: 'Five kinds of thing you put in front of a model, reproduced as written.',
+    count: (await getCollection('artifacts')).length,
+    unit: ['artifact', 'artifacts'] as const,
     whenEmpty: 'none yet',
   },
   {
@@ -65,7 +65,7 @@ const sections = [
   <h1>ai-coding-journey</h1>
   <p class="lede">
     From a 20-year coding pause to a ~5k-commit app built with AI coding agents — one chapter
-    per repo, with the prompts, rules and defects that got it there.
+    per repo, with the prompts, rules, hooks and defects that got it there.
   </p>
 
   <Timeline variant="compact" />

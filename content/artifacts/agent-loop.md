@@ -1,6 +1,7 @@
 ---
 title: The agent loop
 source: OneNote — "AI coding agent prompts"
+kind: prompt
 captured: 2025-12-07/2026-06-21
 ---
 

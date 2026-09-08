@@ -17,4 +17,10 @@ export default defineConfig({
   // The timeline is the site's only island (inc4 ruling b). Preact, not React:
   // it is the first runtime dependency and the first client JS to ship.
   integrations: [preact()],
+  // /prompts/ was the collection's address until it was reframed as context
+  // artifacts; the old URL is already published, so it redirects rather than 404s.
+  redirects: {
+    '/prompts': '/artifacts',
+    '/prompts/[slug]': '/artifacts/[slug]',
+  },
 });

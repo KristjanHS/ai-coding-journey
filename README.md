@@ -10,12 +10,12 @@
 [![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
 [![Live](https://img.shields.io/badge/Live-vercel-000000?logo=vercel&logoColor=white)](https://ai-coding-journey-five.vercel.app)
 
-[What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-six-stages) · [The two rules](docs/creator.md#the-two-content-rules) · [Chapters](content/journey/README.md) · [Prompts](content/prompts/agent-loop.md)
+[What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-six-stages) · [The two rules](docs/creator.md#the-two-content-rules) · [Chapters](content/journey/README.md) · [Context artifacts](content/artifacts/agent-loop.md)
 
 </div>
 
 > **Status 2026-09-06:** the markdown under `content/` is the product and renders on GitHub as-is. An
-> Astro site (inc3) now builds the journey and prompts routes from those same files; `case-study/` and
+> Astro site (inc3) now builds the journey and context-artifact routes from those same files; `case-study/` and
 > `course/` are wired collections over empty directories, and the whole thing renders live at
 > **[ai-coding-journey-five.vercel.app](https://ai-coding-journey-five.vercel.app)**.
 
@@ -62,7 +62,7 @@ in [`00-experiments.md`](content/journey/00-experiments.md) instead of a chapter
 | Where | What is there |
 | --- | --- |
 | [`content/journey/`](content/journey/README.md) | one chapter per repo — the spine of the book |
-| [`content/prompts/`](content/prompts/agent-loop.md) | prompts reproduced as typed, typos and Estonian notes-to-self included |
+| [`content/artifacts/`](content/artifacts/agent-loop.md) | the five kinds of context artifact — prompt, rule, skill, hook, memory — reproduced as written |
 | `content/case-study/` | the sanitised `.md` layer of a private production repo *(empty until inc5)* |
 | `content/course/` | the course skeleton — module, outcome, chapters it draws on *(empty until inc5)* |
 | `content/timeline.json` | the generated spine every index and frontmatter block is synced from |
@@ -149,9 +149,9 @@ The rules in full, and how they are wired to fail a build —
 
 ## 🧭 Status and roadmap
 
-**Live today:** thirteen chapters (several still stubs) plus the experiments round-up, one prompts page
+**Live today:** thirteen chapters (several still stubs) plus the experiments round-up, one context-artifacts page
 lifted verbatim from OneNote, a generated timeline and index, the two content rules in executable form,
-and an Astro site over the same markdown — home, journey and prompts routes, with `case-study/` and
+and an Astro site over the same markdown — home, journey and artifacts routes, with `case-study/` and
 `course/` as honest empty states.
 
 **Where it's heading.** Fill the pending chapters to `artifact: present`; publish the sanitised

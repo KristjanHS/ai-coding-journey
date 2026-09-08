@@ -20,7 +20,7 @@ const RELATIVE_MD = /^\.\.?\//;
 // Anything this map cannot place is refused — inventing a route is worse than
 // leaving the `.md` link alone, because the build stays green either way.
 const CASE_STUDY_LANDING = 'crash-dash'; // mirrors LANDING_ID in [...slug].astro
-const FLAT_COLLECTIONS = new Set(['journey', 'prompts', 'course']);
+const FLAT_COLLECTIONS = new Set(['journey', 'artifacts', 'course']);
 
 /** `content/course/skeleton.md` → `/course/skeleton/`; null when unroutable. */
 export const routeForContentFile = (absPath) => {

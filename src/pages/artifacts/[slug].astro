@@ -3,16 +3,17 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 
 export async function getStaticPaths() {
-  const prompts = await getCollection('prompts');
-  return prompts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+  const artifacts = await getCollection('artifacts');
+  return artifacts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
 }
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 ---
 <Base title={`${entry.data.title} · ai-coding-journey`}>
-  <p class="back"><a href="/prompts/">← prompts</a></p>
+  <p class="back"><a href="/artifacts/">← context artifacts</a></p>
   <dl class="meta">
+    <div><dt>kind</dt><dd>{entry.data.kind}</dd></div>
     <div><dt>source</dt><dd>{entry.data.source}</dd></div>
     <div><dt>captured</dt><dd>{entry.data.captured}</dd></div>
   </dl>
