@@ -211,6 +211,9 @@ def public_era(era: dict, share: float | None) -> dict:
     }
     if "skills" in era:
         out["skills"] = era["skills"]
+    # Counts only, all far under the redaction ceiling; the audit re-checks them anyway.
+    if "governance" in era:
+        out["governance"] = era["governance"]
     if "onset" in era:
         out["onset"] = era["onset"]
     return out

@@ -173,6 +173,13 @@
       "gitCommits": 15,
       "gitEnd": "2026-09-06",
       "gitStart": "2026-06-23",
+      "governance": {
+        "caveat": "Counts of live files on one workstation, not a series: neither hooks nor memory dirs existed before this era. `hookCommands` counts wired commands, not matcher groups and not scripts on disk.",
+        "hookCommands": 12,
+        "hookEvents": 5,
+        "memoryFiles": 136,
+        "memoryProjects": 19
+      },
       "group": "claude-code",
       "id": "claude-code",
       "logEnd": "2026-09-07",
@@ -190,6 +197,7 @@
       "provenance": {
         "configRepo": "kri-local-rag",
         "git": "git log -- .claude",
+        "governance": "settings.json hook table plus a glob of projects/*/memory/ under the Claude Code config dir (read-only); counts only, no names",
         "logs": "~/.claude/projects/**/*.jsonl (snapshots excluded)",
         "onset": "~/.claude.json claudeCodeFirstTokenDate + firstStartTime; ~/.claude/history.jsonl first record (dates only)",
         "skills": "git log/rev-list over skills/ in the dotfiles repo (read-only); counts and names only, no skill bodies"

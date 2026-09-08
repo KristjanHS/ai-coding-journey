@@ -146,6 +146,7 @@ measurements: ## regenerate the measurement store (private full + public redacte
 	@python3 scripts/measurements-codex.py
 	@python3 scripts/measurements-copilot.py
 	@python3 scripts/measurements-skills.py
+	@python3 scripts/measurements-governance.py
 	@python3 scripts/measurements-stt.py
 	@python3 scripts/measurements-public.py
 
