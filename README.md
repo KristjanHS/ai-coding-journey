@@ -1,6 +1,6 @@
 <div align="center">
 
-# ai-coding-journey
+# Journey to AI coding agent governance
 
 **One person's path from a 20-year coding pause to shipping a ~5k-commit app with AI coding agents — written as a public, markdown-first knowledge base. Method and governance, never a demo.**
 

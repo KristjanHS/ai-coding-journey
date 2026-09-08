@@ -1,5 +1,5 @@
 ---
-title: "Course skeleton: AI-assisted delivery as a governance topic"
+title: "Journey to AI coding agent governance"
 summary: "Seven modules, each with one learning outcome and the journey chapters it draws on. Titles and outcomes only — no bodies."
 ---
 
