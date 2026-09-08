@@ -417,10 +417,17 @@ describe('corpus leak class', () => {
 // --- Protected terms -------------------------------------------------------
 //
 // Names that must never appear in `content/`: they resolve the journey to a
-// specific employer and specific colleagues. The words themselves are NOT in
-// this repo and must never be added to it -- only the `sha256` of each, taken
-// after the normalisation below. That is the whole point: the guard is public,
-// the terms are not.
+// specific employer and specific colleagues. The words are NOT in this repo --
+// only the `sha256` of each, taken after the normalisation below.
+//
+// This is an ACCIDENTAL-INCLUSION check, not a secrecy mechanism. The digests
+// are unsalted sha256 of short, low-entropy strings and the normaliser is
+// public in this same file, so anyone with a wordlist can confirm a guess. A
+// salt would break the mirror -- the producer and consumer sides must agree --
+// so the hole is accepted, not closed. The guarantee therefore extends beyond
+// `content/`: **never name a protected term in a commit message, a plan doc, a
+// test name or a failure string either.** The digest set is the only place a
+// term is allowed to appear, and it appears there as a digest.
 //
 // Kept separate from `BANNED` (mirrored against `.claude/rules/content-
 // writing.md` by the drift guard) and from `LEAKS` (regex shapes, samples in
@@ -434,8 +441,9 @@ describe('corpus leak class', () => {
 //   tokens -> join with one space -> strip a trailing `es` or `s` -> sha256
 // so a plural, a possessive, a hyphenated spelling, or an accent dropped from a
 // name reds on the same digest. The accent fold is load-bearing, not cosmetic:
-// without it a `[a-z0-9]+` split would tear a name like `Tonis` in half at the
-// accented letter and hash two fragments that match nothing.
+// without it a `[a-z0-9]+` split would tear a name like `Jarnvarr` in half at
+// the accented letter and hash two fragments that match nothing. (That example
+// is fabricated, per the block header: no protected term appears here.)
 const PROTECTED_SHA256 = new Set([
   '7036c80e90945cfeb26b20592541d830d83c82f9546eeacbb97a0d48988ed2d4',
   'ec4f2dbb3b140095550c9afbbb69b5d6fd9e814b9da82fad0b34e9fcbe56f1cb',
@@ -444,9 +452,17 @@ const PROTECTED_SHA256 = new Set([
   '5d77db2a2906aed32e92acd7c2fa458c9e2185c836146259418733795ca83de8',
   'bb37067afeb4ee16d668eef073ca6eea4f3b4a1fc6c68e3c0b1fd01a5fb7f5ad',
   '0d2c690e7dd5f94780383e9dfa1f4def044319104ad16ab15e45eeb2a8dfc81b',
+  '020df7a901fc42f7543c6bf63dd9874a3aa390a33bf6d8570ff8dc078ebf94d9',
 ]);
 
-/** Longest protected term, in tokens -- the n-gram width the scan must cover. */
+/**
+ * The n-gram width the scan emits. A stored term LONGER than this can never be
+ * produced on the consumer side, so it would pass over every content file
+ * forever and read as proof -- and nothing can assert otherwise, because the
+ * terms are not in this repo to be counted. Adding a digest for a term of more
+ * than this many tokens REQUIRES bumping this constant in the same edit; the
+ * cost is one extra gram per token per position, nothing more.
+ */
 const PROTECTED_MAX_TOKENS = 3;
 
 const normalise = (gram: string) => gram.replace(/(es|s)$/, '');
@@ -512,7 +528,8 @@ describe('protected terms', () => {
 
   it.each(CONTENT_FILES)('%s: names no protected term', (path) => {
     const hits = [...gramDigests(read(path))].filter((digest) => PROTECTED_SHA256.has(digest));
-    // The digest is already public in this file; the term it stands for is not.
-    expect(hits, `${path}: protected term (digest ${hits[0] ?? ''})`).toEqual([]);
+    // The digest is not echoed: a failure message is copied into issues and chat
+    // far more casually than a source file, and the digest confirms a guess.
+    expect(hits.length, `${path}: names a protected term`).toBe(0);
   });
 });
