@@ -34,6 +34,12 @@ const journey = defineCollection({
       .enum(['chat', 'local-llm', 'first-agent', 'config-engineering', 'production-app'])
       .optional(),
     tools: z.array(z.string()),
+    // inc5c: tools tried and rejected in this chapter's window. Distinct from
+    // `tools` (what the era actually ran on) — a rejection is evidence too, and
+    // the chapter that names one owes the reason in its prose. Optional because
+    // the other twelve chapters carry no such key; making it required would red
+    // `astro build` on all of them (the inc5b precedent for repo/start/etc.).
+    evaluated: z.array(z.string()).optional(),
     deck: z.boolean(),
     // Both states are real: scripts/timeline-from-git.py emits `pending` for a
     // fresh chapter stub, and 9 of 13 chapters are still stubs. The evidence
