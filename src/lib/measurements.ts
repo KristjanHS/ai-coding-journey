@@ -47,6 +47,14 @@ export interface SkillsBlock {
   example: { name: string; bucket: string; commits: number; firstCommit: string; snapshotDate: string };
 }
 
+export interface GovernanceBlock {
+  hookEvents: number;
+  hookCommands: number;
+  memoryFiles: number;
+  memoryProjects: number;
+  caveat: string;
+}
+
 /** Era-start dates that survive log pruning (Claude Code only, so far). */
 export interface EraOnset {
   firstToken: string; // first token ever spent in this tool — the era's real start
@@ -80,6 +88,7 @@ export interface Era {
   /** Fraction of the combined cross-era floor. `null` for a tool that logs no tokens. */
   share: number | null;
   skills?: SkillsBlock;
+  governance?: GovernanceBlock;
   onset?: EraOnset;
 }
 
@@ -354,3 +363,46 @@ export const allCaveatLines: string[] = caveats.flatMap((c) => c.lines);
 // ── Skills: a Claude-Code-era-only attribute (D6) ──────────────────────────────
 /** The skills block, exposed only for Claude Code (undefined for every other era). */
 export const skills: SkillsBlock | undefined = eras.find((e) => e.id === 'claude-code')?.skills;
+
+// ── Governance: hook and memory counts (inc5e) ────────────────────────────────
+/** The governance block, Claude-Code-era-only for the same reason skills is. */
+export const governance: GovernanceBlock | undefined = eras.find(
+  (e) => e.id === 'claude-code',
+)?.governance;
+
+export interface GovernanceRow {
+  label: string;
+  value: number;
+  qualifier: string;
+}
+
+/**
+ * The rows the page renders. Every value is read from the store — a figure typed into
+ * markup here would survive a regen that moved it, which is exactly the drift the
+ * counts exist to expose.
+ */
+export const governanceRows: GovernanceRow[] =
+  governance && skills
+    ? [
+        {
+          label: 'hook commands',
+          value: governance.hookCommands,
+          qualifier: `wired across ${governance.hookEvents} events — commands, not the matcher groups holding them, and not the scripts on disk`,
+        },
+        {
+          label: 'memory files',
+          value: governance.memoryFiles,
+          qualifier: `across ${governance.memoryProjects} project dirs that hold at least one`,
+        },
+        {
+          label: 'commits touching skills/',
+          value: skills.commits,
+          qualifier: `a floor — ${skills.vcStart}..${skills.vcEnd}, and skills authored before the dir entered version control contribute zero`,
+        },
+        {
+          label: 'live SKILL.md files',
+          value: skills.liveSkillFiles,
+          qualifier: 'a count of the tree today, with no history behind it',
+        },
+      ]
+    : [];

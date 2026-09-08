@@ -10,7 +10,10 @@ import {
   eraSpans,
   eras,
   overlapLabel,
+  governance,
+  governanceRows,
   overlappingPairs,
+  skills,
   tokenShape,
 } from '../../lib/measurements';
 
@@ -138,6 +141,37 @@ const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/me
           The shares are of a floor, so the floor is a floor too — two of the four contribute one of
           their own. The floor's <em>value</em> is not published.
         </th>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- inc5e: the two context dimensions no other generator reached (20 cross-session
+       memory, 23 compaction handling), plus the skills block, which was measured and
+       redacted from the first release and rendered nowhere until now. Every number is
+       read from the lib; none is typed here. -->
+  <h2>What the setup governed</h2>
+  <p class="lede">
+    Four counts of the configuration itself rather than of what it produced — the gates a session
+    has to run, the notes it can carry between sessions, and the instructions it loads. They are a
+    snapshot of one workstation, not a series: hooks and per-project memory did not exist before the
+    Claude Code era, so there is nothing earlier to compare them against.
+  </p>
+  <table class="tokens">
+    <thead>
+      <tr><th>what</th><th class="num">count</th><th>what qualifies it</th></tr>
+    </thead>
+    <tbody>
+      {governanceRows.map((row) => (
+        <tr>
+          <td>{row.label}</td>
+          <td class="num">{row.value}</td>
+          <td class="cell-note">{row.qualifier}</td>
+        </tr>
+      ))}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="3" class="cell-note">{governance?.caveat} {skills?.caveat}</th>
       </tr>
     </tfoot>
   </table>
