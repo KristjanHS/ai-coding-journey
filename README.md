@@ -75,8 +75,10 @@ progress meter; no count is published on this page, because a hardcoded one rots
 
 ## 🪜 The six stages
 
-Each repo is tagged with the stage of the journey it belongs to, and that tag appears in every chapter's
-frontmatter. The stages describe what changed in the working method — they are not a maturity ladder:
+Each repo carries two tags in its chapter's frontmatter: `stage`, the rung it **opened** on, read off its
+first commit date, and `stage_peak`, the highest rung it **reached**. The rungs are ordered, low to high,
+and they track what changed in the **working method** — not the developer's skill, and not a claim that
+every repo should have climbed:
 
 | Stage | What the method looked like |
 | --- | --- |
