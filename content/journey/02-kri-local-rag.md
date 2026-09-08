@@ -6,6 +6,7 @@ end: 2026-06-25
 commits: 741
 stage: local-llm
 tools: [claude-code]
+evaluated: [roo-code]
 deck: true
 artifact: present
 ---
@@ -51,6 +52,22 @@ UI. That file has since been refactored, so those line numbers locate the findin
 round-trip, a `delete_many`, a version fallback — on the theory that the embedder needed priming. It
 does not: it lazy-loads and caches on first query, and the dance only ever ran against a fresh
 database. It collapsed to a single `ensure_collection()` creating an empty schema.
+
+## What I evaluated and dropped
+
+**Roo Code.** I researched it around 2025-07-06 — a bracketed estimate from the ChatGPT corpus, not a
+measured date; the export that would make it a fact drops its timestamps. It went into VS Code under
+WSL rather than Cursor, which is the whole reason it left a trail on this machine at all.
+
+What the configuration says is that I never got past the default. `customModes` is an empty list and
+no MCP servers are configured — every extension point the tool advertises is untouched. Exactly one
+task survives in its history. I reopened it on 2025-12-08 and did not run anything.
+
+The trail is worth publishing precisely because nothing happened. An evaluation that ends in a
+one-task history and an empty config is the ordinary outcome of trying a tool, and it is the outcome
+that leaves no commits to point at — which is why the frontmatter carries `evaluated: [roo-code]`
+rather than adding it to `tools`. What the repo runs on and what I once installed are different
+claims, and only the first one earned a place in the era's numbers.
 
 ## What I learned
 
