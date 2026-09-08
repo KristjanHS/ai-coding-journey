@@ -1,6 +1,6 @@
 ---
 title: A hook, and the four sentences it is allowed to say
-source: a private dotfiles repo — `claude/.claude/hooks/impag-budget-check.py` (excerpted here)
+source: a private dotfiles repo — `claude/.claude/hooks/impag-budget-check.py`, mirrored in the public `KristjanHS/claudeconf` (excerpted here)
 kind: hook
 captured: "2026-09-08"
 ---
@@ -70,8 +70,8 @@ further growth instead.
 
 ## Where it came from
 
-`claude/.claude/hooks/impag-budget-check.py` in a private dotfiles repository — 383 lines, quoted
-verbatim above. The same file is published at
+`claude/.claude/hooks/impag-budget-check.py` in a private dotfiles repository — 383 lines, of which
+the passages above are quoted verbatim and cut for length. The same file is published at
 [KristjanHS/claudeconf](https://github.com/KristjanHS/claudeconf/blob/main/.claude/hooks/impag-budget-check.py),
 so this is the one hook on the page you can diff against the excerpt rather than take on trust.
 

@@ -1,6 +1,6 @@
 ---
 title: A skill, and why it asks before it builds
-source: a private dotfiles repo — `skills/qimpag/SKILL.md` (excerpted here)
+source: a private dotfiles repo — `skills/qimpag/SKILL.md`, mirrored in the public `KristjanHS/claudeconf` (excerpted here)
 kind: skill
 captured: "2026-09-08"
 ---
