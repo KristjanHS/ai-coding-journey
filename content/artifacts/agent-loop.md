@@ -131,3 +131,12 @@ Four phrases appear across every model used — Copilot, Cursor, Gemini, o3, Dee
 
 Three of the four are brakes. The prompts are mostly not asking for code; they are asking for a plan,
 withholding permission to act on it, and then asking for the plan to be argued against.
+
+## Where it came from
+
+A OneNote notebook page, "AI coding agent prompts", exported locally. It is **not** part of this
+repository and has no public address — the notebook is per-machine, so the excerpts above are the
+whole evidence and cannot be diffed against anything. Individual prompts are undated in the source;
+the `captured` span brackets the page's own edit history rather than any one entry.
+
+Ledger field it evidences: **verified by**.

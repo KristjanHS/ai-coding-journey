@@ -73,3 +73,12 @@ but the habit of writing the limits down first was already there.
 
 The era left almost nothing else behind. No repo, no commits, no tool logs — the threads are the
 only artifact, which is why this page exists at all.
+
+## Where it came from
+
+A ChatGPT conversation export, held outside this repository and gitignored — per-account data with
+no public address, so the quoted prompts are the whole evidence. The export dropped its per-thread
+timestamps, which is why `captured` is a bracket derived from surrounding threads rather than a
+measured span.
+
+Ledger field it evidences: **could see**.
