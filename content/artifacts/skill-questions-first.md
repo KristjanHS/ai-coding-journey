@@ -62,10 +62,9 @@ outcome.
 
 ## Where it came from
 
-`skills/qimpag/SKILL.md` in a private dotfiles repository — 103 lines. `qimpag` is not among the
-skills published at [KristjanHS/claudeconf](https://github.com/KristjanHS/claudeconf), so there is
-no public address to link to: the excerpts above are the whole evidence, quoted verbatim, cut for
-length rather than to improve the argument. (`impag`, the skill `qimpag` wraps, *is* published
-there.)
+`skills/qimpag/SKILL.md` in a private dotfiles repository — 103 lines, and now also published at
+[KristjanHS/claudeconf](https://github.com/KristjanHS/claudeconf/blob/main/.claude/skills/qimpag/SKILL.md),
+where it sits beside `impag`, the skill it wraps. The excerpts above are cut for length rather
+than to improve the argument, and the full file is there to check that against.
 
 Ledger field it evidences: **retrieved**.

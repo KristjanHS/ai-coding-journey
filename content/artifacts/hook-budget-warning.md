@@ -71,10 +71,13 @@ further growth instead.
 ## Where it came from
 
 `claude/.claude/hooks/impag-budget-check.py` in a private dotfiles repository — 383 lines, quoted
-verbatim above. An **earlier** version of the same hook is public at
-[KristjanHS/claudeconf](https://github.com/KristjanHS/claudeconf) under
-`.claude/hooks/impag-budget-check.py` — 191 lines, and useful as context rather than as a diff
-target: it predates the graduated bands entirely and emits a single reminder at 130k with nothing
-before it. The four-band table above is what replaced that, and why.
+verbatim above. The same file is published at
+[KristjanHS/claudeconf](https://github.com/KristjanHS/claudeconf/blob/main/.claude/hooks/impag-budget-check.py),
+so this is the one hook on the page you can diff against the excerpt rather than take on trust.
+
+It was not always: until this page was written, the public copy was a 191-line ancestor that
+predated the graduated bands entirely and emitted a single reminder at 130k with nothing before
+it. Publishing the current version is part of what writing this page cost — an artifact you cannot
+show is an artifact a reader has to believe you about.
 
 Ledger field it evidences: **cost to look**.
