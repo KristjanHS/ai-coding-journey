@@ -4,7 +4,8 @@ repo: llm-eng-template
 start: 2025-09-03
 end: 2025-10-20
 commits: 70
-stage: chat
+stage: delegating
+stage_peak: delegating
 tools: [cursor]
 deck: false
 artifact: present

@@ -2,9 +2,10 @@
 title: dotfiles
 repo: dotfiles
 start: 2026-04-05
-end: 2026-09-07
-commits: 736
-stage: config-engineering
+end: 2026-09-08
+commits: 764
+stage: configuring
+stage_peak: governing
 tools: []
 deck: true
 artifact: present

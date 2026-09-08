@@ -4,97 +4,97 @@
     "first_commit": "2025-06-19",
     "last_commit": "2026-04-11",
     "commits": 170,
-    "stage": "chat"
+    "stage": "asking"
   },
   {
     "repo": "kri-local-rag",
     "first_commit": "2025-07-13",
     "last_commit": "2026-06-25",
     "commits": 741,
-    "stage": "local-llm"
+    "stage": "suggesting"
   },
   {
     "repo": "dewpoint",
     "first_commit": "2025-07-15",
     "last_commit": "2026-06-25",
     "commits": 106,
-    "stage": "chat"
+    "stage": "suggesting"
   },
   {
     "repo": "docs-generator",
     "first_commit": "2025-08-27",
     "last_commit": "2025-08-27",
     "commits": 2,
-    "stage": "chat"
+    "stage": "suggesting"
   },
   {
     "repo": "llm-eng-template",
     "first_commit": "2025-09-03",
     "last_commit": "2025-10-20",
     "commits": 70,
-    "stage": "chat"
+    "stage": "delegating"
   },
   {
     "repo": "stt-faster",
     "first_commit": "2025-10-05",
     "last_commit": "2026-05-29",
     "commits": 274,
-    "stage": "local-llm"
+    "stage": "delegating"
   },
   {
     "repo": "xls-analyser",
     "first_commit": "2025-12-06",
     "last_commit": "2025-12-06",
     "commits": 9,
-    "stage": "first-agent"
+    "stage": "delegating"
   },
   {
     "repo": "proj-mgmt",
     "first_commit": "2026-03-29",
     "last_commit": "2026-08-11",
     "commits": 11,
-    "stage": "first-agent"
+    "stage": "planning"
   },
   {
     "repo": "edf-budget-planner",
     "first_commit": "2026-03-31",
     "last_commit": "2026-07-27",
     "commits": 668,
-    "stage": "production-app"
+    "stage": "planning"
   },
   {
     "repo": "gitlab-standup",
     "first_commit": "2026-03-31",
     "last_commit": "2026-03-31",
     "commits": 6,
-    "stage": "first-agent"
+    "stage": "planning"
   },
   {
     "repo": "token-monitor",
     "first_commit": "2026-04-04",
     "last_commit": "2026-04-24",
     "commits": 20,
-    "stage": "config-engineering"
+    "stage": "configuring"
   },
   {
     "repo": "dotfiles",
     "first_commit": "2026-04-05",
-    "last_commit": "2026-09-07",
-    "commits": 736,
-    "stage": "config-engineering"
+    "last_commit": "2026-09-08",
+    "commits": 764,
+    "stage": "configuring"
   },
   {
     "repo": "claudeconf",
     "first_commit": "2026-06-18",
     "last_commit": "2026-07-09",
     "commits": 44,
-    "stage": "config-engineering"
+    "stage": "configuring"
   },
   {
     "repo": "crash-dash",
     "first_commit": "2026-06-25",
-    "last_commit": "2026-09-07",
-    "commits": 5018,
-    "stage": "production-app"
+    "last_commit": "2026-09-08",
+    "commits": 5035,
+    "stage": "configuring"
   }
 ]

@@ -4,7 +4,8 @@ repo: xls-analyser
 start: 2025-12-06
 end: 2025-12-06
 commits: 9
-stage: first-agent
+stage: delegating
+stage_peak: delegating
 tools: []
 deck: false
 artifact: pending

@@ -4,7 +4,8 @@ repo: claudeconf
 start: 2026-06-18
 end: 2026-07-09
 commits: 44
-stage: config-engineering
+stage: configuring
+stage_peak: configuring
 tools: []
 deck: true
 artifact: present

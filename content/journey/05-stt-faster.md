@@ -4,7 +4,8 @@ repo: stt-faster
 start: 2025-10-05
 end: 2026-05-29
 commits: 274
-stage: local-llm
+stage: delegating
+stage_peak: delegating
 tools: []
 deck: false
 artifact: pending

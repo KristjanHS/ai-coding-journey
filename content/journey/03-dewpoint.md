@@ -4,7 +4,8 @@ repo: dewpoint
 start: 2025-07-15
 end: 2026-06-25
 commits: 106
-stage: chat
+stage: suggesting
+stage_peak: suggesting
 tools: []
 deck: false
 artifact: pending

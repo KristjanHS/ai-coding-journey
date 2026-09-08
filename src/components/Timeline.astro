@@ -35,7 +35,7 @@ const bars: TimelineBar[] = rows.map((row) => {
 });
 
 // Legend order is the stage ramp, not first-seen order.
-const RAMP = ['chat', 'local-llm', 'first-agent', 'config-engineering', 'production-app'];
+const RAMP = ['asking', 'suggesting', 'delegating', 'planning', 'configuring', 'governing'];
 const stages = RAMP.filter((stage) => bars.some((bar) => bar.stage === stage));
 ---
 <Timeline

@@ -16,6 +16,26 @@ const isoDate = z
 // README.md is the generated GitHub index table and 00-experiments.md is the
 // sub-5-commit round-up; neither carries frontmatter, so both would red the
 // schema. Excluded here — the experiments reach /journey/ through timeline.json.
+// The six-rung ladder. Exported so pages, components and the content suite read
+// the vocabulary from one place instead of re-typing it.
+export const RUNGS = [
+  'asking',
+  'suggesting',
+  'delegating',
+  'planning',
+  'configuring',
+  'governing',
+] as const;
+
+// The context ledger's five closed value sets. Each answers one question about
+// what the machine had to work with, in the order the ledger block renders:
+// could see → retrieved → versioned → verified by → cost to look.
+export const COULD_SEE = ['pasted', 'open-file', 'repo-index', 'path-gated-rules'] as const;
+export const RETRIEVED = ['copy-paste', 'editor-index', 'grep-on-demand'] as const;
+export const VERSIONED = ['nothing', 'code', 'code-and-rules', 'governance'] as const;
+export const VERIFIED_BY = ['nothing', 'me-reading', 'tests', 'agent-run-gate'] as const;
+export const COST_TO_LOOK = ['no-log', 'counts-only', 'floor', 'cache-reuse'] as const;
+
 const journey = defineCollection({
   loader: glob({ pattern: ['*.md', '!00-experiments.md', '!README.md'], base: './content/journey' }),
   schema: z.object({
@@ -30,9 +50,30 @@ const journey = defineCollection({
     start: isoDate.optional(),
     end: isoDate.optional(),
     commits: z.number().int().optional(),
-    stage: z
-      .enum(['chat', 'local-llm', 'first-agent', 'config-engineering', 'production-app'])
-      .optional(),
+    // The six-rung ladder (2026-09-08 taxonomy ruling). `stage` is the rung the
+    // repo OPENED on, read off its first commit date — mechanical, never an
+    // authored judgement. Seams: rung 4 opens 2026-02-28, 4→5 2026-04-05,
+    // 5→6 2026-07-09.
+    stage: z.enum(RUNGS).optional(),
+    // `stage_peak` is the highest rung the repo REACHED. Defaults to `stage`;
+    // a higher value ships only with a git-dated artifact inside that repo
+    // evidencing the higher rung, which keeps this column as mechanical as the
+    // first. Optional for the same reason `stage` is: the repo-less chapters of
+    // the reserved 90- band carry neither.
+    stage_peak: z.enum(RUNGS).optional(),
+    // The context ledger — five enumerated fields, one block per chapter. Every
+    // value is drawn from a closed set so the 13 × 5 comparison table is
+    // computable and the vitest content suite can assert that a claimed value
+    // owes its artifact, the same mechanism as the evidence rule. Prose values
+    // were rejected: they would leave "context engineering" resting on prose,
+    // which is what the anti-hype gate exists to catch. All five are optional —
+    // the chapters fill them as they are drafted (ledger-first drafting), and a
+    // required key would red `astro build` on nine stubs today.
+    could_see: z.enum(COULD_SEE).optional(),
+    retrieved: z.enum(RETRIEVED).optional(),
+    versioned: z.enum(VERSIONED).optional(),
+    verified_by: z.enum(VERIFIED_BY).optional(),
+    cost_to_look: z.enum(COST_TO_LOOK).optional(),
     tools: z.array(z.string()),
     // inc5c: tools tried and rejected in this chapter's window. Distinct from
     // `tools` (what the era actually ran on) — a rejection is evidence too, and

@@ -53,14 +53,15 @@ const { title, description } = Astro.props;
     --measure: 68ch;
     --radius: 3px;
 
-    /* stage ramp — an ordinal progression chat -> production-app, used by the
-       timeline island. Five NEW tokens, not a second colour system; the last
+    /* stage ramp — an ordinal progression asking -> governing, used by the
+       timeline island. Six ordered tokens, not a second colour system; the last
        one is --accent. Each clears 3:1 against --bg (WCAG non-text floor). */
-    --stage-chat: #6b7280;
-    --stage-local-llm: #3f7d8c;
-    --stage-first-agent: #4f7a3a;
-    --stage-config-engineering: #b07d2b;
-    --stage-production-app: #9a4b1f;
+    --stage-asking: #6b7280;
+    --stage-suggesting: #3f7d8c;
+    --stage-delegating: #4f7a3a;
+    --stage-planning: #6d7a2e;
+    --stage-configuring: #b07d2b;
+    --stage-governing: #9a4b1f;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -72,11 +73,12 @@ const { title, description } = Astro.props;
       --rule: #2c3038;
       --accent: #e8956a;
 
-      --stage-chat: #9aa0ad;
-      --stage-local-llm: #5fa8b8;
-      --stage-first-agent: #7bb060;
-      --stage-config-engineering: #d6a24e;
-      --stage-production-app: #e8956a;
+      --stage-asking: #9aa0ad;
+      --stage-suggesting: #5fa8b8;
+      --stage-delegating: #7bb060;
+      --stage-planning: #b6bd5e;
+      --stage-configuring: #d6a24e;
+      --stage-governing: #e8956a;
     }
   }
 

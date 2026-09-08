@@ -4,7 +4,8 @@ repo: gitlab-standup
 start: 2026-03-31
 end: 2026-03-31
 commits: 6
-stage: first-agent
+stage: planning
+stage_peak: planning
 tools: []
 deck: false
 artifact: pending

@@ -10,7 +10,7 @@
 [![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
 [![Live](https://img.shields.io/badge/Live-vercel-000000?logo=vercel&logoColor=white)](https://ai-coding-journey-five.vercel.app)
 
-[What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-five-stages) · [The two rules](docs/creator.md#the-two-content-rules) · [Chapters](content/journey/README.md) · [Prompts](content/prompts/agent-loop.md)
+[What it is](#-what-it-is-and-isnt) · [Read it](#-reading-it) · [Decode a chapter](#-decoding-a-chapter) · [Stages](#-the-six-stages) · [The two rules](docs/creator.md#the-two-content-rules) · [Chapters](content/journey/README.md) · [Prompts](content/prompts/agent-loop.md)
 
 </div>
 
@@ -30,7 +30,7 @@ least one real artifact and a *What didn't work* section — **failures get equa
 
 - 🎯 [What it is (and isn't)](#-what-it-is-and-isnt)
 - 📚 [Reading it](#-reading-it)
-- 🪜 [The five stages](#-the-five-stages)
+- 🪜 [The six stages](#-the-six-stages)
 
 **How it works** — the structure, in detail
 
@@ -73,18 +73,19 @@ progress meter; no count is published on this page, because a hardcoded one rots
 
 ---
 
-## 🪜 The five stages
+## 🪜 The six stages
 
 Each repo is tagged with the stage of the journey it belongs to, and that tag appears in every chapter's
 frontmatter. The stages describe what changed in the working method — they are not a maturity ladder:
 
 | Stage | What the method looked like |
 | --- | --- |
-| **chat** | code pasted in and out of a chat window; the human is the integration layer |
-| **local-llm** | models run locally, retrieval and evaluation built by hand |
-| **first-agent** | an agent edits the repo directly; small, short-lived experiments |
-| **config-engineering** | the artifact under work is the *configuration* — rules, skills, gates |
-| **production-app** | agent-written applications shipped and operated under a review system |
+| **asking** | code pasted in and out of a chat window; the human is the integration layer |
+| **suggesting** | models run locally, retrieval and evaluation built by hand |
+| **delegating** | an agent edits the repo directly; small, short-lived experiments |
+| **planning** | the agent works from a written plan or spec, not ad-hoc prompts |
+| **configuring** | the artifact under work is the *configuration* — rules, skills, gates |
+| **governing** | agent-written applications shipped and operated under a written review system |
 
 ---
 
@@ -99,7 +100,8 @@ repo: crash-dash                              from git by scripts/timeline-from-
 start: 2026-06-25                             (start · end · commits · stage) —
 end: 2026-09-06                               never hand-edited, resynced on every run
 commits: 4978
-stage: production-app                      ← one of the five stages above
+stage: configuring                         ← the rung it OPENED on; one of the six above
+stage_peak: governing                      ← highest rung reached; author-set, defaults to stage
 tools: [claude-code]                       ← what was actually driving the keyboard
 deck: false                                ← is this chapter in the lecture deck yet
 artifact: present                          ← present = the evidence rule is satisfied
@@ -120,7 +122,8 @@ Read it top to bottom:
 | Piece | Example | Meaning |
 | --- | --- | --- |
 | **Frontmatter** | `commits: 4978` | Generated from the repo's git log. Prose cites counts rounded ("roughly 4,970"), never exact, so a regen doesn't strand a sentence. |
-| **Stage** | `production-app` | Which rung of the method this repo belongs to (see [the five stages](#-the-five-stages)). |
+| **Stage** | `configuring` | The rung of the method this repo OPENED on, by first-commit date (see [the six stages](#-the-six-stages)). |
+| **`stage_peak:`** | `governing` | The highest rung the repo reached. Author-set, defaults to `stage`; raised only with a git-dated in-repo artifact. |
 | **`artifact:`** | `present` / `pending` | Whether the chapter carries its evidence yet. `present` with an empty `## Artifact` body reds the test suite. |
 | **`## What didn't work`** | *"A green test suite that never touched the code it claimed to cover."* | Required in every chapter. A chapter with only lessons is not done. |
 | **`## Artifact`** | the repo's own rule, quoted and dated: *"A retune is a ONE-place edit — never restate a cut's value."* | The one section that makes a claim checkable by someone who wasn't there. A private repo contributes rule excerpts and dates, never code or commit SHAs. |

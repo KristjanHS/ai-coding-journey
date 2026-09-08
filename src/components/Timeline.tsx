@@ -26,11 +26,12 @@ export interface TimelineProps {
 }
 
 const STAGE_LABEL: Record<string, string> = {
-  chat: 'chat',
-  'local-llm': 'local LLM',
-  'first-agent': 'first agent',
-  'config-engineering': 'config engineering',
-  'production-app': 'production app',
+  asking: 'asking',
+  suggesting: 'suggesting',
+  delegating: 'delegating',
+  planning: 'planning',
+  configuring: 'configuring',
+  governing: 'governing',
 };
 
 const label = (stage: string) => STAGE_LABEL[stage] ?? stage;

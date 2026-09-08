@@ -4,7 +4,8 @@ repo: proj-mgmt
 start: 2026-03-29
 end: 2026-08-11
 commits: 11
-stage: first-agent
+stage: planning
+stage_peak: planning
 tools: []
 deck: false
 artifact: pending

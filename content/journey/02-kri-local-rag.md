@@ -4,7 +4,8 @@ repo: kri-local-rag
 start: 2025-07-13
 end: 2026-06-25
 commits: 741
-stage: local-llm
+stage: suggesting
+stage_peak: configuring
 tools: [claude-code]
 evaluated: [roo-code]
 deck: true

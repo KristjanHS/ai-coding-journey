@@ -7,7 +7,12 @@ import { beforeAll, describe, expect, it } from 'vitest';
 // runs `astro build` before vitest, so dist/ is fresh. Standalone: `make build`.
 const DIST = join(process.cwd(), 'dist');
 const CORPUS = 14;
-const STAGES = ['chat', 'local-llm', 'first-agent', 'config-engineering', 'production-app'];
+// The six-rung ladder is asking → suggesting → delegating → planning → configuring
+// → governing (Base.astro tokens, Timeline RAMP/STAGE_LABEL all carry six). The
+// legend renders only rungs a repo OPENED on, in ladder order: no repo in the corpus
+// opens on `governing` (it is reached as a `stage_peak`, never a `stage`), so the
+// rendered legend is these five. A sixth entry here would red against real markup.
+const STAGES = ['asking', 'suggesting', 'delegating', 'planning', 'configuring'];
 
 // Inlined CSS mentions every `.tl-*` selector, so a bare substring search would
 // report the legend as present on a page that never renders it.

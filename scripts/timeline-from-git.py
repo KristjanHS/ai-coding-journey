@@ -11,7 +11,8 @@ diff in the tree. Chapters that carry no `repo:` key (the reserved 90- band: cha
 that belong to no repo) are never opened -- main() enumerates repos, not chapter files --
 but they are listed in the index so it is not silently incomplete. Author-owned frontmatter (title/tools/deck/artifact,
 and any other key) and the chapter body are never touched.
-Hand-maintain STAGE and EXCLUDE below; never hand-edit the generated files.
+`stage` is assigned mechanically by first-commit date (STAGE_SEAMS below);
+hand-maintain EXCLUDE and STAGE_OVERRIDES only, and never hand-edit the generated files.
 """
 
 from __future__ import annotations
@@ -75,24 +76,50 @@ REPO_GROUPS = {
     "dewpoint": ["dewpoint-app", "dewpoint-ts"],
 }
 
-# Hand-maintained stage per repo. Unknown repos get "unassigned".
-# Grouped projects are keyed by their GROUP name, not their member repos.
-STAGE = {
-    "hands-on-llm": "chat",
-    "dewpoint": "chat",
-    "docs-generator": "chat",
-    "llm-eng-template": "chat",
-    "kri-local-rag": "local-llm",
-    "stt-faster": "local-llm",
-    "xls-analyser": "first-agent",
-    "gitlab-standup": "first-agent",
-    "proj-mgmt": "first-agent",
-    "token-monitor": "config-engineering",
-    "dotfiles": "config-engineering",
-    "claudeconf": "config-engineering",
-    "edf-budget-planner": "production-app",
-    "crash-dash": "production-app",
+# The six-rung ladder (design §7), assigned MECHANICALLY by a repo's first-commit
+# date against ruled seams -- not a hand-maintained table. This is the `stage` the
+# repo OPENED on. `stage_peak` (the highest rung it reached) is author-owned
+# per-chapter frontmatter and is NOT generated here: it defaults to `stage` and is
+# raised only with a git-dated in-repo artifact, so it is never re-synced by this
+# script (it is absent from GENERATED_KEYS below).
+#
+# Ladder, low to high: asking -> suggesting -> delegating -> planning ->
+# configuring -> governing. Each SEAMS entry is the FIRST date NO LONGER in the
+# rung to its left; a repo opens on the first rung whose seam its first commit
+# precedes, else `governing`.
+#   asking       -- before 2025-07-01
+#   suggesting   -- 2025-07-01 .. 2025-08-31
+#   delegating   -- 2025-09-01 .. 2026-02-27
+#   planning     -- 2026-02-28 .. 2026-04-04
+#   configuring  -- 2026-04-05 .. 2026-07-08
+#   governing    -- 2026-07-09 onward
+STAGE_SEAMS = [
+    ("2025-07-01", "asking"),
+    ("2025-09-01", "suggesting"),
+    ("2026-02-28", "delegating"),
+    ("2026-04-05", "planning"),
+    ("2026-07-09", "configuring"),
+]
+STAGE_DEFAULT = "governing"
+
+# design §8: token-monitor's first commit is 2026-04-04, one day inside the
+# `planning` band, but it is ruled `configuring` -- the spend-measurement tool is
+# the first artifact OF the configuring rung (you cannot govern a budget before you
+# can see it), dated a day ahead of `dotfiles`, which came to hold it. This is a
+# named ruling, encoded explicitly rather than by fudging the 4->5 seam date.
+STAGE_OVERRIDES = {
+    "token-monitor": "configuring",
 }
+
+
+def stage_for(repo: str, first_commit: str) -> str:
+    """Rung a repo opened on, by first-commit date -- with §8's named overrides."""
+    if repo in STAGE_OVERRIDES:
+        return STAGE_OVERRIDES[repo]
+    for seam, rung in STAGE_SEAMS:
+        if first_commit < seam:  # ISO dates sort lexically
+            return rung
+    return STAGE_DEFAULT
 
 
 def git(repo: Path, *args: str) -> str:
@@ -130,11 +157,13 @@ def merge(rows: list[dict]) -> list[dict]:
         key = group_of(r["repo"])
         cur = merged.get(key)
         if cur is None:
-            merged[key] = {**r, "repo": key, "stage": STAGE.get(key, "unassigned")}
+            merged[key] = {**r, "repo": key, "stage": stage_for(key, r["first_commit"])}
             continue
         cur["first_commit"] = min(cur["first_commit"], r["first_commit"])
         cur["last_commit"] = max(cur["last_commit"], r["last_commit"])
         cur["commits"] += r["commits"]
+        # A merged row opens on the rung of its EARLIEST member's first commit.
+        cur["stage"] = stage_for(key, cur["first_commit"])
     return list(merged.values())
 
 
@@ -154,7 +183,7 @@ def scan(projects: Path) -> list[dict]:
                 "first_commit": dates[0],
                 "last_commit": last_real_commit(d, dates[-1]),
                 "commits": int(git(d, "rev-list", "--count", "HEAD")),
-                "stage": STAGE.get(name, "unassigned"),
+                "stage": stage_for(name, dates[0]),
             }
         )
     rows = merge(rows)

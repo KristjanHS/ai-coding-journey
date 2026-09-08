@@ -2,9 +2,10 @@
 title: crash-dash
 repo: crash-dash
 start: 2026-06-25
-end: 2026-09-07
-commits: 5018
-stage: production-app
+end: 2026-09-08
+commits: 5035
+stage: configuring
+stage_peak: governing
 tools: [claude-code]
 deck: true
 artifact: present

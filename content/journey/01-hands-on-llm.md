@@ -4,7 +4,8 @@ repo: hands-on-llm
 start: 2025-06-19
 end: 2026-04-11
 commits: 170
-stage: chat
+stage: asking
+stage_peak: asking
 tools: [copilot, gemini-code-assist, continue, cursor, claude-code]
 deck: true
 artifact: present

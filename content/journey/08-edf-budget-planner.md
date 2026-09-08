@@ -4,7 +4,8 @@ repo: edf-budget-planner
 start: 2026-03-31
 end: 2026-07-27
 commits: 668
-stage: production-app
+stage: planning
+stage_peak: configuring
 tools: []
 deck: false
 artifact: pending
