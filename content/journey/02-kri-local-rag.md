@@ -6,6 +6,11 @@ end: 2026-06-25
 commits: 741
 stage: suggesting
 stage_peak: configuring
+could_see: open-file
+retrieved: editor-index
+versioned: code-and-rules
+verified_by: tests
+cost_to_look: floor
 tools: [claude-code]
 evaluated: [roo-code]
 deck: true

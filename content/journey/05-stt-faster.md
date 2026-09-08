@@ -6,6 +6,11 @@ end: 2026-05-29
 commits: 274
 stage: delegating
 stage_peak: delegating
+could_see: path-gated-rules
+retrieved: grep-on-demand
+versioned: code-and-rules
+verified_by: tests
+cost_to_look: floor
 tools: []
 deck: false
 artifact: pending

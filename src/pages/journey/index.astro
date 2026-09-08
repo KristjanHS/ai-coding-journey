@@ -5,6 +5,19 @@ import Timeline from '../../components/Timeline.astro';
 import { MIN_COMMITS, experiments } from '../../lib/timeline';
 
 const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeCompare(b.id));
+
+// The context ledger, one row per repo-backed chapter. The repo-less 90- band
+// carries no ledger by construction (every key is `.optional()` for exactly that
+// reason), so it is excluded rather than rendered as a row of blanks.
+const LEDGER_FIELDS = [
+  { key: 'could_see', label: 'could see', concern: 'Control' },
+  { key: 'retrieved', label: 'retrieved', concern: 'Control' },
+  { key: 'versioned', label: 'versioned', concern: 'Provenance' },
+  { key: 'verified_by', label: 'verified by', concern: 'Quality' },
+  { key: 'cost_to_look', label: 'cost to look', concern: 'Cost' },
+] as const;
+
+const ledgerRows = chapters.filter((entry) => entry.data.repo !== undefined);
 ---
 <Base
   title="The journey · ai-coding-journey"
@@ -30,6 +43,37 @@ const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeComp
       </li>
     ))}
   </ol>
+
+  <h2>What the machine could see</h2>
+  <p class="lede">
+    Five fields per chapter, each drawn from a closed set, each read off the repo as it stood
+    the fortnight it opened — not as it ended. The rung a repo reached later is its own key.
+  </p>
+  <div class="ledger-scroll">
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th scope="col">chapter</th>
+          {LEDGER_FIELDS.map((field) => (
+            <th scope="col">
+              {field.label}
+              <span class="concern">{field.concern}</span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {ledgerRows.map((entry) => (
+          <tr>
+            <th scope="row"><a href={`/journey/${entry.id}/`}>{entry.data.title}</a></th>
+            {LEDGER_FIELDS.map((field) => (
+              <td>{entry.data[field.key] ?? <span class="unset">—</span>}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 
   <h2>Also tried</h2>
   <p class="lede">Repos with fewer than {MIN_COMMITS} commits — no chapter of their own.</p>
@@ -61,6 +105,32 @@ const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeComp
     color: var(--fg-dim);
   }
   .repo { color: var(--fg); }
+  /* Six columns of hyphenated enum values do not fit a phone. Scroll the table
+     rather than abbreviating it: the values are the vocabulary the rest of the
+     site uses, and a legend would cost the reader a lookup on every cell. */
+  .ledger-scroll { overflow-x: auto; }
+  .ledger {
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    white-space: nowrap;
+  }
+  .ledger th, .ledger td {
+    text-align: left;
+    padding: var(--space-1) var(--space-2);
+    border-bottom: 1px solid var(--rule);
+    font-weight: normal;
+  }
+  .ledger thead th { color: var(--fg); vertical-align: bottom; }
+  .ledger tbody th { color: var(--fg); }
+  .ledger td { color: var(--fg-dim); }
+  .ledger .concern {
+    display: block;
+    color: var(--fg-dim);
+    font-size: 0.85em;
+  }
+  .ledger .unset { color: var(--fg-dim); }
+
   @media (max-width: 34rem) {
     .chapters li, .experiments li { grid-template-columns: 1fr; gap: var(--space-1); }
   }

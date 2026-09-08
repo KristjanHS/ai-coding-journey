@@ -6,6 +6,11 @@ end: 2026-09-08
 commits: 764
 stage: configuring
 stage_peak: governing
+could_see: path-gated-rules
+retrieved: grep-on-demand
+versioned: governance
+verified_by: agent-run-gate
+cost_to_look: cache-reuse
 tools: []
 deck: true
 artifact: present

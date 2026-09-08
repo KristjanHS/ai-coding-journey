@@ -6,6 +6,11 @@ end: 2026-04-11
 commits: 170
 stage: asking
 stage_peak: asking
+could_see: pasted
+retrieved: copy-paste
+versioned: code
+verified_by: tests
+cost_to_look: no-log
 tools: [copilot, gemini-code-assist, continue, cursor, claude-code]
 deck: true
 artifact: present

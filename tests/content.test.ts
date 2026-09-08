@@ -130,6 +130,32 @@ describe('evidence rule', () => {
   });
 });
 
+// The context ledger (2026-09-08 reframe, plan §9 item 1). Five enumerated
+// fields per chapter; `astro build` already rejects a value outside its Zod
+// enum, so what is left to assert is the tie between a ledger CLAIM and the
+// evidence the chapter shows for it.
+//
+// The strict reading -- any filled ledger key owes an artifact -- was rejected:
+// decision §5 rules that the stub chapters get their ledger BEFORE their prose,
+// so 7 of the 13 repo chapters are `artifact: pending` by design and the strict
+// gate would red them all. The conditional form below binds a chapter the moment
+// it declares its prose shipped, and binds the remaining stubs automatically as
+// they flip to `present` -- no edit to this file needed.
+const LEDGER_KEYS = ['could_see', 'retrieved', 'versioned', 'verified_by', 'cost_to_look'];
+
+describe('context ledger', () => {
+  it.each(CHAPTERS)('%s: a shipped chapter carrying a ledger shows its artifact', (path) => {
+    const body = read(path);
+    const filled = LEDGER_KEYS.filter((key) => frontmatter(body, key) !== undefined);
+    if (frontmatter(body, 'artifact') !== 'present' || filled.length === 0) return;
+
+    expect(
+      section(body, 'Artifact'),
+      `${path}: ledger keys ${filled.join(', ')} claimed, but the Artifact section is empty`,
+    ).not.toBe('');
+  });
+});
+
 describe('anti-hype rule', () => {
   // (b) Failures get equal billing: the heading is the structural guarantee.
   it.each(CHAPTERS)("%s: has a `## What didn't work` section", (path) => {
