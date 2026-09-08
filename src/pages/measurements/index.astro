@@ -6,16 +6,12 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import {
   TIME_DOMAIN,
-  caveats,
-  crossCheck,
   dateFraction,
   eraSpans,
   eras,
   overlapLabel,
   overlappingPairs,
-  redaction,
   tokenShape,
-  withheld,
 } from '../../lib/measurements';
 
 const share = (n: number) => `${(n * 100).toFixed(n < 0.01 ? 2 : 1)}%`;
@@ -35,12 +31,6 @@ const GROUP_COLOUR: Record<string, string> = {
 // as the product, so the link points at the public source file.
 const narratives = (await getCollection('measurements')).sort((a, b) => a.id.localeCompare(b.id));
 const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/measurements';
-
-const provenanceById = new Map(eras.map((e) => [e.id, e.provenance]));
-const crossById = new Map(crossCheck.map((c) => [c.id, c]));
-// Caveats are not a section of their own any more — each line rides in the note column
-// of the table it qualifies, so a figure can never be read without its qualifier.
-const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
 ---
 <Base
   title="The numbers · ai-coding-journey"
@@ -58,13 +48,14 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
        dates against TIME_DOMAIN. data-overlap names the intersecting pairs. -->
   <h2>Overlapping eras</h2>
   <p class="lede">
-    One time axis, one lane per tool. Each bar spans that tool's whole measured life — the union of
-    its session logs and its config commits — so where two bars share a column, the tools were in use
-    together. <code>{overlappingPairs.length}</code> pairs overlap; none of the
-    <code>{eras.length}</code> eras is clean succession. The first bar is the exception the badge
-    marks: the chat era left no record on this machine, so its bar is a
-    <strong>bracket</strong> — bounded by the earliest thread that cites a dated artifact and by the
-    export that carried the threads off — not a range read from one.
+    One time axis, one lane per tool, each bar spanning that tool's measured life. Where two bars
+    share a column, both tools were in use in the same weeks —
+    <code>{overlappingPairs.length}</code> pairs do, and not one of the
+    <code>{eras.length}</code> eras is a clean succession. That is the finding: adopting a new tool
+    never retired the previous one. The ends of each bar come from the tool's own records; the first
+    bar is the exception its badge marks — the chat era left no record on this machine, so its span
+    is a <strong>bracket</strong> between the earliest thread citing a dated artifact and the export
+    that carried the threads off.
   </p>
   <div class="axis" data-overlap={overlapLabel}>
     {eraSpans.map((span) => (
@@ -101,37 +92,6 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
     pruning. The bar begins {eraSpans.find((s) => s.onset)?.onsetLeadDays} days later because neither
     record reaches back that far; the gap is shown, not closed.
   </p>
-  <p class="note">
-    Two independent records exist per tool — its own session logs and the commits to its config
-    directory — and they disagree. The bar is their union; the table gives both ranges, unreconciled.
-  </p>
-  <table class="sources">
-    <thead>
-      <tr><th>tool</th><th>what the log actually is</th><th class="num">log range</th><th class="num">config commits</th><th>dated by</th></tr>
-    </thead>
-    <tbody>
-      {eras.map((e) => {
-        const cross = crossById.get(e.id)!;
-        return (
-          <tr>
-            <td>
-              <span class="dot" style={`background:${GROUP_COLOUR[e.group]};`} /> {e.tool}
-            </td>
-            <td class="cell-note">{provenanceById.get(e.id)!.logs}</td>
-            <td class="num">
-              {cross.logStart ? <>{cross.logStart} → {cross.logEnd}</> : <span class="empty">none — a genuine absence</span>}
-            </td>
-            <td class="num">
-              {cross.gitStart ? <>{cross.gitStart} → {cross.gitEnd}</> : <span class="empty">none — a genuine absence</span>}
-            </td>
-            <td>
-              <span class="badge" data-date-method={e.dateMethod}>{e.dateMethod}</span>
-            </td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
 
   <!-- Token SHAPE: shares of a floor whose total is not published. The replacement for
        the old absolute headline — same finding (which tool dominated, and which cannot
@@ -146,7 +106,7 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
   <table class="tokens">
     <thead>
       <tr>
-        <th>tool</th><th>state</th><th class="num">share of the floor</th>
+        <th>tool</th><th class="num">share of the floor</th>
         <th>shape</th><th>what qualifies it</th>
       </tr>
     </thead>
@@ -154,7 +114,6 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
       {tokenShape.rows.map((row) => (
         <tr>
           <td>{row.tool}</td>
-          <td><code>{row.state}</code></td>
           <td class="num">
             {row.share !== null ? share(row.share) : <span class="empty">—</span>}
           </td>
@@ -172,7 +131,6 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
     <tfoot>
       <tr>
         <th>the four that log any</th>
-        <th><code>≥</code></th>
         <th class="num">{share(tokenShape.shareTotal)}</th>
         <th class="cell-note" colspan="2">
           The shares are of a floor, so the floor is a floor too — two of the four contribute one of
@@ -182,28 +140,14 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
     </tfoot>
   </table>
 
-  <!-- The redaction, rendered rather than implied. A reader who wonders where the
-       totals went is told here, in the same view as the shares that replaced them. -->
-  <h2>What this page does not publish</h2>
-  <p class="lede">
-    The measurement pass derived more than this. The rest is personal material and stays in a private
-    repo — a total for how much one person used these tools, and what it cost them, is not the finding
-    this journey is about.
-  </p>
-  <ul class="withheld">
-    {withheld.map((item) => <li>{item}</li>)}
-  </ul>
-  <p class="note">
-    {redaction.note} The redaction is a script, not a habit:
-    <code>scripts/measurements-public.py</code> reduces the private store to this one and refuses to
-    write if an absolute survives the reduction.
-  </p>
-
   <!-- D3: the citable narratives, one .md per era, linked to their GitHub source. -->
   <h2>Citable narratives</h2>
   <p class="lede">
-    One entry per era — the single source every chapter, slide and post cites, so a figure is
-    never typed twice.
+    Every figure on this page is derived, and each era's derivation is written up once, in the file
+    linked below — what was counted, what the tool's own records could and could not answer, and what
+    stays unpublished. Chapters, slides and posts cite these files rather than retyping a number, so
+    a figure has exactly one source. Read one when you want to check a bar on this page, or reuse a
+    figure and need its qualifiers with it.
   </p>
   <table class="narratives">
     <thead>
@@ -283,7 +227,6 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
   th { font-family: var(--font-mono); color: var(--fg-dim); font-weight: normal; }
   td.num, .num { font-family: var(--font-mono); text-align: right; }
   .empty { color: var(--fg-dim); }
-  .dot { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; vertical-align: middle; }
 
   /* Log-scaled, deliberately unlabelled: rank and rough spread, never a quantity. */
   .shape { width: 30%; min-width: 6rem; }
@@ -294,11 +237,10 @@ const caveatsById = new Map(caveats.map((c) => [c.id, c.lines]));
     background: var(--accent);
     min-width: 2px;
   }
-  .withheld { color: var(--fg-dim); font-size: var(--size-0); margin: var(--space-2) 0; }
   .cell-note { color: var(--fg-dim); font-size: var(--size-0); line-height: 1.45; }
-  .sources td.num, tfoot .num { white-space: nowrap; }
+  tfoot .num { white-space: nowrap; }
   /* The tool name is the row's identity — never let it wrap to three lines. */
-  .sources td:first-child, .tokens td:first-child { white-space: nowrap; }
+  .tokens td:first-child { white-space: nowrap; }
   tfoot th { font-weight: 600; color: var(--fg); border-top: 1px solid var(--rule); vertical-align: top; }
   td, th { vertical-align: top; }
 
