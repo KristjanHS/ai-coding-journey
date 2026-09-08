@@ -123,12 +123,14 @@ export interface EraSpan {
   group: Group;
   start: string; // union start of git + log
   end: string; // union end of git + log
-  // The era's real start where a pruning-proof artifact dates it. Deliberately NOT
-  // folded into `start`: the bar is what the two records can show, and an onset that
-  // sits months to its left is the finding — a bar silently widened to cover it would
-  // hide exactly that gap.
+  // The era's real start where a pruning-proof artifact dates it. Kept SEPARATE from
+  // `start`, which stays the record start: the gap between the two is the finding, and
+  // the page draws it inside the bar rather than erasing it.
   onset: string | null;
-  onsetLeadDays: number | null; // start - onset, positive = the bar starts late
+  onsetLeadDays: number | null; // start - onset, positive = the records start late
+  // Where the bar is DRAWN from: the earliest thing that dates the era, so a pruned log
+  // does not shorten it. Folds onset in; equals `start` for every era without one.
+  barStart: string;
   // Read from the data, never a hardcoded string: the page's badge must be able to say
   // "estimated" only where the store says the dates are.
   dateMethod: DateMethod;
@@ -145,13 +147,14 @@ export const eraSpans: EraSpan[] = eras.map((e) => ({
   onsetLeadDays: e.onset
     ? days(minDate(e.gitStart, e.logStart, e.dateLow)) - days(e.onset.firstToken)
     : null,
+  barStart: minDate(e.gitStart, e.logStart, e.dateLow, e.onset?.firstToken ?? null),
   dateMethod: e.dateMethod,
 }));
 
 // DERIVED from the spans, so a regenerated eras.json widens the axis instead of
 // clamping against a stale literal. Exported and pinned by a test that names the data.
 export const TIME_DOMAIN: Domain<string> = [
-  eraSpans.reduce((min, s) => (s.start < min ? s.start : min), eraSpans[0]!.start),
+  eraSpans.reduce((min, s) => (s.barStart < min ? s.barStart : min), eraSpans[0]!.barStart),
   eraSpans.reduce((max, s) => (s.end > max ? s.end : max), eraSpans[0]!.end),
 ];
 

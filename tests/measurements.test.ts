@@ -372,11 +372,20 @@ describe('claude-code era — the richest logs', () => {
     expect(onset.firstToken < era.logStart).toBe(true);
   });
 
-  it('keeps the drawn bar apart from the onset instead of widening it', () => {
+  it('draws one bar from the onset while keeping the record start distinct', () => {
     const span = eraSpans.find((s) => s.id === 'claude-code')!;
     expect(span.onset).toBe('2026-02-28');
     expect(span.onsetLeadDays).toBeGreaterThan(100);
+    // The records still begin later — the gap is data, not a rounding artifact.
     expect(span.start > span.onset!).toBe(true);
+    // ...and the drawn bar reaches back to cover it, in one piece.
+    expect(span.barStart).toBe(span.onset);
+  });
+
+  it('leaves barStart equal to start for every era without an onset', () => {
+    for (const span of eraSpans.filter((s) => s.onset === null)) {
+      expect(span.barStart).toBe(span.start);
+    }
   });
 
   it('takes the largest share — more than the other three combined', () => {

@@ -67,15 +67,15 @@ const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/me
         <div class="track">
           <span
             class="band"
-            style={`left:${pct(span.start)}%; right:${(100 - Number(pct(span.end))).toFixed(2)}%; background:${GROUP_COLOUR[span.group]};`}
-            title={`${span.start} → ${span.end} (${span.dateMethod})`}
+            style={`left:${pct(span.barStart)}%; right:${(100 - Number(pct(span.end))).toFixed(2)}%; background:${GROUP_COLOUR[span.group]};`}
+            title={`${span.barStart} → ${span.end} (${span.dateMethod})`}
             data-date-method={span.dateMethod}
           />
           {span.onset && (
             <span
-              class="onset"
-              style={`left:${pct(span.onset)}%;`}
-              title={`first token ${span.onset} — ${span.onsetLeadDays} days before either record starts`}
+              class="record-start"
+              style={`left:${pct(span.start)}%;`}
+              title={`the records only start ${span.start} — ${span.onsetLeadDays} days after the first token on ${span.onset}`}
             />
           )}
         </div>
@@ -87,10 +87,12 @@ const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/me
     </div>
   </div>
   <p class="note">
-    The tick left of the Claude Code bar is that era's <em>real</em> start — its first billed token,
+    The Claude Code bar is one bar from that era's <em>real</em> start — its first billed token,
     <code>{eraSpans.find((s) => s.onset)?.onset}</code>, dated from a config field that survives log
-    pruning. The bar begins {eraSpans.find((s) => s.onset)?.onsetLeadDays} days later because neither
-    record reaches back that far; the gap is shown, not closed.
+    pruning. The tick inside it marks where the two records actually begin,
+    {eraSpans.find((s) => s.onset)?.onsetLeadDays} days later; everything left of that tick is dated
+    by the config field alone, because neither git nor a transcript reaches back that far. The gap is
+    shown, not closed.
   </p>
 
   <!-- Token SHAPE: shares of a floor whose total is not published. The replacement for
@@ -202,7 +204,7 @@ const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/me
     white-space: nowrap;
   }
   .track { position: relative; height: 1.4rem; background: var(--bg-sunk); border-radius: var(--radius); }
-  .onset {
+  .record-start {
     position: absolute; top: 0.1rem; height: 1.2rem; width: 2px;
     background: var(--stage-production-app); transform: translateX(-1px);
   }
