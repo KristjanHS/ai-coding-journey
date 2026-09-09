@@ -39,7 +39,12 @@ const document = eras_ as unknown as {
   sttFaster: Record<string, any>;
 };
 
-// Chronological by onset: the chat era precedes every tool that left a record.
+// Narrative order, NOT chronological — the list has never been sorted by
+// `gitStart` (codex 2025-08-28 precedes cursor 2025-07-31), and gemini's
+// 2025-07-04 is the earliest of any tool era while sitting second-to-last.
+// What the order does say: the chat era precedes every tool that left a
+// record, and gemini is the CLI-agent bridge into Claude Code. Nothing pins
+// order against dates; the only date pins are within-era (gitStart <= gitEnd).
 const SPEC_ORDER = ['chat', 'copilot', 'continue', 'codex', 'cursor', 'gemini', 'claude-code'];
 const TOKEN_STATES = new Set(['yes', 'floor', 'none']);
 const GROUPS = new Set(['chat', 'vscode-plugin', 'cursor', 'gemini', 'claude-code']);
