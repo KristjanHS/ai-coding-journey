@@ -48,6 +48,16 @@ describe('the deck is self-contained under file://', () => {
     expect(built ?? '').toContain('href="https://ai-coding-journey-five.vercel.app/course/skeleton/"');
   });
 
+  it('gives each title slide exactly one h1', () => {
+    // Every deck chapter opens with its own `# NN · title` heading, which lands in
+    // the preamble alongside the frontmatter title Slides.astro emits -- two 4.2vw
+    // headings stacked on all seven title cards. Measured 2026-09-09: dropping the
+    // strip in Slides.astro takes this from 7 to 14.
+    const h1s = [...(built ?? '').matchAll(/<h1\b/g)].length;
+    const titles = [...(built ?? '').matchAll(/<section class="slide slide-title"/g)].length;
+    expect(h1s).toBe(titles);
+  });
+
   it('carries the keyboard nav inline rather than as a bundled module', () => {
     // A bundled `<script>` is emitted as `/_astro/*.js`; the absolute-reference test
     // above already reds on that, but only once Astro decides to bundle. This asserts
@@ -62,19 +72,28 @@ describe('the deck is self-contained under file://', () => {
     // The handout and the misbehaving-browser fallback are the same artifact. Without
     // the print block the deck prints ONE page -- `.slide { display: none }` hides the
     // rest -- which is a silent failure discovered in the room.
-    const print = /@media print\s*\{([\s\S]*?)\n      \}/.exec(built ?? '');
-    expect(print, 'no @media print block in the deck stylesheet').not.toBeNull();
-    expect(print?.[1]).toMatch(/page-break-after:\s*always/);
-    expect(print?.[1]).toMatch(/\.deck-nav\s*\{\s*display:\s*none/);
+    // Keyed on the block's CONTENT, never on its indentation: `is:inline` preserves
+    // the source stylesheet verbatim, so a brace-matching regex would red on a pure
+    // reformat of Deck.astro -- a failure for the wrong reason.
+    const at = (built ?? '').indexOf('@media print');
+    expect(at, 'no @media print block in the deck stylesheet').toBeGreaterThan(-1);
+    const after = (built ?? '').slice(at);
+    expect(after).toMatch(/page-break-after:\s*always/);
+    expect(after).toMatch(/\.deck-nav\s*\{\s*display:\s*none/);
   });
 
   it('emits one slide per `##` plus a title slide per chapter', () => {
-    const slides = [...(built ?? '').matchAll(/<section class="slide[^"]*"/g)].length;
     const titles = [...(built ?? '').matchAll(/<section class="slide slide-title"/g)].length;
-    // Seven `deck: true` chapters today; each contributes its title slide plus at
-    // least one `##` section, so slides must exceed titles or the split silently
-    // collapsed to title cards.
     expect(titles).toBeGreaterThanOrEqual(7);
-    expect(slides).toBeGreaterThan(titles);
+    // Per chapter, not in aggregate: `slides > titles` passes while six of seven
+    // chapters collapse to a bare title card, as long as one still splits. Cutting
+    // the document at each title slide and requiring a body slide in every chunk
+    // reds the moment ANY chapter stops splitting.
+    const [, ...chapters] = (built ?? '').split('<section class="slide slide-title"');
+    expect(chapters.length).toBe(titles);
+    chapters.forEach((chunk, n) => {
+      const bodies = [...chunk.matchAll(/<section class="slide"/g)].length;
+      expect(bodies, `chapter ${n + 1} of ${titles} emitted no \`##\` slide`).toBeGreaterThan(0);
+    });
   });
 });
