@@ -48,6 +48,26 @@ describe('the deck is self-contained under file://', () => {
     expect(built ?? '').toContain('href="https://ai-coding-journey-five.vercel.app/course/skeleton/"');
   });
 
+  it('carries the keyboard nav inline rather than as a bundled module', () => {
+    // A bundled `<script>` is emitted as `/_astro/*.js`; the absolute-reference test
+    // above already reds on that, but only once Astro decides to bundle. This asserts
+    // the handler itself survived into the document, so the deck cannot ship with the
+    // chrome present and the keys dead.
+    expect(built ?? '').toMatch(/addEventListener\('keydown'/);
+    expect(built ?? '').toContain("'ArrowRight'");
+    expect(built ?? '').toContain("'ArrowLeft'");
+  });
+
+  it('prints every slide, not just the current one', () => {
+    // The handout and the misbehaving-browser fallback are the same artifact. Without
+    // the print block the deck prints ONE page -- `.slide { display: none }` hides the
+    // rest -- which is a silent failure discovered in the room.
+    const print = /@media print\s*\{([\s\S]*?)\n      \}/.exec(built ?? '');
+    expect(print, 'no @media print block in the deck stylesheet').not.toBeNull();
+    expect(print?.[1]).toMatch(/page-break-after:\s*always/);
+    expect(print?.[1]).toMatch(/\.deck-nav\s*\{\s*display:\s*none/);
+  });
+
   it('emits one slide per `##` plus a title slide per chapter', () => {
     const slides = [...(built ?? '').matchAll(/<section class="slide[^"]*"/g)].length;
     const titles = [...(built ?? '').matchAll(/<section class="slide slide-title"/g)].length;

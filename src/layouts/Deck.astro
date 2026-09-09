@@ -64,9 +64,90 @@ const { title } = Astro.props;
         padding-left: 1em;
         color: var(--muted);
       }
+      .deck-nav {
+        position: fixed;
+        right: 2vw;
+        bottom: 2vh;
+        display: flex;
+        gap: 0.6em;
+        align-items: center;
+        color: var(--muted);
+        font-size: 1.2vw;
+      }
+      .deck-nav button {
+        font: inherit;
+        color: inherit;
+        background: transparent;
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        padding: 0.2em 0.7em;
+        cursor: pointer;
+      }
+      /* Print is the handout AND the fallback when the room's browser misbehaves,
+         so it renders EVERY slide -- one per page -- not just the current one.
+         Same source, same stylesheet, two outputs. */
+      @media print {
+        html, body { height: auto; }
+        .slide, .slide.current, body.scripted .slide:first-of-type:not(.current) {
+          display: flex;
+          width: 100%;
+          height: auto;
+          min-height: 0;
+          padding: 1.5cm;
+          break-after: page;
+          page-break-after: always;
+        }
+        .slide:last-of-type { break-after: auto; page-break-after: auto; }
+        .slide h1 { font-size: 28pt; }
+        .slide h2 { font-size: 20pt; }
+        .slide p, .slide li { font-size: 12pt; }
+        .slide pre, .slide table { font-size: 9pt; }
+        .deck-nav { display: none; }
+      }
     </style>
   </head>
   <body>
     <slot />
+    <p class="deck-nav">
+      <button type="button" data-deck-prev aria-label="previous slide">&#8592;</button>
+      <span data-deck-count>&#8203;</span>
+      <button type="button" data-deck-next aria-label="next slide">&#8594;</button>
+    </p>
+    <!-- `is:inline` for the same reason the stylesheet carries it: a bundled script
+         is emitted as `/_astro/*.js`, an absolute path that resolves to filesystem
+         root from a USB stick, and the deck loses its arrow keys on stage with no
+         error anywhere. No framework, no router, no history API -- client-side
+         routing is precisely what breaks under `file://`. -->
+    <script is:inline>
+      (function () {
+        var slides = document.querySelectorAll('.slide');
+        if (!slides.length) return;
+        // The CSS shows slide 1 unscripted; `scripted` hands that job to `current`
+        // so the two rules can never both paint a slide.
+        document.body.classList.add('scripted');
+        var count = document.querySelector('[data-deck-count]');
+        var i = 0;
+        function show(next) {
+          i = Math.max(0, Math.min(slides.length - 1, next));
+          for (var n = 0; n < slides.length; n++) {
+            slides[n].classList.toggle('current', n === i);
+          }
+          if (count) count.textContent = i + 1 + ' / ' + slides.length;
+        }
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') show(i + 1);
+          else if (e.key === 'ArrowLeft' || e.key === 'PageUp') show(i - 1);
+          else if (e.key === 'Home') show(0);
+          else if (e.key === 'End') show(slides.length - 1);
+          else return;
+          e.preventDefault();
+        });
+        var prev = document.querySelector('[data-deck-prev]');
+        var next = document.querySelector('[data-deck-next]');
+        if (prev) prev.addEventListener('click', function () { show(i - 1); });
+        if (next) next.addEventListener('click', function () { show(i + 1); });
+        show(0);
+      })();
+    </script>
   </body>
 </html>
