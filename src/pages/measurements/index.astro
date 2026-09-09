@@ -6,6 +6,7 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import {
   TIME_DOMAIN,
+  abandonmentTraces,
   dateFraction,
   eraSpans,
   eras,
@@ -98,6 +99,23 @@ const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/me
     by the config field alone, because neither git nor a transcript reaches back that far. The gap is
     shown, not closed.
   </p>
+  <p>
+    But the overlap runs deeper than time. In the same weeks, tools sat on <em>different rungs</em> of
+    the ladder — a chat window, an IDE plugin and a CLI agent all in use at once — so a stage can never
+    be a calendar band. It is an attribute of the tool-and-repo pairing, which is exactly what each
+    chapter's <code>stage</code> key records; the <a href="/journey/">six-row rung table</a> on the
+    journey names what each rung means. Two abandonment traces show the same thing from the tool's own
+    side: Copilot was installed in <code>{abandonmentTraces.copilot.workspacesTotal}</code> workspaces
+    and chatted in <code>{abandonmentTraces.copilot.workspacesWithChat}</code>; the Gemini CLI was
+    configured in <code>{abandonmentTraces.gemini.configuredRepos}</code> repos across
+    <code>{abandonmentTraces.gemini.from}</code> → <code>{abandonmentTraces.gemini.to}</code>
+    (<code>{abandonmentTraces.gemini.gitCommits}</code> commits), yet the context file it auto-loads,
+    <code>GEMINI.md</code>, exists in <code>{abandonmentTraces.gemini.geminiMdFiles}</code> of them —
+    <code>{abandonmentTraces.gemini.guidelineFiles}</code> repos hold a lowercase <code>gemini.md</code>
+    that a case-sensitive filesystem never loads, and nothing in the journey shipped on it. Neither
+    count was collected to measure disappointment: they are abandonment traces, not satisfaction
+    scores, which is exactly what lets them stand as evidence.
+  </p>
 
   <!-- Token SHAPE: shares of a floor whose total is not published. The replacement for
        the old absolute headline — same finding (which tool dominated, and which cannot
@@ -156,6 +174,13 @@ const GH = 'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/me
     has to run, the notes it can carry between sessions, and the instructions it loads. They are a
     snapshot of one workstation, not a series: hooks and per-project memory did not exist before the
     Claude Code era, so there is nothing earlier to compare them against.
+  </p>
+  <p>
+    Two of these counts are not merely inventory — they are context-engineering dimensions in their own
+    right. The memory files are dimension <code>20 · cross-session memory</code>; the hook commands,
+    wired across events that include <code>PreCompact</code>, are dimension
+    <code>23 · compaction handling</code>. This table is only their snapshot on one workstation — where
+    each moves across the journey is read per chapter in the <a href="/journey/">ledger</a>, not here.
   </p>
   <table class="tokens">
     <thead>

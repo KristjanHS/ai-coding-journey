@@ -407,3 +407,28 @@ export const governanceRows: GovernanceRow[] =
         },
       ]
     : [];
+
+// ── Abandonment traces: how widely a tool was set up vs how much it got used ────
+// Ladder §2's corroboration that the overlap is one of RUNG, not only of time. Each
+// figure is a config/install count beside a use count; the gap is the trace a tool
+// left as it fell out of use — an abandonment trace, never a satisfaction score,
+// which is what lets it stand as evidence. Read from the store like every view here,
+// with Gemini's own date window carried alongside so a comparative reading keeps its
+// months rather than floating free of them.
+const coverageOf = (id: EraId): Record<string, unknown> =>
+  eras.find((e) => e.id === id)?.coverage ?? {};
+
+export const abandonmentTraces = {
+  copilot: {
+    workspacesTotal: coverageOf('copilot').workspacesTotal as number,
+    workspacesWithChat: coverageOf('copilot').workspacesWithChat as number,
+  },
+  gemini: {
+    configuredRepos: coverageOf('gemini').configuredRepos as number,
+    geminiMdFiles: coverageOf('gemini').geminiMdFiles as number, // auto-loaded GEMINI.md (uppercase)
+    guidelineFiles: coverageOf('gemini').guidelineFiles as number, // lowercase gemini.md a case-sensitive FS never loads
+    gitCommits: eras.find((e) => e.id === 'gemini')?.gitCommits ?? null,
+    from: eras.find((e) => e.id === 'gemini')?.gitStart ?? null,
+    to: eras.find((e) => e.id === 'gemini')?.gitEnd ?? null,
+  },
+} as const;
