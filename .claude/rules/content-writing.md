@@ -7,7 +7,7 @@ paths:
 # Content writing — evidence, not hype
 
 The two-line unit and supersede-by-replacing are global → `~/.claude/rules/prose-budget.md`. The rules
-below are this project's binding constraints (source: `2026-09-06-journey-design.md` (docs/plans/)
+below are this project's binding constraints (source: `2026-09-09-journey-vision.md` (docs/plans/)
 §Binding constraints — edit there first, mirror here).
 
 ## Evidence rule

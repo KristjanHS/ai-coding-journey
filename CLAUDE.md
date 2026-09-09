@@ -8,7 +8,7 @@ as-is); an Astro site on Vercel (from inc3) renders it as a browsable journey, a
 ## Where things live
 
 - **Living spec** (north star, binding constraints, increment backlog, shipped log, open calls):
-  `2026-09-06-journey-design.md` (docs/plans/). Read it before any content or design change; it is the
+  `2026-09-09-journey-vision.md` (docs/plans/). Read it before any content or design change; it is the
   single source of the *evidence rule* and the *anti-hype rule*. Never inline build detail there — each
   increment gets a thin `docs/plans/YYYY-MM-DD-<inc>-spec.md`, run via `/qimpag`, then `git mv`'d to
   `docs/plans/archive/` on ship.
