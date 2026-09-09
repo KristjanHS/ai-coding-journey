@@ -6,9 +6,13 @@ import { MIN_COMMITS, experiments } from '../../lib/timeline';
 
 const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeCompare(b.id));
 
-// The context ledger, one row per repo-backed chapter. The repo-less 90- band
-// carries no ledger by construction (every key is `.optional()` for exactly that
-// reason), so it is excluded rather than rendered as a row of blanks.
+// The context ledger, one row per chapter that has earned one. Two bands carry
+// no ledger and are excluded rather than rendered as rows of blanks: the
+// repo-less 90- chapters, which have no repo to read one off, and the seven stub
+// chapters, which gave theirs up in inc5g because a ledger claim with an empty
+// `## Artifact` is the table asserting evidence the chapter does not show. Every
+// key is `.optional()` for exactly this reason. A stub earns its row back by
+// writing the artifact; `tests/content.test.ts` holds that order.
 const LEDGER_FIELDS = [
   { key: 'could_see', label: 'could see', concern: 'Control' },
   { key: 'retrieved', label: 'retrieved', concern: 'Control' },
@@ -17,7 +21,11 @@ const LEDGER_FIELDS = [
   { key: 'cost_to_look', label: 'cost to look', concern: 'Cost' },
 ] as const;
 
-const ledgerRows = chapters.filter((entry) => entry.data.repo !== undefined);
+const LEDGER_KEYS = LEDGER_FIELDS.map((field) => field.key);
+const repoBacked = chapters.filter((entry) => entry.data.repo !== undefined);
+const ledgerRows = repoBacked.filter((entry) =>
+  LEDGER_KEYS.some((key) => entry.data[key] !== undefined),
+);
 ---
 <Base
   title="The journey · ai-coding-journey"
@@ -48,6 +56,13 @@ const ledgerRows = chapters.filter((entry) => entry.data.repo !== undefined);
   <p class="lede">
     Five fields per chapter, each drawn from a closed set, each read off the repo as it stood
     the fortnight it opened — not as it ended. The rung a repo reached later is its own key.
+  </p>
+  <p class="lede">
+    {ledgerRows.length} of the {repoBacked.length} repo-backed chapters appear here. A chapter
+    enters the table by showing the artifact its ledger claims — quoted or fenced, not described.
+    The other {repoBacked.length - ledgerRows.length} have a repo and a rung but no evidence
+    written up yet, and a row of five unbacked claims would be the table asserting exactly what it
+    exists to prove.
   </p>
   <div class="ledger-scroll">
     <table class="ledger">

@@ -6,11 +6,6 @@ end: 2026-08-11
 commits: 11
 stage: planning
 stage_peak: planning
-could_see: path-gated-rules
-retrieved: grep-on-demand
-versioned: governance
-verified_by: tests
-cost_to_look: cache-reuse
 tools: []
 deck: false
 artifact: pending

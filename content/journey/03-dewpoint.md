@@ -6,11 +6,6 @@ end: 2026-06-25
 commits: 106
 stage: suggesting
 stage_peak: suggesting
-could_see: pasted
-retrieved: copy-paste
-versioned: code
-verified_by: me-reading
-cost_to_look: floor
 tools: []
 deck: false
 artifact: pending
