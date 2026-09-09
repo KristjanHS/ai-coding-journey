@@ -181,20 +181,27 @@ describe('context ledger', () => {
   // broken parser, and a ledger on every repo-backed chapter means the stubs got
   // theirs back without the artifact that is supposed to buy it.
   //
-  // Bounded against the REPO-BACKED population, not every chapter: the 90- band
-  // has no repo to read a ledger off, so counting it would slacken the upper
-  // bound by two rows that can never move.
-  it('the ledger population is a strict subset of the repo-backed chapters', () => {
-    const carrying = CHAPTERS.filter((path) =>
-      LEDGER_KEYS.some((key) => frontmatter(read(path), key) !== undefined),
+  // The upper bound is a SUBSET relation, deliberately not `carrying <
+  // repoBacked`. A strict count inequality anchors on the population the work
+  // drains -- the anti-pattern `testing-project.md` names -- so it would red the
+  // day all 13 chapters legitimately carry a ledger WITH the artifact that buys
+  // it, conflating a finished corpus with a stub sneaking its keys back. The
+  // stub case is already link 2's job, per-chapter and with a better message.
+  // What is left for the anchor is the containment link 2 cannot see: a ledger
+  // on a chapter that has no repo to read one off.
+  it('the ledger population is a subset of the repo-backed chapters', () => {
+    const carries = (path: string) =>
+      LEDGER_KEYS.some((key) => frontmatter(read(path), key) !== undefined);
+    const carrying = CHAPTERS.filter(carries);
+    const strays = CHAPTERS.filter(
+      (path) => carries(path) && frontmatter(read(path), 'repo') === undefined,
     );
-    const repoBacked = CHAPTERS.filter((path) => frontmatter(read(path), 'repo') !== undefined);
 
     expect(carrying.length, 'no chapter carries a ledger -- the parser is broken').toBeGreaterThan(0);
     expect(
-      carrying.length,
-      'every repo-backed chapter carries a ledger -- a stub got one back without an artifact',
-    ).toBeLessThan(repoBacked.length);
+      strays,
+      'a chapter with no repo carries a ledger -- there is nothing to have read it off',
+    ).toEqual([]);
   });
 });
 
