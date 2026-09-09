@@ -694,3 +694,30 @@ describe('the rung ladder reaches /journey/', () => {
     expect(page, '/journey/ does not map its table over RUNGS').toMatch(/RUNGS\.map\(/);
   });
 });
+
+const WRONG_CHAPTER = join(JOURNEY, '90-what-i-got-wrong.md');
+
+// A regression guard, not a correctness check: correctness is the verified read
+// against `sources/`, and this only reds when a later edit drops or alters one.
+const DATED_SPINE = [
+  { date: '2025-12-05', what: 'the shell wrapper failed on every command', mark: /`exit -1`[\s\S]*`pid: -1`/ },
+  { date: '2025-12-05', what: 'edits reported success on an untouched file', mark: /CVE-2025-59944/ },
+  { date: '2025-12-05', what: 'a shown diff was absent from disk until applied', mark: /`\+380`-line diff/ },
+  { date: '2025-12-05', what: 'agent plans lived outside the repo', mark: /internal application data/ },
+  { date: '2026-02-08', what: 'the subagent limitation that ended the era', mark: /same conversation context/ },
+  { date: '2026-02-07', what: 'the free alternatives that priced the switch', mark: /OpenCode, Cline and Aider/ },
+];
+
+describe('the dated spine of 90-what-i-got-wrong', () => {
+  const body = read(WRONG_CHAPTER);
+
+  it('there is a spine to check', () => {
+    expect(DATED_SPINE.length).toBe(6);
+    expect(DATED_SPINE.filter((row) => row.date === '2025-12-05')).toHaveLength(4);
+  });
+
+  it.each(DATED_SPINE)('$date: $what', ({ date, mark }) => {
+    expect(body, `${date} no longer appears in the chapter`).toContain(date);
+    expect(body, `the ${date} evidence no longer matches ${mark}`).toMatch(mark);
+  });
+});
