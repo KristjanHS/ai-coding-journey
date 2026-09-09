@@ -1,0 +1,72 @@
+---
+// inc6 Stage 1: the deck deliberately does NOT extend Base.astro. Base's <style is:inline>
+// is bundled by Astro into an absolute `/_astro/*.css` reference, which resolves to
+// FILESYSTEM ROOT when `dist/deck/index.html` is opened from a USB stick and renders
+// the deck unstyled on stage. Every asset here is inline; `tests/deck-offline.test.ts`
+// fails on any absolute href/src that creeps back in.
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <style is:inline>
+      :root {
+        --ink: #14171a;
+        --paper: #fbfaf7;
+        --muted: #5b6570;
+        --rule: #d8d4cc;
+        --accent: #8a4b1f;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; height: 100%; }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font: 400 1rem/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      .slide {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        padding: 4vh 6vw;
+        overflow: hidden;
+        flex-direction: column;
+        justify-content: center;
+      }
+      /* No script has run yet on first paint (and none runs at all if scripting is
+         off): the first slide must be visible without the `current` class. */
+      .slide:first-of-type { display: flex; }
+      .slide.current { display: flex; }
+      body.scripted .slide:first-of-type:not(.current) { display: none; }
+      .slide h1 { font-size: 4.2vw; line-height: 1.15; margin: 0 0 0.4em; }
+      .slide h2 { font-size: 3.2vw; line-height: 1.2; margin: 0 0 0.6em; color: var(--accent); }
+      .slide p, .slide li { font-size: 1.8vw; line-height: 1.5; }
+      .slide .subtitle { color: var(--muted); font-size: 1.6vw; }
+      .slide pre {
+        font-size: 1.3vw;
+        line-height: 1.4;
+        overflow-x: auto;
+        background: #f2efe9;
+        border: 1px solid var(--rule);
+        padding: 0.8em 1em;
+      }
+      .slide code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .slide table { border-collapse: collapse; font-size: 1.4vw; }
+      .slide th, .slide td { border: 1px solid var(--rule); padding: 0.3em 0.6em; text-align: left; }
+      .slide blockquote {
+        border-left: 3px solid var(--accent);
+        margin: 0 0 1em;
+        padding-left: 1em;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

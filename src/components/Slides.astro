@@ -1,0 +1,38 @@
+---
+// inc6 Stage 1: the `##` split, ruled build-time rather than client-side. Astro's
+// `render(entry)` hands back a component, not a string, so the cut happens here --
+// `Astro.slots.render()` forces the slot to HTML at BUILD time, which is what lets
+// `dist/deck/index.html` hold countable `<section class="slide">` elements and paint
+// sliced on first frame under `file://`, where no script has run yet.
+interface Props {
+  /** Chapter title -- becomes the chapter's own title slide. */
+  title: string;
+  /** Rendered under the title on that slide; the chapter's repo/span line. */
+  subtitle?: string;
+}
+const { title, subtitle } = Astro.props;
+
+const html = await Astro.slots.render('default');
+
+// A cross-content link (`content/journey/91-the-close.md` -> /course/skeleton/) is
+// rewritten by `src/md-links.mjs` to a ROOT-ABSOLUTE site route. That route resolves
+// to filesystem root on a USB stick, so the deck would carry a link that is dead
+// exactly where the deck is meant to run. Absolutising against `site` keeps it
+// clickable offline-with-network and keeps `tests/deck-offline.test.ts` strict about
+// root-absolute references rather than carving out an exception for anchors.
+const origin = Astro.site?.href.replace(/\/$/, '') ?? '';
+const absolutise = (fragment: string) =>
+  fragment.replace(/href="(\/[^"]*)"/g, (_m, path) => `href="${origin}${path}"`);
+
+// Lookahead split: every chunk after the first OPENS with its own `<h2`, and the
+// first chunk is whatever prose precedes the first heading (often empty). Splitting
+// on `<h2` itself would eat the tag.
+const [lead, ...bodies] = html.split(/(?=<h2)/).map(absolutise);
+const preamble = lead.trim();
+---
+<section class="slide slide-title">
+  <h1>{title}</h1>
+  {subtitle && <p class="subtitle">{subtitle}</p>}
+  {preamble && <div class="preamble" set:html={preamble} />}
+</section>
+{bodies.map((body) => <section class="slide" set:html={body} />)}

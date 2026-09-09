@@ -52,6 +52,17 @@ const sections = [
     unit: ['page', 'pages'] as const,
     whenEmpty: 'none yet',
   },
+  {
+    href: '/deck/',
+    title: 'The deck',
+    // inc6: the count is the number of chapters that opted in via `deck: true`,
+    // not the chapter total -- the deck is a selection, and a link claiming all
+    // 15 would advertise slides that are not there.
+    blurb: 'The lecture, from the chapters that opted in. Opens offline.',
+    count: (await getCollection('journey')).filter((entry) => entry.data.deck).length,
+    unit: ['chapter', 'chapters'] as const,
+    whenEmpty: 'arrives at inc6',
+  },
 ].map((section) => ({
   ...section,
   live: section.count > 0,

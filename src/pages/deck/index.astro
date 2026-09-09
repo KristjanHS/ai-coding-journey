@@ -1,0 +1,30 @@
+---
+import { getCollection, render } from 'astro:content';
+import Deck from '../../layouts/Deck.astro';
+import Slides from '../../components/Slides.astro';
+
+// The deck renders `deck: true` chapters only -- not `/` and not `/journey/`, so no
+// hydrated island ships under `file://` (inc4's constraint for inc6, still closed).
+const chapters = (await getCollection('journey'))
+  .filter((entry) => entry.data.deck)
+  .sort((a, b) => a.id.localeCompare(b.id));
+
+const rendered = await Promise.all(
+  chapters.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
+);
+
+const subtitle = (data: (typeof chapters)[number]['data']) => {
+  const bits: string[] = [];
+  if (data.repo) bits.push(data.repo);
+  if (data.start && data.end) bits.push(`${data.start} → ${data.end}`);
+  if (data.commits !== undefined) bits.push(`${data.commits.toLocaleString('en-US')} commits`);
+  return bits.join(' · ');
+};
+---
+<Deck title="ai-coding-journey · deck">
+  {rendered.map(({ entry, Content }) => (
+    <Slides title={entry.data.title} subtitle={subtitle(entry.data)}>
+      <Content />
+    </Slides>
+  ))}
+</Deck>
