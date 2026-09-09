@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Timeline from '../../components/Timeline.astro';
 import { MIN_COMMITS, experiments } from '../../lib/timeline';
+import { RUNGS } from '../../content.config';
 
 const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeCompare(b.id));
 
@@ -13,6 +14,24 @@ const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeComp
 // `## Artifact` is the table asserting evidence the chapter does not show. Every
 // key is `.optional()` for exactly this reason. A stub earns its row back by
 // writing the artifact; `tests/content.test.ts` holds that order.
+// The rung table renders BY MAPPING over `RUNGS`, never from six hand-typed
+// rows: order and vocabulary come from the enum, so neither can drift. The
+// Record is declared total over `RUNGS` for the editor's benefit, but note what
+// actually stops a bad ship: `astro build` does NOT typecheck, so a seventh
+// rung added to `src/content.config.ts` without a date and a unit fails the
+// build at RENDER time (`Cannot read properties of undefined`), demoed red
+// 2026-09-09. That message names neither the rung nor this file, which is why
+// `tests/content.test.ts` also asserts the pairing — the test is the legible
+// half of the gate, the build is the one that cannot be skipped.
+const RUNG_META: Record<(typeof RUNGS)[number], { from: string; unit: string }> = {
+  asking: { from: '2025-06', unit: 'a question' },
+  suggesting: { from: '2025-06', unit: 'a snippet' },
+  delegating: { from: '2025-07', unit: 'a task' },
+  planning: { from: '2026-02', unit: 'a plan' },
+  configuring: { from: '2026-04', unit: 'a policy' },
+  governing: { from: '2026-07', unit: 'a process' },
+};
+
 const LEDGER_FIELDS = [
   { key: 'could_see', label: 'could see', concern: 'Control' },
   { key: 'retrieved', label: 'retrieved', concern: 'Control' },
@@ -51,6 +70,42 @@ const ledgerRows = repoBacked.filter((entry) =>
       </li>
     ))}
   </ol>
+
+  <h2>The six rungs</h2>
+  <p class="lede">
+    The rungs are named off the <em>unit of instruction</em> — what is handed to the machine in one
+    go. It is the one dimension that moves at every step, which is why it names the ladder rather
+    than the tool, the model or the interface, all of which change out of order.
+  </p>
+  <div class="ledger-scroll">
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">rung</th>
+          <th scope="col">from</th>
+          <th scope="col">unit handed over</th>
+        </tr>
+      </thead>
+      <tbody>
+        {RUNGS.map((rung, index) => (
+          <tr>
+            <td>{index + 1}</td>
+            <th scope="row">{rung}</th>
+            <td>{RUNG_META[rung].from}</td>
+            <td>{RUNG_META[rung].unit}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="lede">
+    The three upper boundaries are git-dated, not authored. Rung 4 opens 2026-02-28, the first
+    token this account spent in Claude Code. Rung 5 opens 2026-04-05, the first commit of the
+    dotfiles repo, which is the day configuration itself entered version control. Rung 6 opens
+    2026-07-09, the day the skills directory did the same. Each is a date something was recorded,
+    so the seams can be checked rather than argued with.
+  </p>
 
   <h2>What the machine could see</h2>
   <p class="lede">
