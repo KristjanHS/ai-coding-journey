@@ -156,6 +156,36 @@
     {
       "availability": {
         "counts": "yes",
+        "skills": "none",
+        "tokens": "none"
+      },
+      "configDir": ".gemini",
+      "coverage": {
+        "configuredRepos": 8,
+        "geminiMdFiles": 0,
+        "guidelineFiles": 5
+      },
+      "dateHigh": null,
+      "dateLow": null,
+      "dateMethod": "measured",
+      "gitCommits": 18,
+      "gitEnd": "2026-06-23",
+      "gitStart": "2025-07-04",
+      "group": "gemini",
+      "id": "gemini",
+      "logEnd": null,
+      "logStart": null,
+      "provenance": {
+        "configRepo": "kri-local-rag",
+        "git": "git log over .gemini + gemini.md across the 8 repos under ~/projects that carry Gemini config; earliest first-commit to latest last-commit, commits summed",
+        "logs": "no local token or session log — the Gemini CLI wrote none on this machine"
+      },
+      "share": null,
+      "tool": "Gemini CLI"
+    },
+    {
+      "availability": {
+        "counts": "yes",
         "skills": "yes",
         "tokens": "yes"
       },
@@ -226,7 +256,7 @@
     "bearingTools": 4,
     "note": "Shares are fractions of the combined floor across the token-bearing tools. The floor itself is not published, so no absolute is recoverable from them. The full store is private.",
     "policy": "states-dates-shares",
-    "totalTools": 6,
+    "totalTools": 7,
     "withheld": [
       "absolute token counts",
       "session, message, turn and file counts",

@@ -24,9 +24,9 @@ import data from '../../content/measurements/data/eras.json';
 // ── Raw JSON shapes ───────────────────────────────────────────────────────────
 // `coverage` differs per era by construction (each tool measures to a different depth),
 // so it stays loosely typed here — tests/measurements.test.ts pins the per-era shapes.
-export type EraId = 'chat' | 'copilot' | 'continue' | 'codex' | 'cursor' | 'claude-code';
+export type EraId = 'chat' | 'copilot' | 'continue' | 'codex' | 'cursor' | 'gemini' | 'claude-code';
 export type TokenState = 'yes' | 'floor' | 'none';
-export type Group = 'chat' | 'vscode-plugin' | 'cursor' | 'claude-code';
+export type Group = 'chat' | 'vscode-plugin' | 'cursor' | 'gemini' | 'claude-code';
 /** How an era's span was arrived at. `estimated` is a bracket, never a record. */
 export type DateMethod = 'estimated' | 'measured';
 
@@ -243,6 +243,7 @@ const SHARE_QUALIFIER: Record<EraId, string> = {
   continue: 'Exact: every token event is logged, and a SQLite mirror agrees to the event.',
   codex: 'A floor — the token_count event only starts 2025-09-23, in a third of the rollouts.',
   cursor: "A floor, and Cursor's own client-side estimate — 4.86% of bubbles carry a count.",
+  gemini: 'The Gemini CLI kept no local token or session log on this machine — an absence, not a zero.',
   'claude-code': 'Exact within the surviving transcripts, which Claude Code prunes as it goes.',
 };
 

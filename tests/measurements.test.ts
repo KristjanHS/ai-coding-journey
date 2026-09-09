@@ -40,9 +40,9 @@ const document = eras_ as unknown as {
 };
 
 // Chronological by onset: the chat era precedes every tool that left a record.
-const SPEC_ORDER = ['chat', 'copilot', 'continue', 'codex', 'cursor', 'claude-code'];
+const SPEC_ORDER = ['chat', 'copilot', 'continue', 'codex', 'cursor', 'gemini', 'claude-code'];
 const TOKEN_STATES = new Set(['yes', 'floor', 'none']);
-const GROUPS = new Set(['chat', 'vscode-plugin', 'cursor', 'claude-code']);
+const GROUPS = new Set(['chat', 'vscode-plugin', 'cursor', 'gemini', 'claude-code']);
 
 const byId = (id: string) => document.eras.find((e) => e.id === id)!;
 
@@ -341,6 +341,31 @@ describe('cursor era — a floor because most bubbles are unpriced', () => {
   });
 });
 
+describe('gemini era — a CLI agent configured, never given a context file', () => {
+  const era = byId('gemini');
+
+  it('records the config spread and that no GEMINI.md was ever written', () => {
+    // The era whole finding: the config was stamped into repo after repo, but the
+    // uppercase GEMINI.md the CLI actually loads was written in none of them.
+    expect(era.coverage.configuredRepos).toBe(8);
+    expect(era.coverage.geminiMdFiles).toBe(0);
+  });
+
+  it('logs no tokens, so takes no share of the floor', () => {
+    expect(era.availability.tokens).toBe('none');
+    expect(era.share).toBeNull();
+    expect(era.logStart).toBeNull();
+    expect(era.logEnd).toBeNull();
+  });
+
+  it('dates the era from the cross-repo git config span, measured not bracketed', () => {
+    expect(era.dateMethod).toBe('measured');
+    expect(era.dateLow).toBeNull();
+    expect([era.gitStart, era.gitEnd]).toEqual(['2025-07-04', '2026-06-23']);
+    expect(era.gitCommits).toBe(18);
+  });
+});
+
 describe('claude-code era — the richest logs', () => {
   const era = byId('claude-code');
 
@@ -515,10 +540,11 @@ describe('measurements lib — token shape replaces the absolute headline', () =
     expect(tokenShape.rows.map((r) => r.id)).toEqual(SPEC_ORDER);
     expect(tokenShape.bearingRows.length).toBe(4);
     expect(tokenShape.bearingCount).toBe(4);
-    // Six eras, four that log a token at all. Copilot and the chat era are the two
-    // absences, and they are absences of different kinds: one tool logged and left the
-    // field out, the other never wrote a file.
-    expect(tokenShape.totalTools).toBe(6);
+    // Seven eras, four that log a token at all. The chat era, Copilot and the Gemini CLI
+    // are the three absences, and they are absences of different kinds: one tool logged
+    // and left the field out, one never wrote a file, one ran a CLI agent that logged no
+    // tokens locally.
+    expect(tokenShape.totalTools).toBe(7);
   });
 
   it('sums the bearing shares to the whole floor', () => {
