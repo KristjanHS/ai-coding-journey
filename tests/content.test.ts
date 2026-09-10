@@ -552,27 +552,11 @@ describe('sidecar corpus', () => {
 });
 
 
-// /measurements shipped in inc5a with no link to it from anywhere: the root
-// page's `sections` array listed four of the five top-level routes, so the page
-// was reachable only by typing the URL. This guard derives the route set from
-// src/pages/ itself, so a sixth section added tomorrow reds until it is linked.
-describe('root page links every top-level route', () => {
-  const PAGES = join('src', 'pages');
-  const routes = readdirSync(PAGES, { withFileTypes: true })
-    .filter((e) => e.isDirectory())
-    .map((e) => e.name);
+// The `root page links every top-level route` guard used to live here. inc8
+// moved it to `tests/nav.test.ts`: three doors means a route is reachable via
+// the root page OR one of the three door indexes, so the assertion could not
+// stay pinned to src/pages/index.astro alone.
 
-  it('finds the route directories', () => {
-    expect(routes.length, `no route dirs under ${PAGES}`).toBeGreaterThan(0);
-  });
-
-  it.each(routes)('/%s/ is linked from the root page', (route) => {
-    const root = read(join(PAGES, 'index.astro'));
-    expect(root, `${route}: no href to /${route}/ in src/pages/index.astro`).toContain(
-      `'/${route}/'`,
-    );
-  });
-});
 
 // inc5c Stage 3a -- the corpus leak class. The ChatGPT exports under sources/
 // are gitignored, but their contents reach content/ by hand, and three kinds of

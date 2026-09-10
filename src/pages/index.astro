@@ -21,6 +21,22 @@ const sections = [
     whenEmpty: 'none yet',
   },
   {
+    // inc8 Stage 1: the corpus door goes up before the root page collapses to
+    // three rows, because `tests/nav.test.ts` treats an unlinked route dir as
+    // an orphan the moment it exists. The count is the four shelves summed --
+    // the door's claim is "this much corpus", not "this many of one kind".
+    href: '/corpus/',
+    title: 'The corpus',
+    blurb: 'Topics, atoms, sidecars and artifacts \u2014 the storage every output is served from.',
+    count:
+      (await getCollection('topics')).length +
+      (await getCollection('atoms')).length +
+      (await getCollection('sidecars')).length +
+      (await getCollection('artifacts')).length,
+    unit: ['entry', 'entries'] as const,
+    whenEmpty: 'arrives at inc7',
+  },
+  {
     href: '/artifacts/',
     title: 'Context artifacts',
     blurb: 'Five kinds of thing you put in front of a model, reproduced as written.',

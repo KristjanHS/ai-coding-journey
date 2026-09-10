@@ -1,0 +1,107 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+// The corpus door. Four shelves, one storage mechanism: a topic groups atoms, an
+// atom is one claim with one shown piece of evidence, a sidecar describes what a
+// source showed, and an artifact reproduces it verbatim. Sidecars and artifacts
+// are the same shelf at two fidelities, which is why they sit here together
+// rather than as two of nine peers on the root page.
+//
+// The count rule is the root page's, verbatim and for the same reason: a shelf
+// with no entries is not a link and says why it is empty in its own words. A
+// live-looking link onto an empty index is the failure this avoids, so the
+// branch is on the count, never on the shelf's identity.
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+const shelves = [
+  {
+    href: '/topics/',
+    title: 'Topics',
+    blurb: 'One idea per file, grouping the atoms mined for it.',
+    count: (await getCollection('topics')).length,
+    unit: ['topic', 'topics'] as const,
+    whenEmpty: 'arrives at inc7',
+  },
+  {
+    href: '/atoms/',
+    title: 'Atoms',
+    blurb: 'One claim, one shown piece of evidence, tagged so a talk is a query.',
+    count: (await getCollection('atoms')).length,
+    unit: ['atom', 'atoms'] as const,
+    whenEmpty: 'arrives at inc7',
+  },
+  {
+    href: '/sidecars/',
+    title: 'Sidecars',
+    blurb: 'Supporting material per topic, described rather than reproduced.',
+    count: (await getCollection('sidecars')).length,
+    unit: ['sidecar', 'sidecars'] as const,
+    whenEmpty: 'arrives at inc7',
+  },
+  {
+    href: '/artifacts/',
+    title: 'Context artifacts',
+    blurb: 'Five kinds of thing you put in front of a model, reproduced as written.',
+    count: (await getCollection('artifacts')).length,
+    unit: ['artifact', 'artifacts'] as const,
+    whenEmpty: 'none yet',
+  },
+].map((shelf) => ({
+  ...shelf,
+  live: shelf.count > 0,
+  label: shelf.count > 0 ? plural(shelf.count, ...shelf.unit) : shelf.whenEmpty,
+}));
+---
+<Base
+  title="The corpus · ai-coding-journey"
+  description="Topics, atoms, sidecars and artifacts — the storage the site, the deck and the book are all served from."
+>
+  <h1>The corpus</h1>
+  <p class="lede">
+    The storage layer, not an output. Every chapter, every slide and every future
+    page is assembled from these four shelves rather than written beside them.
+  </p>
+
+  <ul class="shelves">
+    {shelves.map((shelf) => (
+      <li>
+        {shelf.live
+          ? <a href={shelf.href}>{shelf.title}</a>
+          : <span class="pending">{shelf.title}</span>}
+        <span class="count">{shelf.label}</span>
+        <span class="blurb">{shelf.blurb}</span>
+      </li>
+    ))}
+  </ul>
+
+  <p class="note">
+    Querying the corpus by rung, audience and type — the way a talk gets
+    assembled — lands with the deck rebuild.
+  </p>
+</Base>
+
+<style>
+  .lede { color: var(--fg-dim); margin-top: 0; max-width: 52ch; }
+  .shelves { list-style: none; padding: 0; margin-top: var(--space-4); }
+  .shelves li {
+    display: grid;
+    grid-template-columns: minmax(9rem, auto) 9rem 1fr;
+    gap: var(--space-2) var(--space-3);
+    align-items: baseline;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .count, .blurb { font-size: var(--size-0); color: var(--fg-dim); }
+  .pending { color: var(--fg-dim); }
+  .count { font-family: var(--font-mono); }
+  .note {
+    margin-top: var(--space-4);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+    max-width: 52ch;
+  }
+  @media (max-width: 34rem) {
+    .shelves li { grid-template-columns: 1fr; gap: var(--space-1); }
+  }
+</style>
