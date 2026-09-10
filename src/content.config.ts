@@ -196,6 +196,11 @@ const atoms = defineCollection({
     level: z.enum(LEVELS),
     // The chapter this was mined for. Stage 4's transclusion query keys on it.
     source_chapter: z.string(),
+    // Where the `## Evidence` quote is reproduced FROM, when that file is public
+    // and in-repo. `source_chapter` cannot serve: it is a mining target, not
+    // provenance. Absent means the quote came from a private source, and the
+    // verbatim gate skips the atom explicitly rather than passing it silently.
+    quote_from: z.string().optional(),
   }),
 });
 
