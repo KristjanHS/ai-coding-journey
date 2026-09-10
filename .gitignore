@@ -7,3 +7,4 @@ docs/plans
 .claude/settings.local.json
 .vercel
 .env*
+.gate-stamp

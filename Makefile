@@ -15,7 +15,11 @@ VITEST := node_modules/.bin/vitest
 # the shared include at the bottom must not be able to steal the default goal.
 .DEFAULT_GOAL := help
 
-.PHONY: help check lint site test timeline measurements ship dev build preview
+.PHONY: help brief check lint site test timeline measurements ship dev build preview
+
+# The gate stamp `check` writes on green and `brief` reads. Gitignored: it is a
+# local verdict about a local tree, never a fact about the repo.
+STAMP := .gate-stamp
 
 help: ## show this list of targets
 	@printf 'Usage: make <target>\n\n'
@@ -27,6 +31,55 @@ help: ## show this list of targets
 	  syncwt   'rebase the linked worktree, run the gate, ff-merge it into the primary' \
 	  commit   'make commit <message...>  — stage all + commit on the current branch' \
 	  commitwt 'same, but in the linked worktree'
+
+# The session-opening orientation call. The 30-session token audit (App SS3)
+# found ~28 recon commands per session -- 296 grep, 202 ls, 187 sed -n, 156 cat,
+# 115 of them CWD-prefixed -- just to answer "where am I". This target answers it
+# once, in five labelled sections, so the answer costs one tool call.
+#
+# `plan` and `next` read the impag pointer, NOT the newest file in docs/plans/.
+# Newest-mtime is wrong by construction: a plan doc is touched when it is RULED
+# and archived, so a closed doc routinely outranks the live spec (on 2026-09-10
+# the closed audit doc was one minute newer than the spec it spawned). The
+# pointer at ~/.claude/projects/<slug>/memory/project_state.md is the file that
+# actually knows, and it is the same contract impag-chain reads. Absent or
+# unparseable => "unknown (no pointer)"; there is deliberately no fallback, since
+# a confident wrong plan costs more than an admitted gap. The slug substitutes
+# BOTH `/` and `.` (a `claude --worktree` cwd carries a dot) -- one `tr` pass.
+#
+# `gate` reads the stamp `check` writes on green only. It exists to catch the
+# case no other line can show: the gate passed, then commits landed on top of
+# it, so the tree is green about a SHA that is no longer HEAD.
+brief: ## one-block session orientation: branch, log, active plan, next action, gate
+	@slug=$$(printf '%s' "$$PWD" | tr '/.' '--'); \
+	mem="$$HOME/.claude/projects/$$slug/memory/project_state.md"; \
+	printf 'branch . %s\n' "$$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '(not a git repo)')"; \
+	git status --short 2>/dev/null | sed 's/^/         /'; \
+	printf 'log ....\n'; \
+	git log --oneline -5 2>/dev/null | sed 's/^/         /'; \
+	nextblk=$$(awk '/\*\*Next action:\*\*/{f=1} f && p && /^[[:space:]]*$$/{exit} f{print; p=1}' "$$mem" 2>/dev/null); \
+	plan=$$(printf '%s' "$$nextblk" | grep -oE '[0-9A-Za-z._-]+\.md' | head -1); \
+	if [ -n "$$plan" ] && [ -f "docs/plans/$$plan" ]; then \
+	  printf 'plan ... %s\n' "$$plan"; \
+	  grep -E '^## ' "docs/plans/$$plan" | sed 's/^/         /'; \
+	else \
+	  printf 'plan ... unknown (no pointer)\n'; \
+	fi; \
+	if [ -n "$$nextblk" ]; then \
+	  printf 'next ...\n'; printf '%s\n' "$$nextblk" | sed 's/^/         /'; \
+	else \
+	  printf 'next ... unknown (no pointer)\n'; \
+	fi; \
+	if [ -f $(STAMP) ]; then \
+	  printf 'gate ... %s\n' "$$(cat $(STAMP))"; \
+	  ssha=$$(cut -d' ' -f2 $(STAMP)); head=$$(git rev-parse --short HEAD 2>/dev/null); \
+	  if [ "$$ssha" != "$$head" ]; then \
+	    n=$$(git rev-list --count "$$ssha..HEAD" 2>/dev/null || echo '?'); \
+	    printf '         WARN HEAD is %s - gate is %s commits stale\n' "$$head" "$$n"; \
+	  fi; \
+	else \
+	  printf 'gate ... never run\n'; \
+	fi
 
 # THE gate (CLAUDE.md: "one verification gate, run once per step").
 # Three parts, all blocking:
@@ -49,6 +102,8 @@ check: ## THE gate: markdownlint + astro build + vitest, all blocking
 	@$(MAKE) --no-print-directory lint
 	@$(MAKE) --no-print-directory site
 	@$(MAKE) --no-print-directory test
+	@sha=$$(git rev-parse --short HEAD 2>/dev/null) && \
+	  printf 'ok %s %s\n' "$$sha" "$$(date '+%Y-%m-%d %H:%M')" > $(STAMP) || true
 
 # The release: verify HEAD, push HEAD. The push IS the deploy — Vercel's git
 # integration builds and publishes every push to `main` once the repo is imported

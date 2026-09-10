@@ -30,6 +30,7 @@ The `make` targets check for the binaries they need and tell you to run `npm ins
 
 ```bash
 make            # list every target
+make brief      # one-block orientation — start a session with this
 make check      # THE gate — run it once per step
 make timeline   # regenerate timeline.json + the index, then commit the regen
 make dev        # Astro dev server on localhost:4321
@@ -52,6 +53,14 @@ Two things the gate cannot see: `markdownlint` ignores `.claude/`, so a malforme
 and nothing type-checks the prose. Both are reviewed by eye.
 
 Never gate a commit on `cmd | tail`: the pipe reports tail's exit status, not the command's.
+
+`make brief` is the orientation call that opens a session: branch and status, the last five commits, the
+active plan's `##` headings, the next action, and the last gate result. The plan and next action are read
+from the working pointer, never from the newest file in `docs/plans/` — a plan doc is touched when it is
+ruled and archived, so a closed doc routinely outranks the live one. No pointer, no guess: it prints
+`unknown (no pointer)`. The gate line comes from `.gate-stamp`, which `check` writes on green only, and
+`brief` flags it when that SHA is no longer `HEAD` — the one way to see that the tree is green about a
+commit you have since built on top of.
 
 ---
 
