@@ -59,3 +59,11 @@ runs against the real seam. **This repo is not exposed today**: `vitest.config.m
 isolation stays on, and the content suite mocks nothing (it reads markdown with `node:fs`). If either fact
 changes — a mock appears, or `isolate: false` is set for speed — this section becomes live and wants a
 standing manifest guard over `mock`/`doMock`/`spyOn`/`stubEnv`/`stubGlobal`/`useFakeTimers`.
+
+## An ordering assertion must be measured inside the region it claims to order
+
+Slice to the region before comparing offsets (`html.slice(html.indexOf('class="atoms'))`) —
+a page-wide `indexOf` finds a nav or link list that repeats the same identifiers in the same
+order, so the assertion passes however the region is sorted.
+
+Red-demo it by REVERSING the comparator, never by removing it: a duplicate list survives removal.
