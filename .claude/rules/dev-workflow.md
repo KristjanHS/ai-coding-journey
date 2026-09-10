@@ -13,6 +13,28 @@ Stack: **Astro 7.3.1** static output (no adapter — Vercel auto-detects a stati
 v22.19.0, npm 11.6.0. Markdown under `content/` is the source; `src/` renders it. `Makefile` is in this
 rule's `paths:` on purpose — it defines the gate, so editing it loads the gate's contract.
 
+## Web stack and the offline deck
+
+These bind `src/**` and the Astro config; the content-governing constraints live in `2026-09-09-journey-vision.md` (docs/plans/).
+
+- **Web stack: Astro + MDX, React/Preact islands only where interactive**, deployed on Vercel (native
+  Astro preset; Cloudflare Pages / Netlify are equivalent fallbacks). Chosen for lowest per-edit token
+  cost for an agent. Deck = one Astro layout over **atoms selected by facet query**, not over chapters
+  flagged `deck: true`; print stylesheet → PDF fallback (USB stick). **This repo still ships no pptx** —
+  what changed 2026-09-09 (user) is that the atom corpus is structured so claude.ai can emit one per
+  audience from it.
+- **The deck runs offline.** `is:inline` on the deck's style and script is what keeps it working from
+  `file://`, not the falsifier: Astro's `build.inlineStylesheets` defaults to `auto` and only inlines under
+  ~4 kB, so a plain `<style>` passes today purely because the CSS is small. Never remove either from
+  `src/layouts/Deck.astro`.
+- **No hydrated island ships in the deck — ruled at inc4, still binding.** The offline deck renders under
+  `file://`, where a client-hydrated component cannot be relied on. inc7's 7c repoints the deck onto a
+  facet query, which is new deck work: if it ever embeds the timeline or any other island, this ruling is
+  reopened first, never worked around.
+- **Islands degrade to text.** Every interactive island embeds alongside a text equivalent in the same
+  markdown — the inc4 timeline's sr-only table is the pattern. It keeps three things alive at once: the
+  GitHub fallback, screen-reader access, and the pandoc → PDF/EPUB book export.
+
 ## The one gate
 
 **`make check`** = `markdownlint-cli2` (BLOCKING) + `astro build` (BLOCKING) + `vitest run` (BLOCKING).

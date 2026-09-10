@@ -9,8 +9,9 @@ Adapted from crash-dash's rule of the same name; project-specific doc names stri
 ## Archiving and deleting a plan doc
 
 - **Archive at ship** — every stage committed, only a USER-owed manual/eye/live confirm left. User-owed
-  *decisions* go to the living spec's `## Open calls`; assistant-owed follow-ups go to its backlog, and are
-  deleted in the commit that ships them. The living spec's `## Shipped log` gets one line + commit subject.
+  *decisions* go to `journey-backlog.md`'s `## Open calls` (docs/plans/); assistant-owed follow-ups go to
+  its `## Backlog`, and are deleted in the commit that ships them. `journey-backlog.md`'s `## Shipped` gets
+  one line + commit subject.
 - **A carry is a re-admission, never a relocation** — an item moved into the backlog re-clears its
   admission row (`content-writing.md`) at the move; evidence, measurements and ship narrative stay in the
   archived plan and the commit message.
@@ -46,9 +47,9 @@ Everything you write down is a claim. The moves:
   referent; diff against the original for silently dropped gates.
 - **A gate or quantifier you author owes the population it must admit** — run it exactly as written; it can
   be unsatisfiable by construction.
-- **Closing a decision or shipping an owed item owes a stem-grep of its staged copies** (living spec,
+- **Closing a decision or shipping an owed item owes a stem-grep of its staged copies** (`journey-backlog.md`,
   `project_state`) in the same burst: **delete the entry; a ✅/CLOSED marker written into the file is the
-  defect** — the commit message is the closure record. (Exception: the living spec's `## Shipped log` is the
+  defect** — the commit message is the closure record. (Exception: `journey-backlog.md`'s `## Shipped` is the
   one sanctioned ✅ line.)
 
 ## Deleting a SECTION HEADING dangles refs exactly like deleting a file
