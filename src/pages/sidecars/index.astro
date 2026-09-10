@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionIndex from '../../components/SectionIndex.astro';
+import { SIDECAR_TYPES } from '../../content.config';
+
+// Rows group by type, in the declared order of SIDECAR_TYPES rather than
+// alphabetically: the type list is ordered from what a source showed towards
+// what was concluded from it, and that order is the argument.
+const order = (type: string) => SIDECAR_TYPES.indexOf(type as never);
+const rows = (await getCollection('sidecars'))
+  .sort((a, b) => order(a.data.type) - order(b.data.type) || a.id.localeCompare(b.id))
+  .map((entry) => ({
+    href: `/sidecars/${entry.id}/`,
+    title: entry.data.title,
+    meta: `${entry.data.type} · ${entry.data.topic}`,
+  }));
+---
+<Base
+  title="Sidecars · ai-coding-journey"
+  description="Supporting material for a topic: what a source showed, described rather than reproduced."
+>
+  <SectionIndex
+    title="Sidecars"
+    lede="Supporting material hanging off a topic — an artifact, a decision, a failure, a misconception. Each one describes what the source showed rather than reproducing it: the identifying detail stays out of the public tier by construction, and a sidecar that needs a quote to make its point is a sidecar that has not been written yet."
+    rows={rows}
+    empty="No sidecars mined yet."
+  />
+</Base>

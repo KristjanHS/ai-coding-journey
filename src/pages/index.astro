@@ -69,6 +69,14 @@ const sections = [
     whenEmpty: 'arrives at inc7',
   },
   {
+    href: '/sidecars/',
+    title: 'Sidecars',
+    blurb: 'Supporting material per topic, described rather than reproduced.',
+    count: (await getCollection('sidecars')).length,
+    unit: ['sidecar', 'sidecars'] as const,
+    whenEmpty: 'arrives at inc7',
+  },
+  {
     href: '/deck/',
     title: 'The deck',
     // inc6: the count is the number of chapters that opted in via `deck: true`,

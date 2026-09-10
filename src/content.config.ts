@@ -199,6 +199,39 @@ const atoms = defineCollection({
   }),
 });
 
+// The eight kinds of supporting material a topic can carry. Totality is pinned
+// by set-equality against the `content/sidecars/` directory listing in both
+// directions (`tests/content.test.ts` -- sidecar corpus), so every member here
+// owes a directory on disk and every directory owes a member here.
+export const SIDECAR_TYPES = [
+  'transcript',
+  'artifact',
+  'decision',
+  'failure',
+  'tool-eval',
+  'method',
+  'misconception',
+  'era',
+] as const;
+
+// Supporting material for a topic: what the source showed, described rather
+// than reproduced. There is deliberately NO evidence or quote field -- the
+// public tier carries descriptions, and identifying detail stays in the private
+// store. A no-blockquote guard over `content/sidecars/**` enforces that at the
+// gate; see the Stage 2 rulings in docs/plans/2026-09-09-inc7-mine-spec.md for
+// what it does and does not catch.
+const sidecars = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './content/sidecars' }),
+  schema: z.object({
+    title: z.string(),
+    // Both required. A sidecar with no topic is unreachable material, and a
+    // sidecar with no type cannot be grouped -- the two facets ARE the index.
+    topic: z.string(),
+    type: z.enum(SIDECAR_TYPES),
+    summary: z.string().optional(),
+  }),
+});
+
 export const collections = {
   journey,
   artifacts,
@@ -207,4 +240,5 @@ export const collections = {
   measurements,
   topics,
   atoms,
+  sidecars,
 };
