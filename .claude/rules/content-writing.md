@@ -26,6 +26,12 @@ measured*. A chapter without one is not done; the content test (from inc3) reds 
   chapter as the source of a method — name it and what it taught — never given a chapter of their own.
 - **Private repos** (crash-dash, the defence-exercise repos, R&D engineering work): lessons and sanitised `.md`
   excerpts only — no code dumps, no live URLs, no colleague names, no client names.
+- **Flat-then-jump must stay visible.** Context engineering appeared at *one* rung of this journey;
+  any copy implying a 15-month gradual discipline is false to the data. The `/journey/` comparison
+  table is what keeps that honest — never soften it into a growth curve.
+- **An over-budget slide is a content defect, not a styling one.** A section or heading that yields an
+  over-budget (or multi-minute) slide is fixed by splitting the heading, never by shrinking type: when
+  the deck-budget check reds, the fix is editorial.
 - **Public-link gate:** before the first public link or LinkedIn post, a fresh sub-agent runs
   `brutal-honesty-review` over `content/` as a sceptical senior engineer; every hype finding is fixed or the
   sentence is deleted.
@@ -34,7 +40,7 @@ measured*. A chapter without one is not done; the content test (from inc3) reds 
 
 | target | admits | refuses |
 |---|---|---|
-| `content/journey/NN-<repo>.md` | frontmatter from `timeline.json` (never hand-edit `start`/`end`/`commits`/`stage` — `timeline-from-git.py` resyncs them; cite counts in prose rounded, never exact); `## What I was trying to do` · `## What didn't work` · `## What I learned` · `## Artifact`; ≤1 screenshot per section, referenced from `content/media/` | narrative padding, tool marketing, claims about repos not in `timeline.json`, anything the anti-hype list bans |
+| `content/journey/NN-<repo>.md` | frontmatter from `timeline.json` (never hand-edit `start`/`end`/`commits`/`stage` — `timeline-from-git.py` resyncs them; cite counts in prose rounded, never exact); `stage_peak` is the highest rung the repo *reached*, where `stage` is the rung it *opened* on — a peak above `stage` ships only with a git-dated artifact **inside that repo**, since adopting the global config baseline is consuming governance, not authoring it; the default `peak ?? stage` lives in a schema comment, not in Zod, so anything reading the key applies it itself; `## What I was trying to do` · `## What didn't work` · `## What I learned` · `## Artifact`; ≤1 screenshot per section, referenced from `content/media/` | narrative padding, tool marketing, claims about repos not in `timeline.json`, anything the anti-hype list bans |
 | `content/journey/00-experiments.md` | one line per <5-commit repo: name · date · one-sentence outcome | a section per repo |
 | `content/journey/README.md` | **generated** index from `timeline.json` | hand edits |
 | `content/artifacts/<slug>.md` — one of five kinds (`prompt`, `rule`, `skill`, `hook`, `memory`), declared in frontmatter | a prompt verbatim as used (sanitised), one line on what it was for, and whether it is still used; for the other four kinds, excerpts ≤40 lines each from a real file, plus a *Where it came from* line naming the tree and stating whether a reader can verify it; a date per entry where the source has one, else one page-level `captured:` range plus an explicit "undated in source" note | improved/idealised rewrites presented as the original; an inferred date; a guessed still-used status; a claimed public address for a private or per-machine file |

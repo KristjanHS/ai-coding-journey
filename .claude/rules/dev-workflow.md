@@ -31,6 +31,9 @@ These bind `src/**` and the Astro config; the content-governing constraints live
   `file://`, where a client-hydrated component cannot be relied on. inc7's 7c repoints the deck onto a
   facet query, which is new deck work: if it ever embeds the timeline or any other island, this ruling is
   reopened first, never worked around.
+- **Never add a root-absolute nav link inside `src/pages/deck/`** (e.g. `/course/`). That tree is the
+  slide runtime — `Deck.astro`, no `Base`, assets inline — and `tests/deck-offline.test.ts` asserts the
+  built deck carries zero root-absolute `href`/`src`. Door links belong on the homepage rows.
 - **Islands degrade to text.** Every interactive island embeds alongside a text equivalent in the same
   markdown — the inc4 timeline's sr-only table is the pattern. It keeps three things alive at once: the
   GitHub fallback, screen-reader access, and the pandoc → PDF/EPUB book export.
