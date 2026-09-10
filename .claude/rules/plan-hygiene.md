@@ -27,6 +27,9 @@ a plan doc in the *dotfiles* repo, pathspec'd to that dir, and lint it: only `do
 Because `make check` runs markdownlint through the symlink, an agent-authored plan doc reds the gate on
 MD060/MD040/MD004 — lint it before the burst, not after.
 
+- **Size each increment spec so ONE session finishes it** — split into per-stage specs rather than
+  letting one grow; a spec that needs resuming re-pays the start prefix and re-reads the whole doc.
+
 ## Cite plan docs by stem, not path
 
 Cite `<stem>.md (docs/plans/)` — never a `docs/plans/`-prefixed path, and never into `docs/plans/archive/`
