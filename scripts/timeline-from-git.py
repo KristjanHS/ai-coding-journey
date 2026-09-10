@@ -30,7 +30,12 @@ TIMELINE = CONTENT / "timeline.json"
 INDEX = JOURNEY / "README.md"
 EXPERIMENTS = JOURNEY / "00-experiments.md"
 REPOS_CONFIG = ROOT / "scripts" / "repos.json"
-MIN_COMMITS = 5  # below this a repo is an experiment line, not a chapter
+# Below this a repo is an experiment line, not a chapter. One source, shared with
+# src/lib/timeline.ts: both read scripts/timeline-config.json, so neither carries a
+# hand-copied mirror of the other.
+MIN_COMMITS: int = json.loads((ROOT / "scripts" / "timeline-config.json").read_text())[
+    "minCommits"
+]
 
 
 # Which repos are scanned is an explicit ALLOWLIST in scripts/repos.json, never a

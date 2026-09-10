@@ -43,7 +43,7 @@ make ship       # gate HEAD + push HEAD (uncommitted work ignored) — the push 
 | --- | --- | --- |
 | `markdownlint-cli2` over every `.md` | ✅ | formatting drift across the product itself |
 | `astro build` | ✅ | the Zod frontmatter gate — a bad `stage` enum, a string `commits`, an out-of-enum `artifact` |
-| `vitest run` | ✅ | the evidence rule, the missing `What didn't work`, the banned vocabulary, and the two mirrored constants |
+| `vitest run` | ✅ | the evidence rule, the missing `What didn't work`, the banned vocabulary, and the rule prose against `src/lib/content-rules.ts` |
 
 The timeline is not part of the gate. Run `make timeline` when you want the spine refreshed; it rewrites
 `timeline.json`, the index and the generated frontmatter, and creates a chapter stub for any repo that has
@@ -118,8 +118,9 @@ excerpt, a defect a reviewer sub-agent caught (with the fix commit's subject), o
 ## How the content rules are enforced
 
 The two rules above are binding *and* executable. The vitest suite in `tests/content.test.ts` is their machine half; `.claude/rules/content-writing.md` is their prose half.
-The two are mirror-tested against each other, so a reworded rule reds instead of rotting quietly — the
-banned-vocabulary list and the `MIN_COMMITS` threshold are each asserted against their other copy.
+The banned-vocabulary list has one machine source, `src/lib/content-rules.ts`, and the suite compares the
+rule's prose to it, so a reworded rule reds instead of rotting quietly. `MIN_COMMITS` likewise has one
+source, `scripts/timeline-config.json`, read by both the site lib and the generator.
 
 Every new assertion owes a **mutate-and-confirm-red demo** before the step that added it counts as
 verified. A check that cannot fail proves nothing.

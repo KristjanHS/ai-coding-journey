@@ -47,9 +47,9 @@ the gate to `0` and it silently becomes `-1`: the test passes on every input and
 gate constant therefore owes a repo-wide grep for offsets off it — not just a re-run of the suites, since
 the hollowed tests stay GREEN. Pair the derived fixture with a premise guard that reds on the re-arm
 (`expect(MIN_COMMITS).toBeGreaterThan(0)`), so the test fails loudly instead of quietly ceasing to
-discriminate. The suite's existing mirror checks (banned-word list against `content-writing.md`,
-`MIN_COMMITS` against `scripts/timeline-from-git.py`) are this pattern: a hand-copied constant that drifts
-reds instead of rotting.
+discriminate. The suite's prose-vs-source check (the banned-word bullet in `content-writing.md` against
+`src/lib/content-rules.ts`) is this pattern: a restated constant that drifts reds instead of rotting.
+`MIN_COMMITS` no longer has a copy to mirror — both readers load `scripts/timeline-config.json`.
 
 ## `isolate: false` silently no-ops a `vi.mock` — not yet applicable here
 

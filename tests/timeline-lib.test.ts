@@ -98,6 +98,22 @@ describe('experiments', () => {
     const dates = experiments.map((row) => row.first_commit);
     expect([...dates].sort()).toEqual(dates);
   });
+
+  // `MIN_COMMITS` has ONE source, `scripts/timeline-config.json`, read by this
+  // lib and by the Python generator. The two assertions prove each reader
+  // actually reads it: the lib's export equals the file's value (a re-hardcoded
+  // `= 5` in timeline.ts reds), and the generator names the file and carries
+  // no `MIN_COMMITS = <digits>` literal of its own (a re-hardcoded copy reds).
+  it('MIN_COMMITS is read from scripts/timeline-config.json by both readers', () => {
+    const root = process.cwd();
+    const config = JSON.parse(readFileSync(join(root, 'scripts', 'timeline-config.json'), 'utf8'));
+    expect(config.minCommits).toBeGreaterThan(0);
+    expect(MIN_COMMITS).toBe(config.minCommits);
+
+    const script = readFileSync(join(root, 'scripts', 'timeline-from-git.py'), 'utf8');
+    expect(script).toMatch(/timeline-config\.json/);
+    expect(script).not.toMatch(/^MIN_COMMITS\s*=\s*\d/m);
+  });
 });
 
 // The GENERATOR's config, not the site's: `scripts/repos.json` is the explicit
@@ -106,9 +122,8 @@ describe('experiments', () => {
 // assert the two ways that file can be wrong: a row in `timeline.json` no repo
 // in the list can account for (the list and the generated spine disagree), and a
 // duplicated entry (two dirs, one row, silently). `REPO_GROUPS` is parsed out of
-// the generator the way `content.test.ts` parses `MIN_COMMITS`: vitest has no
-// Python resolution, and a hand-copied mirror is the drift this repo keeps
-// deleting.
+// the generator with a regex: vitest has no Python resolution, and a hand-copied
+// mirror is the drift this repo keeps deleting.
 describe('generator allowlist (scripts/repos.json)', () => {
   const root = process.cwd();
   const allow: string[] = JSON.parse(

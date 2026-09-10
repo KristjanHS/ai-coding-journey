@@ -89,9 +89,10 @@ brief: ## one-block session orientation: branch, log, active plan, next action, 
 #   3. the vitest content suite — BLOCKS. The executable half of the two content
 #      rules: `artifact: present` must have a body under `## Artifact`, every
 #      chapter needs `## What didn't work`, and no content file may use the
-#      banned vocabulary. It also mirror-checks the two hand-copied constants
-#      (the banned list against content-writing.md, MIN_COMMITS against the
-#      generator), so a divergence reds instead of rotting quietly.
+#      banned vocabulary. The banned list (src/lib/content-rules.ts) and
+#      MIN_COMMITS (scripts/timeline-config.json) each have ONE source; the suite
+#      checks the rule prose and the generator against them, so a divergence
+#      reds instead of rotting quietly.
 # There is deliberately NO timeline drift probe here. It ran the generator on
 # every gate to compare-and-restore, and the answer was almost always drift the
 # repo could do nothing about. The foreign-repo half of that is now fixed at the

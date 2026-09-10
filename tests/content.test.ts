@@ -3,13 +3,16 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { BANNED } from '../src/lib/content-rules';
+
 // The content gate. Three assertions over the authored markdown, each one the
 // executable form of a line in `.claude/rules/content-writing.md`:
 //   (a) `artifact: present` <=> a non-empty `## Artifact` body   (evidence rule)
 //   (b) every chapter carries `## What didn't work`               (anti-hype rule)
 //   (c) no content file uses the banned vocabulary                (anti-hype rule)
-// Plus two mirror tests: each hand-copied constant is read back out of BOTH of
-// its homes and compared, so a divergence reds instead of rotting quietly.
+// Plus one prose-vs-source test: the rule file's banned-vocabulary bullet is
+// compared to `src/lib/content-rules.ts`, so a divergence reds instead of
+// rotting quietly.
 
 const CONTENT = 'content';
 const JOURNEY = join(CONTENT, 'journey');
@@ -20,22 +23,6 @@ const JOURNEY = join(CONTENT, 'journey');
 // frontmatter), so (a) and (b) cannot apply to them.
 const NOT_A_CHAPTER = new Set(['00-experiments.md', 'README.md']);
 
-// Mirrors the banned list in `.claude/rules/content-writing.md` §Anti-hype.
-// Hardcoded on purpose: the `banned list matches the rule file` test below
-// compares the two, so a reworded rule bullet reds THAT test rather than
-// taking this assertion down with it.
-const BANNED = [
-  '10x',
-  'game-changer',
-  'game changer',
-  'revolution',
-  'revolutionary',
-  'anyone can',
-  'in minutes',
-  'no code needed',
-  'effortless',
-  'magic',
-];
 
 /** Every `.md` under content/, recursively, minus the generated index. */
 function contentFiles(dir = CONTENT): string[] {
@@ -220,10 +207,11 @@ describe('anti-hype rule', () => {
   });
 });
 
-describe('mirrored constants', () => {
-  // The banned list above is a hand-copy of the rule file's. Parse the rule's
-  // bullet and compare the two sets, so adding a word in one place and not the
-  // other reds here rather than silently going unenforced.
+describe('rule prose vs its machine half', () => {
+  // `BANNED` has ONE machine source (`src/lib/content-rules.ts`); the rule file
+  // restates it as prose for authors. Parse the rule's bullet and compare the
+  // two sets, so adding a word in one place and not the other reds here rather
+  // than silently going unenforced.
   it('banned list matches `content-writing.md` §Anti-hype', () => {
     const rule = read(join('.claude', 'rules', 'content-writing.md'));
     const bullet = rule.match(/^- \*\*Banned vocabulary\*\*[^\n]*\n(?:[ \t]+[^\n]*\n)*/m);
@@ -231,23 +219,6 @@ describe('mirrored constants', () => {
 
     const fromRule = [...bullet![0].matchAll(/`([^`]+)`/g)].map((m) => m[1]);
     expect(new Set(fromRule)).toEqual(new Set(BANNED));
-  });
-
-  // `MIN_COMMITS` lives in the generator and is hand-copied into the site's
-  // shared timeline lib (which uses it to build the "also tried" list). They
-  // must not drift: the two files would then disagree about what counts as a
-  // chapter. The site half moved out of `src/pages/journey/index.astro` into
-  // `src/lib/timeline.ts` in inc4 Stage 2, so this regex tracks the new home.
-  it('MIN_COMMITS matches between the generator and the timeline lib', () => {
-    const script = read(join('scripts', 'timeline-from-git.py'));
-    const lib = read(join('src', 'lib', 'timeline.ts'));
-
-    const fromScript = script.match(/^MIN_COMMITS\s*=\s*(\d+)/m);
-    const fromLib = lib.match(/^export const MIN_COMMITS\s*=\s*(\d+);/m);
-    expect(fromScript, 'no MIN_COMMITS in timeline-from-git.py').not.toBeNull();
-    expect(fromLib, 'no MIN_COMMITS in src/lib/timeline.ts').not.toBeNull();
-
-    expect(fromLib![1]).toBe(fromScript![1]);
   });
 
   // `content/timeline.json` is generated, so these assert the GENERATOR's two
@@ -587,7 +558,7 @@ describe('sidecar corpus', () => {
 // address, plus the `/g/g-p-<id>/` segment that project-folder threads carry),
 // a machine or account fingerprint, and a credential shape.
 //
-// Kept deliberately OUT of the BANNED list above. That list is mirrored against
+// Kept deliberately OUT of `BANNED` (src/lib/content-rules.ts). That list is checked against
 // `.claude/rules/content-writing.md` §Anti-hype by the drift guard, so folding
 // these in would (a) couple a leak guard to a vocabulary rule and (b) publish
 // each pattern in the same breath as `10x` and `magic`. Separate assertion,
