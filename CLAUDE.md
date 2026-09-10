@@ -3,7 +3,7 @@
 Public, **markdown-first** knowledge base of one person's journey from a 20-year coding pause to shipping
 a ~5k-commit app with AI coding agents. The markdown under `content/` IS the product (readable on GitHub
 as-is); an Astro site on Vercel (from inc3) renders it as a browsable journey, a web-native lecture deck
-(TalTech, 19 Nov 2026) and, later, interactive explorers. Long horizon: a book from the same files.
+(a university, 19 Nov 2026) and, later, interactive explorers. Long horizon: a book from the same files.
 
 ## Where things live
 

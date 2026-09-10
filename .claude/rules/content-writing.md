@@ -24,7 +24,7 @@ measured*. A chapter without one is not done; the content test (from inc3) reds 
   generated code; say so plainly where relevant and show the review system and what it caught instead.
 - **Learning/course repos** (`01-claude-code-pm-course`, `03-`/`09-learn-claude-code`) are cited inside a
   chapter as the source of a method — name it and what it taught — never given a chapter of their own.
-- **Private repos** (crash-dash, Locked Shields, ls-sitrep, Sharemind work): lessons and sanitised `.md`
+- **Private repos** (crash-dash, the defence-exercise repos, R&D engineering work): lessons and sanitised `.md`
   excerpts only — no code dumps, no live URLs, no colleague names, no client names.
 - **Public-link gate:** before the first public link or LinkedIn post, a fresh sub-agent runs
   `brutal-honesty-review` over `content/` as a sceptical senior engineer; every hype finding is fixed or the

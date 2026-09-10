@@ -472,7 +472,7 @@ describe('atom corpus', () => {
   });
 
   it('the four audiences are the cuts one corpus emits', () => {
-    expect(configEnum('AUDIENCES')).toEqual(['taltech', 'sharemind', 'meetup', 'linkedin']);
+    expect(configEnum('AUDIENCES')).toEqual(['university', 'rnd-engineers', 'meetup', 'linkedin']);
   });
 
   // Fidelity rule: paraphrase everywhere, exactly one verbatim line per atom, and

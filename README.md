@@ -155,7 +155,7 @@ and an Astro site over the same markdown — home, journey and artifacts routes,
 `course/` as honest empty states.
 
 **Where it's heading.** Fill the pending chapters to `artifact: present`; publish the sanitised
-crash-dash case study and the course skeleton (inc5); then the web-native lecture deck (TalTech, 19 Nov 2026), which is what the
+crash-dash case study and the course skeleton (inc5); then the web-native lecture deck (a university lecture, 19 Nov 2026), which is what the
 `deck:` frontmatter key is reserved for. Interactive explorers over `timeline.json` come after that,
 and a book from the same files is the long horizon.
 

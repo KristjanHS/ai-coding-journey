@@ -42,7 +42,7 @@ export const COST_TO_LOOK = ['no-log', 'counts-only', 'floor', 'cache-reuse'] as
 // unwritable and the vitest pins vacuous.
 
 // Who a cut is for. Fixed by the vision, not chosen here.
-export const AUDIENCES = ['taltech', 'sharemind', 'meetup', 'linkedin'] as const;
+export const AUDIENCES = ['university', 'rnd-engineers', 'meetup', 'linkedin'] as const;
 
 // What the atom DOES to a listener — deliberately not a reader-experience scale
 // (intro/practitioner/expert), which maps near-1:1 onto `audience[]` and would
