@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """Fill the Codex era in sources/measurements/eras-full.json from ~/.codex/sessions.
 
-Usage: python3 scripts/measurements-codex.py [CODEX_SESSIONS_ROOT]
+Usage: python3 scripts/measurements.py codex [CODEX_SESSIONS_ROOT]
        (default ~/.codex/sessions)
 
 Rollouts live at `sessions/YYYY/MM/DD/rollout-*.jsonl`, and they come in TWO formats
@@ -44,8 +43,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
+import measlib
+
 DEFAULT_ROOT = Path.home() / ".codex" / "sessions"
 ERA_ID = "codex"
 
@@ -150,16 +149,13 @@ def scan(paths: list[Path]) -> dict:
     }
 
 
-def main() -> int:
-    root = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_ROOT
+def measure(argv: list[str]) -> int:
+    root = Path(argv[0]).expanduser() if argv else DEFAULT_ROOT
     if not root.is_dir():
         print(f"error: {root} is not a directory", file=sys.stderr)
         return 1
-    if not ERAS.exists():
-        print(
-            "error: eras.json missing — run scripts/measurements-git.py first",
-            file=sys.stderr,
-        )
+    document = measlib.load_store()
+    if document is None:
         return 1
     paths = sorted(root.glob("*/*/*/rollout-*.jsonl"))
     if not paths:
@@ -169,24 +165,19 @@ def main() -> int:
     measured = scan(paths)
     start, end = measured.pop("start"), measured.pop("end")
 
-    document = json.loads(ERAS.read_text())
-    for era in document["eras"]:
-        if era["id"] != ERA_ID:
-            continue
-        era["logStart"], era["logEnd"] = start, end
-        era["metrics"] = measured
-        # D2 as amended: Codex joins the token floor, with its own reason for being one.
-        era["availability"]["tokens"] = "floor"
-        era["provenance"]["logs"] = (
-            "~/.codex/sessions/**/rollout-*.jsonl (two header formats); "
-            "history.jsonl is a 3-line stub, not a prompt log"
-        )
-        break
-    else:
-        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+    era = measlib.find_era(document, ERA_ID)
+    if era is None:
         return 1
+    era["logStart"], era["logEnd"] = start, end
+    era["metrics"] = measured
+    # D2 as amended: Codex joins the token floor, with its own reason for being one.
+    era["availability"]["tokens"] = "floor"
+    era["provenance"]["logs"] = (
+        "~/.codex/sessions/**/rollout-*.jsonl (two header formats); "
+        "history.jsonl is a 3-line stub, not a prompt log"
+    )
 
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    measlib.write_store(document)
     tokens = measured["tokens"]
     print(
         f"codex: {measured['sessions']} sessions in {measured['files']} rollouts "
@@ -195,7 +186,3 @@ def main() -> int:
         f"{tokens['filesWithTokens']} rollouts since {tokens['loggingStart']}, {start}..{end}"
     )
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

@@ -198,14 +198,14 @@ timeline: ## regenerate content/timeline.json + the journey index from git
 # because every log-derived range is cross-checked against it.
 measurements: ## regenerate the measurement store (private full + public redacted)
 	@python3 scripts/measurements-git.py
-	@python3 scripts/measurements-cc.py
-	@python3 scripts/measurements-cursor.py
-	@python3 scripts/measurements-continue.py
-	@python3 scripts/measurements-codex.py
-	@python3 scripts/measurements-copilot.py
-	@python3 scripts/measurements-skills.py
-	@python3 scripts/measurements-governance.py
-	@python3 scripts/measurements-stt.py
+	@python3 scripts/measurements.py cc
+	@python3 scripts/measurements.py cursor
+	@python3 scripts/measurements.py continue
+	@python3 scripts/measurements.py codex
+	@python3 scripts/measurements.py copilot
+	@python3 scripts/measurements.py skills
+	@python3 scripts/measurements.py governance
+	@python3 scripts/measurements.py stt
 	@python3 scripts/measurements-public.py
 
 # ── Astro site ──

@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """Fill the Cursor era in sources/measurements/eras-full.json from its state.vscdb.
 
-Usage: python3 scripts/measurements-cursor.py [STATE_VSCDB]
+Usage: python3 scripts/measurements.py cursor [STATE_VSCDB]
        (default: the measured Windows-side path below)
 
 Cursor keeps everything in one ~1.2 GB SQLite file. Two rules govern reading it, and
@@ -35,15 +34,14 @@ Deterministic: sorted keys, no timestamps of its own.
 
 from __future__ import annotations
 
-import json
 import shutil
 import sqlite3
 import sys
 import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
+import measlib
+
 DEFAULT_DB = Path(
     "/mnt/c/Users/PC/AppData/Roaming/Cursor/User/globalStorage/state.vscdb"
 )
@@ -86,7 +84,7 @@ def iso_day(epoch_ms: int | None) -> str | None:
     )
 
 
-def measure(db: Path) -> dict:
+def scan(db: Path) -> dict:
     """Copy the database, then read the copy read-only and immutable."""
     with tempfile.TemporaryDirectory(prefix="cursor-measure-") as tmp:
         copy = Path(tmp) / "state.vscdb"
@@ -126,44 +124,32 @@ def measure(db: Path) -> dict:
     }
 
 
-def main() -> int:
-    db = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_DB
+def measure(argv: list[str]) -> int:
+    db = Path(argv[0]).expanduser() if argv else DEFAULT_DB
     if not db.is_file():
         print(f"error: {db} is not a file", file=sys.stderr)
         return 1
-    if not ERAS.exists():
-        print(
-            "error: eras.json missing — run scripts/measurements-git.py first",
-            file=sys.stderr,
-        )
+    document = measlib.load_store()
+    if document is None:
         return 1
 
-    measured = measure(db)
+    measured = scan(db)
     log_start, log_end = measured.pop("_range")
 
-    document = json.loads(ERAS.read_text())
-    for era in document["eras"]:
-        if era["id"] != ERA_ID:
-            continue
-        era["logStart"] = log_start
-        era["logEnd"] = log_end
-        era["metrics"] = measured
-        era["provenance"]["logs"] = (
-            "Cursor state.vscdb (cursorDiskKV), read-only immutable copy"
-        )
-        break
-    else:
-        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+    era = measlib.find_era(document, ERA_ID)
+    if era is None:
         return 1
+    era["logStart"] = log_start
+    era["logEnd"] = log_end
+    era["metrics"] = measured
+    era["provenance"]["logs"] = (
+        "Cursor state.vscdb (cursorDiskKV), read-only immutable copy"
+    )
 
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    measlib.write_store(document)
     print(
         f"cursor: {measured['sessions']} sessions, {measured['messages']['total']} messages, "
         f"{measured['tokens']['input']} input / {measured['tokens']['output']} output tokens "
         f"({measured['nonZeroBubbleFraction']:.0%} of bubbles priced) {log_start}..{log_end}"
     )
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

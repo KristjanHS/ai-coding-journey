@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
 """Fill the Claude Code era in sources/measurements/eras-full.json from its own logs.
 
-Usage: python3 scripts/measurements-cc.py [PROJECTS_ROOT]   (default ~/.claude/projects)
-       python3 scripts/measurements-cc.py --onset-only       (era-start dates, no rescan)
+Usage: python3 scripts/measurements.py cc [PROJECTS_ROOT]   (default ~/.claude/projects)
+       python3 scripts/measurements.py cc --onset-only       (era-start dates, no rescan)
 
 `--onset-only` refreshes just the `onset` block. It exists because the transcript scan
 and the onset dates age at different rates: the scan's totals move every session (and
@@ -49,8 +48,8 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
+import measlib
+
 DEFAULT_LOG_ROOT = Path.home() / ".claude" / "projects"
 ERA_ID = "claude-code"
 
@@ -209,16 +208,13 @@ def write_onset_only() -> int:
     if block is None:
         print(f"error: no onset dates in {CONFIG_JSON}", file=sys.stderr)
         return 1
-    document = json.loads(ERAS.read_text())
-    for era in document["eras"]:
-        if era["id"] == ERA_ID:
-            era["onset"] = block
-            era["provenance"]["onset"] = block["source"]
-            break
-    else:
-        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+    document = json.loads(measlib.ERAS.read_text())
+    era = measlib.find_era(document, ERA_ID)
+    if era is None:
         return 1
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    era["onset"] = block
+    era["provenance"]["onset"] = block["source"]
+    measlib.write_store(document)
     print(
         f"claude-code onset: first start {block['firstStart']}, "
         f"first token {block['firstToken']}"
@@ -226,18 +222,15 @@ def write_onset_only() -> int:
     return 0
 
 
-def main() -> int:
-    if len(sys.argv) > 1 and sys.argv[1] == "--onset-only":
+def measure(argv: list[str]) -> int:
+    if argv and argv[0] == "--onset-only":
         return write_onset_only()
-    log_root = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_LOG_ROOT
+    log_root = Path(argv[0]).expanduser() if argv else DEFAULT_LOG_ROOT
     if not log_root.is_dir():
         print(f"error: {log_root} is not a directory", file=sys.stderr)
         return 1
-    if not ERAS.exists():
-        print(
-            "error: eras.json missing — run scripts/measurements-git.py first",
-            file=sys.stderr,
-        )
+    document = measlib.load_store()
+    if document is None:
         return 1
 
     main_files = sorted(log_root.glob("*/*.jsonl"))
@@ -251,33 +244,24 @@ def main() -> int:
     scan(main_files, parent, dates, sidechain=False)
     scan(subagent_files, subagent, dates, sidechain=True)
 
-    document = json.loads(ERAS.read_text())
-    for era in document["eras"]:
-        if era["id"] != ERA_ID:
-            continue
-        era["logStart"] = min(dates) if dates else None
-        era["logEnd"] = max(dates) if dates else None
-        era["metrics"] = {
-            "main": parent.as_json("sessions"),
-            "subagent": subagent.as_json("parentSessions"),
-        }
-        era["provenance"]["logs"] = "~/.claude/projects/**/*.jsonl (snapshots excluded)"
-        onset_block = onset()
-        if onset_block:
-            era["onset"] = onset_block
-            era["provenance"]["onset"] = onset_block["source"]
-        break
-    else:
-        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+    era = measlib.find_era(document, ERA_ID)
+    if era is None:
         return 1
+    era["logStart"] = min(dates) if dates else None
+    era["logEnd"] = max(dates) if dates else None
+    era["metrics"] = {
+        "main": parent.as_json("sessions"),
+        "subagent": subagent.as_json("parentSessions"),
+    }
+    era["provenance"]["logs"] = "~/.claude/projects/**/*.jsonl (snapshots excluded)"
+    onset_block = onset()
+    if onset_block:
+        era["onset"] = onset_block
+        era["provenance"]["onset"] = onset_block["source"]
 
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    measlib.write_store(document)
     print(
         f"claude-code: {len(parent.sessions)} main sessions ({parent.files} files), "
         f"{subagent.files} subagent transcripts across {len(subagent.sessions)} parent sessions"
     )
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

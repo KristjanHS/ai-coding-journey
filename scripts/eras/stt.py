@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
 """Fill the stt-faster experimentation corpus block in sources/measurements/eras-full.json.
 
-Usage: python3 scripts/measurements-stt.py [CORPUS_DIR]
+Usage: python3 scripts/measurements.py stt [CORPUS_DIR]
        (default: /mnt/c/Users/PC/Downloads/transcribe)
 
 SANITISATION GUARD — the most sensitive source in the increment. The `.aac` inputs and
 `.txt`/`.json` transcripts are personal Teams and desk recordings. Nothing from them is
 copied, quoted, excerpted or summarised: this script reads FILE NAMES only to bucket
 extensions, and emits AGGREGATE COUNTS only. No filename, no transcript text and nothing
-naming a person may reach an emitted field; tests/measurements.test.ts asserts that.
+naming a person may reach an emitted field; tests/measurements-redaction.test.ts asserts that.
 
 SCHEMA PROBE (decision D7) — one `.json` was read, not all 38. It is raw faster-whisper
 transcription output: `segments[]` of `{start, end, text, no_speech_prob, avg_logprob}`
@@ -28,13 +27,12 @@ Deterministic: sorted keys, no timestamps of its own.
 from __future__ import annotations
 
 import datetime as dt
-import json
 import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
+import measlib
+
 DEFAULT_CORPUS = Path("/mnt/c/Users/PC/Downloads/transcribe")
 REPO = Path.home() / "projects" / "stt-faster"
 ERA_ID = "claude-code"
@@ -46,7 +44,7 @@ def git(repo: Path, *args: str) -> str:
     ).stdout.strip()
 
 
-def measure(corpus: Path) -> dict:
+def scan(corpus: Path) -> dict:
     # Three generations of the same batch harness, accumulated and never deleted — the
     # stacked-iteration pattern the kri-local-rag config dirs show. The split is the
     # measurement: collapsing the three into one total loses the iteration story.
@@ -81,19 +79,16 @@ def measure(corpus: Path) -> dict:
     }
 
 
-def main() -> int:
-    corpus = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_CORPUS
+def measure(argv: list[str]) -> int:
+    corpus = Path(argv[0]).expanduser() if argv else DEFAULT_CORPUS
     if not corpus.is_dir():
         print(f"error: {corpus} is not a directory", file=sys.stderr)
         return 1
-    if not ERAS.exists():
-        print(
-            "error: eras.json missing — run scripts/measurements-git.py first",
-            file=sys.stderr,
-        )
+    document = measlib.load_store()
+    if document is None:
         return 1
 
-    measured = measure(corpus)
+    measured = scan(corpus)
     # Cross-check, per the kri-local-rag precedent: a disagreement between the corpus
     # mtime span and the repo's own commit span is a finding the page shows, never a
     # gate that must reconcile to zero.
@@ -104,9 +99,8 @@ def main() -> int:
         "gitEnd": dates[0],
     }
 
-    document = json.loads(ERAS.read_text())
     document["sttFaster"] = measured
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    measlib.write_store(document)
     g = measured["batGenerations"]
     print(
         f"stt-faster: {measured['batTotal']} .bat "
@@ -117,7 +111,3 @@ def main() -> int:
         f"{measured['repo']['gitStart']}..{measured['repo']['gitEnd']}"
     )
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

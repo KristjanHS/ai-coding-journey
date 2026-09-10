@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """Fill the Claude Code era's `governance` block in sources/measurements/eras-full.json.
 
-Usage: python3 scripts/measurements-governance.py [CLAUDE_DIR]
+Usage: python3 scripts/measurements.py governance [CLAUDE_DIR]
        (default: ~/.claude)
 
 Two figures, both COUNTS of live files on this workstation, feeding the two context
@@ -34,13 +33,13 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
+import measlib
+
 DEFAULT_CLAUDE = Path.home() / ".claude"
 ERA_ID = "claude-code"
 
 
-def measure(claude: Path) -> dict:
+def scan(claude: Path) -> dict:
     settings = json.loads((claude / "settings.json").read_text())
     hooks = settings.get("hooks", {})
     # Three counts that disagree; the docblock says why only the first crosses.
@@ -62,42 +61,30 @@ def measure(claude: Path) -> dict:
     }
 
 
-def main() -> int:
-    claude = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_CLAUDE
+def measure(argv: list[str]) -> int:
+    claude = Path(argv[0]).expanduser() if argv else DEFAULT_CLAUDE
     if not (claude / "settings.json").is_file():
         print(f"error: {claude}/settings.json not found", file=sys.stderr)
         return 1
-    if not ERAS.exists():
-        print(
-            "error: eras.json missing — run scripts/measurements-git.py first",
-            file=sys.stderr,
-        )
+    document = measlib.load_store()
+    if document is None:
         return 1
 
-    measured = measure(claude)
+    measured = scan(claude)
 
-    document = json.loads(ERAS.read_text())
-    for era in document["eras"]:
-        if era["id"] != ERA_ID:
-            continue
-        era["governance"] = measured
-        era["provenance"]["governance"] = (
-            "settings.json hook table plus a glob of projects/*/memory/ under the "
-            "Claude Code config dir (read-only); counts only, no names"
-        )
-        break
-    else:
-        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+    era = measlib.find_era(document, ERA_ID)
+    if era is None:
         return 1
+    era["governance"] = measured
+    era["provenance"]["governance"] = (
+        "settings.json hook table plus a glob of projects/*/memory/ under the "
+        "Claude Code config dir (read-only); counts only, no names"
+    )
 
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    measlib.write_store(document)
     print(
         f"governance: {measured['hookCommands']} hook commands across "
         f"{measured['hookEvents']} events, {measured['memoryFiles']} memory files "
         f"across {measured['memoryProjects']} projects"
     )
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

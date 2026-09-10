@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """Fill the Claude Code era's `skills` block in sources/measurements/eras-full.json.
 
-Usage: python3 scripts/measurements-skills.py [SKILLS_DIR]
+Usage: python3 scripts/measurements.py skills [SKILLS_DIR]
        (default: ~/projects/dotfiles/skills)
 
 READ-ONLY GUARD. This script never writes to, deletes from, or even opens
@@ -28,13 +27,12 @@ Deterministic: sorted keys, no timestamps of its own.
 
 from __future__ import annotations
 
-import json
 import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
+import measlib
+
 DEFAULT_SKILLS = Path.home() / "projects" / "dotfiles" / "skills"
 ERA_ID = "claude-code"
 # The original-bucket worked example: no `superpowers/` upstream ancestor, invented as a
@@ -51,7 +49,7 @@ def git(repo: Path, *args: str) -> str:
     ).stdout.strip()
 
 
-def measure(skills: Path) -> dict:
+def scan(skills: Path) -> dict:
     repo = skills.parent
     rel = skills.name
     # Scoped to the skills dir on BOTH halves: counting SKILL.md repo-wide, or counting
@@ -87,42 +85,30 @@ def measure(skills: Path) -> dict:
     }
 
 
-def main() -> int:
-    skills = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_SKILLS
+def measure(argv: list[str]) -> int:
+    skills = Path(argv[0]).expanduser() if argv else DEFAULT_SKILLS
     if not skills.is_dir():
         print(f"error: {skills} is not a directory", file=sys.stderr)
         return 1
-    if not ERAS.exists():
-        print(
-            "error: eras.json missing — run scripts/measurements-git.py first",
-            file=sys.stderr,
-        )
+    document = measlib.load_store()
+    if document is None:
         return 1
 
-    measured = measure(skills)
+    measured = scan(skills)
 
-    document = json.loads(ERAS.read_text())
-    for era in document["eras"]:
-        if era["id"] != ERA_ID:
-            continue
-        era["skills"] = measured
-        era["provenance"]["skills"] = (
-            f"git log/rev-list over {skills.name}/ in the dotfiles repo (read-only); "
-            "counts and names only, no skill bodies"
-        )
-        break
-    else:
-        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+    era = measlib.find_era(document, ERA_ID)
+    if era is None:
         return 1
+    era["skills"] = measured
+    era["provenance"]["skills"] = (
+        f"git log/rev-list over {skills.name}/ in the dotfiles repo (read-only); "
+        "counts and names only, no skill bodies"
+    )
 
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    measlib.write_store(document)
     print(
         f"skills: {measured['liveSkillFiles']} live SKILL.md, "
         f"{measured['commits']} commits (FLOOR) {measured['vcStart']}..{measured['vcEnd']}, "
         f"example {EXAMPLE} = {measured['example']['commits']} commit(s)"
     )
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

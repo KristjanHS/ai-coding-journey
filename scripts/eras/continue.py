@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """Fill the Continue era in sources/measurements/eras-full.json from ~/.continue.
 
-Usage: python3 scripts/measurements-continue.py [CONTINUE_ROOT]
+Usage: python3 scripts/measurements.py continue [CONTINUE_ROOT]
        (default: the measured Windows-side path below)
 
 Continue records the same token events twice, and this generator reads BOTH on purpose:
@@ -38,8 +37,8 @@ import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
+import measlib
+
 DEFAULT_ROOT = Path("/mnt/c/Users/PC/.continue")
 ERA_ID = "continue"
 
@@ -123,8 +122,8 @@ def read_sessions(path: Path) -> dict:
     }
 
 
-def main() -> int:
-    root = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_ROOT
+def measure(argv: list[str]) -> int:
+    root = Path(argv[0]).expanduser() if argv else DEFAULT_ROOT
     events_path = root / "dev_data" / "0.2.0" / "tokensGenerated.jsonl"
     mirror_path = root / "dev_data" / "devdata.sqlite"
     sessions_path = root / "sessions" / "sessions.json"
@@ -132,11 +131,8 @@ def main() -> int:
         if not path.is_file():
             print(f"error: {path} is not a file", file=sys.stderr)
             return 1
-    if not ERAS.exists():
-        print(
-            "error: eras.json missing — run scripts/measurements-git.py first",
-            file=sys.stderr,
-        )
+    document = measlib.load_store()
+    if document is None:
         return 1
 
     events = read_events(events_path)
@@ -156,43 +152,38 @@ def main() -> int:
         "agrees": not any(deltas.values()),
     }
 
-    document = json.loads(ERAS.read_text())
-    for era in document["eras"]:
-        if era["id"] != ERA_ID:
-            continue
-        # The token-event range is the era's log range; the chat-session range is
-        # shorter and is kept beside it rather than replacing it.
-        era["logStart"] = events["start"]
-        era["logEnd"] = events["end"]
-        era["metrics"] = {
-            "sessions": sessions,
-            "tokens": {
-                "events": events["events"],
-                "promptTokens": events["promptTokens"],
-                "generatedTokens": events["generatedTokens"],
-                "models": events["models"],
-                "start": events["start"],
-                "end": events["end"],
-            },
-            "byProvider": {
-                "events": events["eventsByProvider"],
-                "tokens": events["tokensByProvider"],
-            },
-            "crossCheck": cross_check,
-            # D4: not an unknown. Local inference has no marginal price, and the
-            # provider split above is the evidence for saying so.
-            "costFinding": "near-zero-local",
-        }
-        era["provenance"]["logs"] = (
-            "~/.continue/dev_data/0.2.0/tokensGenerated.jsonl "
-            "(+ devdata.sqlite mirror cross-check), sessions/sessions.json"
-        )
-        break
-    else:
-        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+    era = measlib.find_era(document, ERA_ID)
+    if era is None:
         return 1
+    # The token-event range is the era's log range; the chat-session range is
+    # shorter and is kept beside it rather than replacing it.
+    era["logStart"] = events["start"]
+    era["logEnd"] = events["end"]
+    era["metrics"] = {
+        "sessions": sessions,
+        "tokens": {
+            "events": events["events"],
+            "promptTokens": events["promptTokens"],
+            "generatedTokens": events["generatedTokens"],
+            "models": events["models"],
+            "start": events["start"],
+            "end": events["end"],
+        },
+        "byProvider": {
+            "events": events["eventsByProvider"],
+            "tokens": events["tokensByProvider"],
+        },
+        "crossCheck": cross_check,
+        # D4: not an unknown. Local inference has no marginal price, and the
+        # provider split above is the evidence for saying so.
+        "costFinding": "near-zero-local",
+    }
+    era["provenance"]["logs"] = (
+        "~/.continue/dev_data/0.2.0/tokensGenerated.jsonl "
+        "(+ devdata.sqlite mirror cross-check), sessions/sessions.json"
+    )
 
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    measlib.write_store(document)
     print(
         f"continue: {sessions['count']} sessions ({sessions['start']}..{sessions['end']}), "
         f"{events['events']} token events ({events['start']}..{events['end']}), "
@@ -200,7 +191,3 @@ def main() -> int:
         f"sqlite mirror {'agrees' if cross_check['agrees'] else 'DISAGREES: ' + json.dumps(deltas)}"
     )
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

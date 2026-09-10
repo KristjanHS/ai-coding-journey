@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """Fill the Copilot Chat era in sources/measurements/eras-full.json.
 
-Usage: python3 scripts/measurements-copilot.py [WORKSPACE_STORAGE_ROOT]
+Usage: python3 scripts/measurements.py copilot [WORKSPACE_STORAGE_ROOT]
        (default: the measured Windows-side path below)
 
 VS Code stores Copilot Chat history per workspace:
@@ -31,8 +30,8 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-ERAS = ROOT / "sources" / "measurements" / "eras-full.json"
+import measlib
+
 DEFAULT_ROOT = Path("/mnt/c/Users/PC/AppData/Roaming/Code/User/workspaceStorage")
 ERA_ID = "copilot"
 
@@ -70,16 +69,13 @@ def scan(paths: list[Path]) -> dict:
     }
 
 
-def main() -> int:
-    root = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else DEFAULT_ROOT
+def measure(argv: list[str]) -> int:
+    root = Path(argv[0]).expanduser() if argv else DEFAULT_ROOT
     if not root.is_dir():
         print(f"error: {root} is not a directory", file=sys.stderr)
         return 1
-    if not ERAS.exists():
-        print(
-            "error: eras.json missing — run scripts/measurements-git.py first",
-            file=sys.stderr,
-        )
+    document = measlib.load_store()
+    if document is None:
         return 1
     paths = sorted(root.glob("*/chatSessions/*.json"))
     if not paths:
@@ -90,34 +86,25 @@ def main() -> int:
     start, end = measured.pop("start"), measured.pop("end")
     workspaces_total = len([p for p in root.iterdir() if p.is_dir()])
 
-    document = json.loads(ERAS.read_text())
-    for era in document["eras"]:
-        if era["id"] != ERA_ID:
-            continue
-        era["logStart"], era["logEnd"] = start, end
-        era["metrics"] = {
-            **measured,
-            "workspacesTotal": workspaces_total,
-            # Stated as data, not left to the reader to infer from a missing key: this
-            # era has no token or cost field at all.
-            "tokenFieldPresent": False,
-            "costFieldPresent": False,
-        }
-        era["provenance"]["logs"] = (
-            "VS Code workspaceStorage/*/chatSessions/*.json (no token or cost field)"
-        )
-        break
-    else:
-        print(f"error: no '{ERA_ID}' era in eras.json", file=sys.stderr)
+    era = measlib.find_era(document, ERA_ID)
+    if era is None:
         return 1
+    era["logStart"], era["logEnd"] = start, end
+    era["metrics"] = {
+        **measured,
+        "workspacesTotal": workspaces_total,
+        # Stated as data, not left to the reader to infer from a missing key: this
+        # era has no token or cost field at all.
+        "tokenFieldPresent": False,
+        "costFieldPresent": False,
+    }
+    era["provenance"]["logs"] = (
+        "VS Code workspaceStorage/*/chatSessions/*.json (no token or cost field)"
+    )
 
-    ERAS.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    measlib.write_store(document)
     print(
         f"copilot: {measured['sessions']} sessions / {measured['turns']} turns across "
         f"{measured['workspacesWithChat']} of {workspaces_total} workspaces, {start}..{end}"
     )
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
