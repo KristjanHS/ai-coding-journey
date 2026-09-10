@@ -2,28 +2,61 @@
 import { getCollection, render } from 'astro:content';
 import Deck from '../../layouts/Deck.astro';
 import Slides from '../../components/Slides.astro';
+import deck from '../../../content/deck.json';
 
-// The deck renders `deck: true` chapters only -- not `/` and not `/journey/`, so no
-// hydrated island ships under `file://` (inc4's constraint for inc6, still closed).
-const chapters = (await getCollection('journey'))
-  .filter((entry) => entry.data.deck)
+// inc7c: the deck is the lecture's RUNNING ORDER, not the chapter list. `content/deck.json`
+// holds the seven 90-minute slots in order; each slot renders its `university` atoms if it
+// has any, else the one `deck: true` chapter named in `fallback` (the migration path, until
+// every slot has atoms). A zero-atom slot with a null fallback renders nothing at all.
+// Everything stays inline -- no hydrated island ships under `file://` (inc4's constraint).
+const atoms = (await getCollection('atoms'))
+  .filter((entry) => entry.data.audience.includes('university'))
   .sort((a, b) => a.id.localeCompare(b.id));
 
-const rendered = await Promise.all(
-  chapters.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
-);
+const chapters = await getCollection('journey');
+const byId = new Map(chapters.map((entry) => [entry.id, entry]));
 
-const subtitle = (data: (typeof chapters)[number]['data']) => {
+const chapterSubtitle = (data: (typeof chapters)[number]['data']) => {
   const bits: string[] = [];
   if (data.repo) bits.push(data.repo);
   if (data.start && data.end) bits.push(`${data.start} → ${data.end}`);
   if (data.commits !== undefined) bits.push(`${data.commits.toLocaleString('en-US')} commits`);
   return bits.join(' · ');
 };
+
+// Rendering is resolved here rather than in the template: `render()` is async and an
+// Astro template cannot await per-item. One flat list of {title, subtitle, Content},
+// already in running order, is all the markup below needs.
+type Slide = { key: string; title: string; subtitle: string; Content: Awaited<ReturnType<typeof render>>['Content'] };
+
+const slides: Slide[] = [];
+for (const slot of deck.slots) {
+  const spoken = `${slot.title} · ${slot.minutes} min`;
+  const mine = atoms.filter((entry) => entry.data.slot === slot.id);
+  if (mine.length > 0) {
+    for (const entry of mine) {
+      slides.push({
+        key: `${slot.id}/${entry.id}`,
+        title: entry.data.title,
+        subtitle: spoken,
+        Content: (await render(entry)).Content,
+      });
+    }
+    continue;
+  }
+  const fallback = slot.fallback ? byId.get(slot.fallback) : undefined;
+  if (!fallback) continue;
+  slides.push({
+    key: `${slot.id}/${fallback.id}`,
+    title: fallback.data.title,
+    subtitle: chapterSubtitle(fallback.data),
+    Content: (await render(fallback)).Content,
+  });
+}
 ---
 <Deck title="ai-coding-journey · deck">
-  {rendered.map(({ entry, Content }) => (
-    <Slides title={entry.data.title} subtitle={subtitle(entry.data)}>
+  {slides.map(({ key, title, subtitle, Content }) => (
+    <Slides title={title} subtitle={subtitle}>
       <Content />
     </Slides>
   ))}

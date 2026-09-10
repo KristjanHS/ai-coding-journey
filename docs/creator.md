@@ -78,7 +78,11 @@ of whatever else sat in that directory), reads each git log, and writes three th
 Nothing on that list is hand-edited; `make timeline` regenerates and the result is committed. Author-owned
 frontmatter (`title`, `tools`, `deck`, `artifact`) and the chapter body are never touched by the script.
 
-Because it scans *all* of `~/projects`, another repo's commits are enough to stale this repo's
+`content/deck.json` is the one content JSON that **is** hand-edited: it holds the lecture's seven
+running-order slots, and `/deck/` renders each slot's `university` atoms, or the chapter named in
+`fallback` while a slot still has none. `tests/deck-slots.test.ts` is its gate.
+
+Because the allowlisted repos keep moving, another repo's commits are enough to stale this repo's
 `timeline.json` — which is why the gate does **not** probe for drift. Regenerate when the spine matters.
 Prose that cites a commit count is written rounded ("roughly 4,970") for the same reason: a regen must not
 strand a sentence.
