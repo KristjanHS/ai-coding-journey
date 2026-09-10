@@ -66,8 +66,9 @@ commit you have since built on top of.
 
 ## How the timeline is generated
 
-`scripts/timeline-from-git.py` is the single source of the spine. It scans the repos under `~/projects`,
-reads each git log, and writes three things:
+`scripts/timeline-from-git.py` is the single source of the spine. It reads the repos named in
+`scripts/repos.json` (an explicit allowlist, never a `~/projects` scan — a scan made the spine a function
+of whatever else sat in that directory), reads each git log, and writes three things:
 
 1. **`content/timeline.json`** — repo · first commit · last commit · commit count · stage.
 2. **`content/journey/README.md`** — the index table, regenerated whole.

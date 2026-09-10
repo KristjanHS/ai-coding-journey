@@ -12,7 +12,7 @@ that belong to no repo) are never opened -- main() enumerates repos, not chapter
 but they are listed in the index so it is not silently incomplete. Author-owned frontmatter (title/tools/deck/artifact,
 and any other key) and the chapter body are never touched.
 `stage` is assigned mechanically by first-commit date (STAGE_SEAMS below);
-hand-maintain EXCLUDE and STAGE_OVERRIDES only, and never hand-edit the generated files.
+hand-maintain scripts/repos.json and STAGE_OVERRIDES only, and never hand-edit the generated files.
 """
 
 from __future__ import annotations
@@ -29,29 +29,21 @@ JOURNEY = CONTENT / "journey"
 TIMELINE = CONTENT / "timeline.json"
 INDEX = JOURNEY / "README.md"
 EXPERIMENTS = JOURNEY / "00-experiments.md"
+REPOS_CONFIG = ROOT / "scripts" / "repos.json"
 MIN_COMMITS = 5  # below this a repo is an experiment line, not a chapter
 
-# Repos never scanned: tooling dirs, learning/course repos (work done while learning
-# someone else's material, not the author's own build -- 01-claude-code-pm-course has
-# 121 commits, many the author's, and is still excluded on that ground), other people's
-# repos, this repo, and git worktrees (any name ending in -wt).
-EXCLUDE = {
-    "ai-coding-journey",
-    "bin",
-    "mybrain",
-    "claude_skills",
-    "arxiv-paper-curator",
-    "01-claude-code-pm-course",
-    "03-learn-claude-code",
-    "09-learn-claude-code",
-    "cookie-test1",
-    "cafe-cursor-lab-materials",
-    "Locked-Shields-PR-BT06-2026",
-    "ls-sitrep",
-    "autoresearch-ks",
-    "Closaria",
-    "Closaria-FE",
-}
+
+# Which repos are scanned is an explicit ALLOWLIST in scripts/repos.json, never a
+# directory scan: a scan made content/timeline.json a function of whatever else sat
+# under ~/projects, so an unrelated repo's commits staled it. Admission rule for that
+# file -- the author's OWN builds only. Out: tooling dirs, learning/course repos (work
+# done while learning someone else's material -- 01-claude-code-pm-course has 121
+# commits, many the author's, and is still out on that ground), other people's repos,
+# this repo, and git worktrees. A listed repo missing from disk is skipped with a
+# warning, so the generator still runs on a machine holding a subset.
+def allowlist() -> list[str]:
+    return sorted(json.loads(REPOS_CONFIG.read_text())["repos"])
+
 
 # Paths that do not count as real work when dating a repo's last activity.
 # A `chore(claude):` deny-list sweep landed across the projects dir on 2026-09-06
@@ -169,9 +161,11 @@ def merge(rows: list[dict]) -> list[dict]:
 
 def scan(projects: Path) -> list[dict]:
     rows = []
-    for d in sorted(projects.iterdir()):
-        name = d.name
-        if name in EXCLUDE or name.endswith("-wt") or not (d / ".git").is_dir():
+    missing = []
+    for name in allowlist():
+        d = projects / name
+        if not (d / ".git").is_dir():
+            missing.append(name)
             continue
         try:
             dates = git(d, "log", "--reverse", "--format=%as").splitlines()
@@ -185,6 +179,11 @@ def scan(projects: Path) -> list[dict]:
                 "commits": int(git(d, "rev-list", "--count", "HEAD")),
                 "stage": stage_for(name, dates[0]),
             }
+        )
+    if missing:
+        print(
+            f"skipped (not found under {projects}): " + ", ".join(missing),
+            file=sys.stderr,
         )
     rows = merge(rows)
     rows.sort(key=lambda r: (r["first_commit"], r["repo"]))

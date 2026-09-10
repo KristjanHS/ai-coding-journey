@@ -94,9 +94,11 @@ brief: ## one-block session orientation: branch, log, active plan, next action, 
 #      generator), so a divergence reds instead of rotting quietly.
 # There is deliberately NO timeline drift probe here. It ran the generator on
 # every gate to compare-and-restore, and the answer was almost always drift the
-# repo could do nothing about: timeline-from-git.py scans all of ~/projects, so
-# another repo's commits staled content/timeline.json and printed a diff nobody
-# was meant to act on. `make timeline` regenerates on demand; that is the whole
+# repo could do nothing about. The foreign-repo half of that is now fixed at the
+# source -- timeline-from-git.py reads the scripts/repos.json allowlist, not a
+# ~/projects scan -- but an ALLOWLISTED repo's own commits still stale
+# content/timeline.json, so a probe here would red this gate for work done in
+# another repo. `make timeline` regenerates on demand; that is the whole
 # mechanism now.
 check: ## THE gate: markdownlint + astro build + vitest, all blocking
 	@$(MAKE) --no-print-directory lint

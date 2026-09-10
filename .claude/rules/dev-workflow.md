@@ -61,10 +61,12 @@ Each part answers something the others can't:
   mirrors those figures against the narratives, so the drift reds `make check` until
   `content/measurements/01`–`04` and `content/journey/13-crash-dash.md` carry the new numbers —
   update them in the same commit as the regen, never after it.
-- **the timeline is not in the gate.** `scripts/timeline-from-git.py` scans all of `~/projects`, so
-  another repo's commits stale `content/timeline.json`; the old advisory drift report ran the generator on
-  every gate to print a diff nobody was meant to act on. Run `make timeline` when the spine matters and
-  commit the regen on its own.
+- **the timeline is not in the gate.** `scripts/timeline-from-git.py` reads an explicit allowlist
+  (`scripts/repos.json`), so an unrelated repo under `~/projects` can no longer stale
+  `content/timeline.json` — but a **listed** repo's own commits still do, and a probe in the gate would red
+  this repo for work done in another. Run `make timeline` when the spine matters and commit the regen on
+  its own. A repo joins or leaves the spine by editing `repos.json`; a listed repo missing from disk is
+  skipped with a warning, never a hard error.
 
 **Never gate a commit on `cmd | tail`** — the pipe reports tail's exit status, so a red run reads green.
 The `lint`/`site`/`test` targets each capture-and-replay instead of piping, for exactly this reason.

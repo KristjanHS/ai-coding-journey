@@ -1,0 +1,20 @@
+{
+  "note": "The explicit repo allowlist for scripts/timeline-from-git.py: the DIRECTORY names under ~/projects the journey spine is built from. JSON carries no comments -- the admission rule (whose repos count as the author's own build) lives in that script's docblock. dewpoint-app and dewpoint-ts are one journey row; the merge is REPO_GROUPS in the generator, not here.",
+  "repos": [
+    "claudeconf",
+    "crash-dash",
+    "dewpoint-app",
+    "dewpoint-ts",
+    "docs-generator",
+    "dotfiles",
+    "edf-budget-planner",
+    "gitlab-standup",
+    "hands-on-llm",
+    "kri-local-rag",
+    "llm-eng-template",
+    "proj-mgmt",
+    "stt-faster",
+    "token-monitor",
+    "xls-analyser"
+  ]
+}

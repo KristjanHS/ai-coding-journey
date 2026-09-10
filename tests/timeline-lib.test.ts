@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -94,5 +97,49 @@ describe('experiments', () => {
 
     const dates = experiments.map((row) => row.first_commit);
     expect([...dates].sort()).toEqual(dates);
+  });
+});
+
+// The GENERATOR's config, not the site's: `scripts/repos.json` is the explicit
+// allowlist that replaced the `~/projects` directory scan, so it -- not whatever
+// happens to sit in that directory -- decides which repos reach the spine. These
+// assert the two ways that file can be wrong: a row in `timeline.json` no repo
+// in the list can account for (the list and the generated spine disagree), and a
+// duplicated entry (two dirs, one row, silently). `REPO_GROUPS` is parsed out of
+// the generator the way `content.test.ts` parses `MIN_COMMITS`: vitest has no
+// Python resolution, and a hand-copied mirror is the drift this repo keeps
+// deleting.
+describe('generator allowlist (scripts/repos.json)', () => {
+  const root = process.cwd();
+  const allow: string[] = JSON.parse(
+    readFileSync(join(root, 'scripts', 'repos.json'), 'utf8'),
+  ).repos;
+  const script = readFileSync(join(root, 'scripts', 'timeline-from-git.py'), 'utf8');
+
+  // `REPO_GROUPS = { "dewpoint": ["dewpoint-app", "dewpoint-ts"] }` -> row name => member dirs.
+  const groupsBlock = script.match(/^REPO_GROUPS = \{([\s\S]*?)^\}/m);
+  const groups = new Map<string, string[]>();
+  for (const line of (groupsBlock?.[1] ?? '').split('\n')) {
+    const m = line.match(/^\s*"([^"]+)":\s*\[([^\]]*)\]/);
+    if (m) groups.set(m[1]!, [...m[2]!.matchAll(/"([^"]+)"/g)].map((x) => x[1]!));
+  }
+
+  it('parses REPO_GROUPS out of the generator', () => {
+    expect(groupsBlock, 'no REPO_GROUPS block in timeline-from-git.py').not.toBeNull();
+    expect(groups.get('dewpoint')).toEqual(['dewpoint-app', 'dewpoint-ts']);
+  });
+
+  it('lists a directory for every row in timeline.json', () => {
+    const listed = new Set(allow);
+    for (const row of rows) {
+      const dirs = groups.get(row.repo) ?? [row.repo];
+      for (const dir of dirs) {
+        expect(listed.has(dir), `${dir} (row ${row.repo}) missing from scripts/repos.json`).toBe(true);
+      }
+    }
+  });
+
+  it('names each directory exactly once', () => {
+    expect([...new Set(allow)]).toHaveLength(allow.length);
   });
 });
