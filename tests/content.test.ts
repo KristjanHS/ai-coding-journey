@@ -432,14 +432,37 @@ describe('atom corpus', () => {
       .map((name) => name.replace(/\.md$/, '')),
   );
 
-  it('there are atoms and topics to check', () => {
+  const chapterSlugs = new Set(
+    readdirSync(JOURNEY)
+      .filter((name) => name.endsWith('.md'))
+      .map((name) => name.replace(/\.md$/, '')),
+  );
+
+  it('there are atoms, topics and chapters to check', () => {
     expect(ATOMS.length, `no atoms found under ${ATOM_DIR}`).toBeGreaterThan(0);
     expect(topicSlugs.size, `no topics found under ${TOPIC_DIR}`).toBeGreaterThan(0);
+    expect(chapterSlugs.size, `no chapters found under ${JOURNEY}`).toBeGreaterThan(0);
   });
 
   // Referential integrity. This is the whole reason topics are files rather than
   // a free-text tag: a typo'd `topic:` is a broken link on the site and a dead
   // group in the corpus, and nothing else in the gate can see it.
+  // Same shape, same reason: `source_chapter` is Stage 4's transclusion key, and
+  // Zod validates a string, not a reference. A typo'd or renamed chapter makes an
+  // atom transclude onto NOTHING while `astro build` stays green -- the atom still
+  // renders at its own route, so nothing else in the gate can see the orphan. The
+  // target is the chapter FILE, not the journey collection: `00-experiments` is
+  // excluded from the collection on purpose (Stage 4 ruling 2), so an atom mined
+  // for it legitimately transcludes nowhere and must still resolve here.
+  it.each(ATOMS)('%s: `source_chapter` resolves to a chapter file', (path) => {
+    const chapter = frontmatter(read(path), 'source_chapter');
+    expect(chapter, `${path}: no \`source_chapter:\` in frontmatter`).toBeDefined();
+    expect(
+      [...chapterSlugs],
+      `${path}: \`source_chapter: ${chapter}\` has no ${join(JOURNEY, `${chapter}.md`)}`,
+    ).toContain(chapter);
+  });
+
   it.each(ATOMS)('%s: `topic` resolves to a topic file', (path) => {
     const topic = frontmatter(read(path), 'topic');
     expect(topic, `${path}: no \`topic:\` in frontmatter`).toBeDefined();
@@ -881,6 +904,20 @@ const collapse = (body: string) => body.replace(/\s+/g, ' ');
 // verified against the private index at authoring time, and is SKIPPED by name
 // rather than passed silently.
 describe('evidence provenance', () => {
+  // The skip is honest -- it keys on the ABSENCE of `quote_from`, per atom, not on
+  // a hand-maintained name list. But a corpus of skips is a corpus with no gate:
+  // drop `quote_from` from every atom and every case below skips, the describe
+  // passes green, and nothing is verified. This floor reds on that. It anchors on
+  // the atoms the gate CHECKS, which publishing more quotes grows -- never on the
+  // violations it finds, which a fix would drain to zero.
+  it('at least one atom is actually verbatim-checked', () => {
+    const checked = ATOMS.filter((path) => frontmatter(read(path), 'quote_from'));
+    expect(
+      checked.length,
+      'every atom skips: no `quote_from` anywhere, so this gate verifies nothing',
+    ).toBeGreaterThan(0);
+  });
+
   for (const path of ATOMS) {
     const from = frontmatter(read(path), 'quote_from');
     const label = from
