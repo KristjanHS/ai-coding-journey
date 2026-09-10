@@ -73,6 +73,12 @@ StarCoder2 7B (78–80 %, ≈3.8 GB) and Code Llama 7B (67 %, ≈4 GB). Those ar
 measurements of my own — and the 8 GB of VRAM on the machine capped the shortlist at roughly
 7-billion-parameter models before any quality argument ran.
 
+The startup log confirmed the arithmetic rather than asserting it: Ollama found the machine's RTX
+3070, loaded a 4-bit Mistral-7B, and reported the weights landing well inside the card before it
+committed a layer.
+
+> new model will fit in available VRAM in single GPU, loading ... required="5.9 GiB"
+
 **I believed a benchmark I never ran.** My README states Windows Ollama was fastest of four local
 setups. Going back for the numbers behind it, there are none — four server-startup logs that cannot
 be compared:
