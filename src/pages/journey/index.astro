@@ -13,7 +13,7 @@ const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeComp
 // chapters, which gave theirs up in inc5g because a ledger claim with an empty
 // `## Artifact` is the table asserting evidence the chapter does not show. Every
 // key is `.optional()` for exactly this reason. A stub earns its row back by
-// writing the artifact; `tests/content.test.ts` holds that order.
+// writing the artifact; `tests/content-evidence.test.ts` holds that order.
 // The rung table renders BY MAPPING over `RUNGS`, never from six hand-typed
 // rows: order and vocabulary come from the enum, so neither can drift. The
 // Record is declared total over `RUNGS` for the editor's benefit, but note what
@@ -21,7 +21,7 @@ const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeComp
 // rung added to `src/content.config.ts` without a date and a unit fails the
 // build at RENDER time (`Cannot read properties of undefined`), demoed red
 // 2026-09-09. That message names neither the rung nor this file, which is why
-// `tests/content.test.ts` also asserts the pairing — the test is the legible
+// `tests/content-journey.test.ts` also asserts the pairing — the test is the legible
 // half of the gate, the build is the one that cannot be skipped.
 const RUNG_META: Record<(typeof RUNGS)[number], { from: string; unit: string }> = {
   asking: { from: '2025-06', unit: 'a question' },

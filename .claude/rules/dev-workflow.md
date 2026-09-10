@@ -57,7 +57,7 @@ Each part answers something the others can't:
   rule as assertions. Authoring guidance for those tests → `testing-project.md`.
 - **`make measurements` is never figure-neutral, and the gate makes that BLOCKING.** The scanners
   re-read live log trees, so a regen run for an unrelated reason (adding an era, say) also moves the
-  shares and the Claude Code split by whatever was used since the last run. `measurements.test.ts`
+  shares and the Claude Code split by whatever was used since the last run. `tests/measurements-*.test.ts`
   mirrors those figures against the narratives, so the drift reds `make check` until
   `content/measurements/01`–`04` and `content/journey/13-crash-dash.md` carry the new numbers —
   update them in the same commit as the regen, never after it.

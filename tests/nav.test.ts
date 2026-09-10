@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 // The reachability guard, inc8. It replaces `root page links every top-level
-// route` in content.test.ts, which asserted that every route directory appears
+// route` in the content suite (now content-*.test.ts), which asserted that every route directory appears
 // in src/pages/index.astro ITSELF. Three doors deliberately removes seven of
 // those direct links -- /case-study/ and /measurements/ move behind the journey
 // door, /topics/, /atoms/, /sidecars/ and /artifacts/ behind the corpus door,

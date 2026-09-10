@@ -206,7 +206,7 @@ const atoms = defineCollection({
 
 // The eight kinds of supporting material a topic can carry. Totality is pinned
 // by set-equality against the `content/sidecars/` directory listing in both
-// directions (`tests/content.test.ts` -- sidecar corpus), so every member here
+// directions (`tests/content-sidecars.test.ts`), so every member here
 // owes a directory on disk and every directory owes a member here.
 export const SIDECAR_TYPES = [
   'transcript',

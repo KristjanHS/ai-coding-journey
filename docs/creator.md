@@ -117,7 +117,7 @@ excerpt, a defect a reviewer sub-agent caught (with the fix commit's subject), o
 
 ## How the content rules are enforced
 
-The two rules above are binding *and* executable. The vitest suite in `tests/content.test.ts` is their machine half; `.claude/rules/content-writing.md` is their prose half.
+The two rules above are binding *and* executable. The vitest suite in `tests/content-*.test.ts` is their machine half; `.claude/rules/content-writing.md` is their prose half.
 The banned-vocabulary list has one machine source, `src/lib/content-rules.ts`, and the suite compares the
 rule's prose to it, so a reworded rule reds instead of rotting quietly. `MIN_COMMITS` likewise has one
 source, `scripts/timeline-config.json`, read by both the site lib and the generator.
@@ -157,7 +157,7 @@ infrastructure, so a push costs no Actions minutes.
 | --- | --- |
 | `content/` | **the product** — journey, prompts, case study, course, timeline |
 | `src/` | the Astro site: `content.config.ts` (the schema), layouts, and the journey/prompts routes |
-| `tests/content.test.ts` | the executable half of the two content rules |
+| `tests/content-*.test.ts` | the executable half of the two content rules |
 | `vercel.json` | the static-build settings Vercel reads — framework, build command, `dist` |
 | `scripts/timeline-from-git.py` | the generator behind `timeline.json`, the index, and chapter stubs |
 | `scripts/onenote/` | the export path that lifts the source notebook out of Windows |

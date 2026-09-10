@@ -23,7 +23,7 @@ import data from '../../content/measurements/data/eras.json';
 
 // ── Raw JSON shapes ───────────────────────────────────────────────────────────
 // `coverage` differs per era by construction (each tool measures to a different depth),
-// so it stays loosely typed here — tests/measurements.test.ts pins the per-era shapes.
+// so it stays loosely typed here — tests/measurements-*.test.ts pins the per-era shapes.
 export type EraId = 'chat' | 'copilot' | 'continue' | 'codex' | 'cursor' | 'gemini' | 'claude-code';
 export type TokenState = 'yes' | 'floor' | 'none';
 export type Group = 'chat' | 'vscode-plugin' | 'cursor' | 'gemini' | 'claude-code';
