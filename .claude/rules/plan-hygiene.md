@@ -45,8 +45,8 @@ Everything you write down is a claim. The moves:
 - **Moving a section RE-ASSERTS every claim inside it.** Grep the moved text for `this file`,
   `above`/`below`, counts and its outbound cites; resolve each locator to the file that now holds its
   referent; diff against the original for silently dropped gates.
-- **A gate or quantifier you author owes the population it must admit** — run it exactly as written; it can
-  be unsatisfiable by construction.
+- **A gate or quantifier you author owes the population it must admit** — run it as written, and sum the
+  sections a numeric threshold will measure; both can be unsatisfiable by construction.
 - **Closing a decision or shipping an owed item owes a stem-grep of its staged copies** (`journey-backlog.md`,
   `project_state`) in the same burst: **delete the entry; a ✅/CLOSED marker written into the file is the
   defect** — the commit message is the closure record. (Exception: `journey-backlog.md`'s `## Shipped` is the
