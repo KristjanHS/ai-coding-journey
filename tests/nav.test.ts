@@ -59,3 +59,26 @@ describe('every top-level route is reachable', () => {
     ).not.toHaveLength(0);
   });
 });
+
+// inc8 Stage 2's other falsifier: the root page carries exactly three doors. It
+// is asserted against the BUILT page, not the `sections` array in source --
+// `make check` runs `astro build` before vitest, so dist/index.html exists, and
+// the rendered list is what a reader actually gets. A fourth row added to the
+// array reds this whether or not it renders.
+describe('the root page carries exactly three doors', () => {
+  const ROOT = join(process.cwd(), 'dist', 'index.html');
+  const built = existsSync(ROOT) ? readFileSync(ROOT, 'utf8') : null;
+
+  it('is built at all', () => {
+    expect(built, `no built root page at ${ROOT} \u2014 run \`make build\``).not.toBeNull();
+  });
+
+  it('renders three <li> in the sections list', () => {
+    // Astro appends a scope attribute (`data-astro-cid-*`) to every styled
+    // element, so the open tag is matched loosely rather than literally.
+    const list = (built ?? '').match(/<ul class="sections"[^>]*>([\s\S]*?)<\/ul>/);
+    expect(list, 'no <ul class="sections"> in the built root page').not.toBeNull();
+    const rows = [...(list?.[1] ?? '').matchAll(/<li[\s>]/g)].length;
+    expect(rows, 'the root page is meant to carry three doors').toBe(3);
+  });
+});

@@ -3,31 +3,43 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Timeline from '../components/Timeline.astro';
 
-// Counts are derived at build time from the collections themselves, so a
-// section can never advertise rows it does not have. One rule covers all four:
-// a section with no entries is not a link, and says why it is empty in its own
-// words — "arrives at inc5" for the unwritten sections, "none yet" for the
-// published ones. A live-looking link onto an empty index is the thing this
-// avoids, so the branch is on the count, never on the section's identity.
+// Counts are derived at build time from the collections themselves, so a door
+// can never advertise rows it does not have.
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
+const journey = await getCollection('journey');
+
+// inc8 Stage 2. Nine rows became three doors because the nine were never peers:
+// the corpus is the storage mechanism, the site and the deck are outputs served
+// from it, and a flat list hid that while splitting single stories across rows
+// (`case-study` is chapter 13 expanded; `course` is the deck delivered).
+//
+// The count rule from inc5a survives verbatim and for the same reason: a door
+// with no entries is not a link and says why it is empty in its own words. The
+// branch is on the count, never on the door's identity.
+//
+// `inside` is what keeps the collapse honest. Every route dissolved into a door
+// stays one click from here, so nothing became an orphan -- `tests/nav.test.ts`
+// is the executable form of that promise. `/course/` in particular has nowhere
+// else to be linked from: `/deck/` is the offline slide runtime, and
+// `tests/deck-offline.test.ts` fails the build on any root-absolute href there.
 const sections = [
   {
     href: '/journey/',
     title: 'The journey',
     blurb: 'One chapter per repo, oldest first.',
-    count: (await getCollection('journey')).length,
+    count: journey.length,
     unit: ['chapter', 'chapters'] as const,
     whenEmpty: 'none yet',
+    inside: [
+      { href: '/case-study/', label: 'the case study' },
+      { href: '/measurements/', label: 'the numbers' },
+    ],
   },
   {
-    // inc8 Stage 1: the corpus door goes up before the root page collapses to
-    // three rows, because `tests/nav.test.ts` treats an unlinked route dir as
-    // an orphan the moment it exists. The count is the four shelves summed --
-    // the door's claim is "this much corpus", not "this many of one kind".
     href: '/corpus/',
     title: 'The corpus',
-    blurb: 'Topics, atoms, sidecars and artifacts \u2014 the storage every output is served from.',
+    blurb: 'The storage layer every output is assembled from, not written beside.',
     count:
       (await getCollection('topics')).length +
       (await getCollection('atoms')).length +
@@ -35,73 +47,24 @@ const sections = [
       (await getCollection('artifacts')).length,
     unit: ['entry', 'entries'] as const,
     whenEmpty: 'arrives at inc7',
+    inside: [
+      { href: '/topics/', label: 'topics' },
+      { href: '/atoms/', label: 'atoms' },
+      { href: '/sidecars/', label: 'sidecars' },
+      { href: '/artifacts/', label: 'context artifacts' },
+    ],
   },
   {
-    href: '/artifacts/',
-    title: 'Context artifacts',
-    blurb: 'Five kinds of thing you put in front of a model, reproduced as written.',
-    count: (await getCollection('artifacts')).length,
-    unit: ['artifact', 'artifacts'] as const,
-    whenEmpty: 'none yet',
-  },
-  {
-    href: '/case-study/',
-    title: 'Case study',
-    blurb: 'The markdown layer of the app this ends at.',
-    count: (await getCollection('case-study')).length,
-    unit: ['page', 'pages'] as const,
-    whenEmpty: 'arrives at inc5',
-  },
-  {
-    href: '/course/',
-    title: 'Course',
-    blurb: 'Built from the same markdown.',
-    count: (await getCollection('course')).length,
-    unit: ['page', 'pages'] as const,
-    whenEmpty: 'arrives at inc5',
-  },
-  {
-    href: '/measurements/',
-    title: 'The numbers',
-    blurb: 'What five tool eras recorded about themselves — states, dates and shares.',
-    count: (await getCollection('measurements')).length,
-    unit: ['page', 'pages'] as const,
-    whenEmpty: 'none yet',
-  },
-  {
-    href: '/topics/',
-    title: 'Topics',
-    blurb: 'One idea per file, grouping the atoms mined for it.',
-    count: (await getCollection('topics')).length,
-    unit: ['topic', 'topics'] as const,
-    whenEmpty: 'arrives at inc7',
-  },
-  {
-    href: '/atoms/',
-    title: 'Atoms',
-    blurb: 'One claim, one shown piece of evidence, tagged so a talk is a query.',
-    count: (await getCollection('atoms')).length,
-    unit: ['atom', 'atoms'] as const,
-    whenEmpty: 'arrives at inc7',
-  },
-  {
-    href: '/sidecars/',
-    title: 'Sidecars',
-    blurb: 'Supporting material per topic, described rather than reproduced.',
-    count: (await getCollection('sidecars')).length,
-    unit: ['sidecar', 'sidecars'] as const,
-    whenEmpty: 'arrives at inc7',
-  },
-  {
-    href: '/deck/',
-    title: 'The deck',
     // inc6: the count is the number of chapters that opted in via `deck: true`,
     // not the chapter total -- the deck is a selection, and a link claiming all
     // 15 would advertise slides that are not there.
+    href: '/deck/',
+    title: 'The deck',
     blurb: 'The lecture, from the chapters that opted in. Opens offline.',
-    count: (await getCollection('journey')).filter((entry) => entry.data.deck).length,
+    count: journey.filter((entry) => entry.data.deck).length,
     unit: ['chapter', 'chapters'] as const,
     whenEmpty: 'arrives at inc6',
+    inside: [{ href: '/course/', label: 'the course skeleton' }],
   },
 ].map((section) => ({
   ...section,
@@ -128,7 +91,18 @@ const sections = [
           ? <a href={section.href}>{section.title}</a>
           : <span class="pending">{section.title}</span>}
         <span class="count">{section.label}</span>
-        <span class="blurb">{section.blurb}</span>
+        <span class="blurb">
+          {section.blurb}
+          <span class="inside">
+            {'inside: '}
+            {section.inside.map((child, i) => (
+              <>
+                {i > 0 && ' \u00b7 '}
+                <a href={child.href}>{child.label}</a>
+              </>
+            ))}
+          </span>
+        </span>
       </li>
     ))}
   </ul>
@@ -146,6 +120,8 @@ const sections = [
     border-bottom: 1px solid var(--rule);
   }
   .count, .blurb { font-size: var(--size-0); color: var(--fg-dim); }
+  .inside { display: block; margin-top: var(--space-1); }
+  .inside a { color: var(--fg-dim); }
   .pending { color: var(--fg-dim); }
   .count { font-family: var(--font-mono); }
   @media (max-width: 34rem) {
