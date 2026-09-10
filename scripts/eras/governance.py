@@ -20,7 +20,7 @@ that crosses.
 holding at least one. A project dir with an empty memory dir contributes to neither.
 
 NAMES NEVER CROSS. No project slug, no memory-file name and no hook command string
-reaches eras.json — the same rule measurements-skills.py applies to skill bodies.
+reaches eras.json — the same rule scripts/eras/skills.py applies to skill bodies.
 These are per-workstation counts with no history: hooks and memory dirs did not exist
 before the Claude Code era, so the block is a snapshot, not a series.
 

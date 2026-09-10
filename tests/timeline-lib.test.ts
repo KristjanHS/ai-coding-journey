@@ -111,8 +111,10 @@ describe('experiments', () => {
     expect(MIN_COMMITS).toBe(config.minCommits);
 
     const script = readFileSync(join(root, 'scripts', 'timeline-from-git.py'), 'utf8');
-    expect(script).toMatch(/timeline-config\.json/);
-    expect(script).not.toMatch(/^MIN_COMMITS\s*=\s*\d/m);
+    // The positive match anchors on the READ, not any mention (a comment names
+    // the file too); the negative one admits the annotated `MIN_COMMITS: int = 5`.
+    expect(script).toMatch(/^MIN_COMMITS[^=\n]*=\s*json\.loads\([^\n]*timeline-config\.json/m);
+    expect(script).not.toMatch(/^MIN_COMMITS(\s*:\s*\w+)?\s*=\s*\d/m);
   });
 });
 
