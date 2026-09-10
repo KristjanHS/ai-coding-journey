@@ -3,6 +3,9 @@ name: Content writing — evidence, not hype
 description: What each content/ target admits and refuses; the evidence rule and the anti-hype rule as path-gated instructions
 paths:
   - "content/**/*.md"
+  # deck.json is the one hand-edited content JSON, so its admission row has to
+  # load when it is edited — a .md-only gate would leave it structurally inert.
+  - "content/**/*.json"
 ---
 # Content writing — evidence, not hype
 

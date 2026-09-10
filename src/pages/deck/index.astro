@@ -27,7 +27,7 @@ const chapterSubtitle = (data: (typeof chapters)[number]['data']) => {
 // Rendering is resolved here rather than in the template: `render()` is async and an
 // Astro template cannot await per-item. One flat list of {title, subtitle, Content},
 // already in running order, is all the markup below needs.
-type Slide = { key: string; title: string; subtitle: string; Content: Awaited<ReturnType<typeof render>>['Content'] };
+type Slide = { title: string; subtitle: string; Content: Awaited<ReturnType<typeof render>>['Content'] };
 
 const slides: Slide[] = [];
 for (const slot of deck.slots) {
@@ -36,7 +36,6 @@ for (const slot of deck.slots) {
   if (mine.length > 0) {
     for (const entry of mine) {
       slides.push({
-        key: `${slot.id}/${entry.id}`,
         title: entry.data.title,
         subtitle: spoken,
         Content: (await render(entry)).Content,
@@ -44,10 +43,13 @@ for (const slot of deck.slots) {
     }
     continue;
   }
-  const fallback = slot.fallback ? byId.get(slot.fallback) : undefined;
-  if (!fallback) continue;
+  if (slot.fallback === null) continue;
+  // A non-null fallback that resolves to nothing would silently drop a whole
+  // slot from the lecture. `tests/deck-slots.test.ts` catches it, but only via a
+  // filename-stem proxy for the Astro id; throwing makes `astro build` red too.
+  const fallback = byId.get(slot.fallback);
+  if (!fallback) throw new Error(`deck.json slot '${slot.id}': fallback '${slot.fallback}' is not a journey chapter`);
   slides.push({
-    key: `${slot.id}/${fallback.id}`,
     title: fallback.data.title,
     subtitle: chapterSubtitle(fallback.data),
     Content: (await render(fallback)).Content,
@@ -55,7 +57,7 @@ for (const slot of deck.slots) {
 }
 ---
 <Deck title="ai-coding-journey · deck">
-  {slides.map(({ key, title, subtitle, Content }) => (
+  {slides.map(({ title, subtitle, Content }) => (
     <Slides title={title} subtitle={subtitle}>
       <Content />
     </Slides>
