@@ -8,6 +8,7 @@ evidence: artifact
 minutes: 2
 level: orient
 source_chapter: 00-experiments
+slot: climb
 ---
 
 # Ask how quality is measured first

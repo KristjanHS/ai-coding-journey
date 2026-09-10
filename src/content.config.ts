@@ -44,6 +44,11 @@ export const COST_TO_LOOK = ['no-log', 'counts-only', 'floor', 'cache-reuse'] as
 // Who a cut is for. Fixed by the vision, not chosen here.
 export const AUDIENCES = ['university', 'rnd-engineers', 'meetup', 'linkedin'] as const;
 
+// The lecture's running-order slots, in order. Mirrors `content/deck.json`'s
+// slot ids: z.enum needs a literal tuple (a JSON import is not one), so the two
+// are separate sources and `tests/deck-slots.test.ts` pins them equal in order.
+export const SLOTS = ['open', 'locate', 'climb', 'toolkit', 'live', 'worksheet', 'qa'] as const;
+
 // What the atom DOES to a listener — deliberately not a reader-experience scale
 // (intro/practitioner/expert), which maps near-1:1 onto `audience[]` and would
 // encode one axis in two keys. `orient` says what changed, `show` puts the thing
@@ -196,6 +201,9 @@ const atoms = defineCollection({
     level: z.enum(LEVELS),
     // The chapter this was mined for. Stage 4's transclusion query keys on it.
     source_chapter: z.string(),
+    // The running-order slot this atom is spoken in. Required: an atom with no
+    // slot has no place in the deck, and the deck route groups strictly by slot.
+    slot: z.enum(SLOTS),
     // Where the `## Evidence` quote is reproduced FROM, when that file is public
     // and in-repo. `source_chapter` cannot serve: it is a mining target, not
     // provenance. Absent means the quote came from a private source, and the

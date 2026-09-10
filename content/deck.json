@@ -1,0 +1,12 @@
+{
+  "_comment": "The 90-minute lecture running order (journey-corpus.md). Hand-edited, unlike the generated timeline.json. `fallback` is the chapter id rendered when a slot has zero `university` atoms, or null for none. Slot ids are mirrored by SLOTS in src/content.config.ts; tests/deck-slots.test.ts pins the two together.",
+  "slots": [
+    { "id": "open",      "title": "Open + the ladder",        "minutes": 10, "fallback": "01-hands-on-llm" },
+    { "id": "locate",    "title": "Self-locate on the ladder", "minutes": 8,  "fallback": "02-kri-local-rag" },
+    { "id": "climb",     "title": "One worked climb",          "minutes": 14, "fallback": "11-dotfiles" },
+    { "id": "toolkit",   "title": "The toolkit",               "minutes": 34, "fallback": "12-claudeconf" },
+    { "id": "live",      "title": "Live agent run",            "minutes": 10, "fallback": "13-crash-dash" },
+    { "id": "worksheet", "title": "Worksheet",                 "minutes": 6,  "fallback": "90-what-i-got-wrong" },
+    { "id": "qa",        "title": "Q&A",                       "minutes": 8,  "fallback": "91-the-close" }
+  ]
+}

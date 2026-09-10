@@ -8,6 +8,7 @@ evidence: artifact
 minutes: 3
 level: orient
 source_chapter: 02-kri-local-rag
+slot: climb
 ---
 
 # Ask for proposals, not edits

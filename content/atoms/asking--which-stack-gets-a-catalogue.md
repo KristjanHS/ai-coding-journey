@@ -8,6 +8,7 @@ evidence: transcript
 minutes: 2
 level: orient
 source_chapter: 02-kri-local-rag
+slot: climb
 ---
 
 # Ask which stack to build on and you get a catalogue

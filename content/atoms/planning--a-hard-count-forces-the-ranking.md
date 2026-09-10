@@ -8,6 +8,7 @@ evidence: artifact
 minutes: 3
 level: show
 source_chapter: 05-stt-faster
+slot: climb
 quote_from: content/journey/05-stt-faster.md
 ---
 
