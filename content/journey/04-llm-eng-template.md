@@ -62,3 +62,7 @@ cookiecutter gh:<user>/llm-eng-template
   project_slug  – directory/package name
   author_name   – used in licensing and docs
 ```
+
+## Atoms
+
+- [One paste fixes one line, not the class](../atoms/asking--one-paste-fixes-one-line.md)

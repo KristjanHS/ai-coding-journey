@@ -16,11 +16,17 @@ const RELATIVE_MD = /^\.\.?\//;
 // The site's REAL route table, not "every file under content/". `measurements`
 // has an index page and no `[slug]` route, so a link into it would rewrite to a
 // route that 404s on the built site; `case-study` is nested, strips `/index` the
-// way the glob loader does, and renders its landing entry at the section root.
+// way the glob loader does, and renders its landing entry at the section root;
+// `sidecars` is nested too, but with no landing entry and no `/index` stripping.
 // Anything this map cannot place is refused — inventing a route is worse than
 // leaving the `.md` link alone, because the build stays green either way.
 const CASE_STUDY_LANDING = 'crash-dash'; // mirrors LANDING_ID in [...slug].astro
-const FLAT_COLLECTIONS = new Set(['journey', 'artifacts', 'course']);
+const FLAT_COLLECTIONS = new Set(['journey', 'artifacts', 'course', 'atoms', 'topics']);
+// `sidecars` is the second nested collection: its ids carry the type directory
+// (`decision/foo`), which is why its page is a rest route and not `[slug]`. Two
+// segments exactly -- one would be a type directory with no file, three a depth
+// the loader never produces.
+const NESTED_SIDECAR_SEGMENTS = 2;
 
 /** `content/course/skeleton.md` → `/course/skeleton/`; null when unroutable. */
 export const routeForContentFile = (absPath) => {
@@ -32,6 +38,9 @@ export const routeForContentFile = (absPath) => {
   if (collection === 'case-study') {
     if (!id) return null;
     return id === CASE_STUDY_LANDING ? '/case-study/' : `/case-study/${id}/`;
+  }
+  if (collection === 'sidecars') {
+    return rest.length === NESTED_SIDECAR_SEGMENTS ? `/sidecars/${id}/` : null;
   }
   return null; // `measurements` and anything new: no per-slug route to point at.
 };

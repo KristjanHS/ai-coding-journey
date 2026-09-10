@@ -51,6 +51,35 @@ describe('md-links — one source form for GitHub and the site', () => {
     ).toBe('/case-study/crash-dash/path-gated-rule/');
   });
 
+  it('routes the three collections inc7 added', () => {
+    // atoms and topics render a flat `[slug]`; sidecars renders `[...slug]`
+    // because its ids carry the type directory, so its route keeps both segments.
+    expect(
+      routeForContentFile(resolve(CONTENT, 'atoms', 'planning--proposals-not-edits.md')),
+    ).toBe('/atoms/planning--proposals-not-edits/');
+    expect(routeForContentFile(resolve(CONTENT, 'topics', 'rag-simplify-align.md'))).toBe(
+      '/topics/rag-simplify-align/',
+    );
+    expect(routeForContentFile(resolve(CONTENT, 'sidecars', 'method', 'x.md'))).toBe(
+      '/sidecars/method/x/',
+    );
+    // One segment is a type directory with no file; three is a depth the loader
+    // never produces. Either would mint a route `[...slug].astro` cannot match.
+    expect(routeForContentFile(resolve(CONTENT, 'sidecars', 'method.md'))).toBe(null);
+    expect(routeForContentFile(resolve(CONTENT, 'sidecars', 'method', 'a', 'x.md'))).toBe(null);
+  });
+
+  it('rewrites a real chapter\u2192atom link that exists on disk', () => {
+    // The Stage 4 affordance end to end: the source form is the `.md` path a
+    // GitHub reader follows, and it must resolve to a file that is really there.
+    const chapter = join(CONTENT, 'journey', '02-kri-local-rag.md');
+    const body = readFileSync(chapter, 'utf8');
+    const link = /\]\((\.\.\/atoms\/[^)]+\.md)\)/.exec(body);
+    expect(link, '02-kri-local-rag.md links no atom as a relative .md path').not.toBeNull();
+    expect(visit(link![1], chapter)).toMatch(/^\/atoms\/[^/]+\/$/);
+    expect(() => readFileSync(resolve(CONTENT, 'journey', link![1]))).not.toThrow();
+  });
+
   it('refuses a nested path in a flat collection', () => {
     // journey/artifacts/course render a single `[slug]`, so a nested file has no route.
     expect(routeForContentFile(resolve(CONTENT, 'journey', 'sub', 'deep.md'))).toBe(null);

@@ -115,3 +115,8 @@ Log the app↔LangChain interaction so retrieval and generation steps are tracea
 The parenthetical is the load-bearing part. It does not say "prefer fewer dependencies" — it names the
 three packages that were dropped and what replaced them, so the rule can be checked against the
 lockfile rather than interpreted.
+
+## Atoms
+
+- [Ask which stack to build on and you get a catalogue](../atoms/asking--which-stack-gets-a-catalogue.md)
+- [Ask for proposals, not edits](../atoms/planning--proposals-not-edits.md)

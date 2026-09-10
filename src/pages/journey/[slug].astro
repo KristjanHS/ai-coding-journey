@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Chapter from '../../layouts/Chapter.astro';
+import { RUNGS } from '../../content.config';
 
 export async function getStaticPaths() {
   const chapters = await getCollection('journey');
@@ -9,7 +10,55 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+
+// inc7 Stage 4 — transclusion. An atom names the chapter it was mined for in
+// `source_chapter`; the chapter page inlines those atoms below its own body so a
+// site reader never has to follow the `## Atoms` links the markdown carries for
+// GitHub. Rung order, not file order: the ladder is the argument.
+//
+// No `<h2>Atoms</h2>` here: the chapter markdown already carries a `## Atoms`
+// heading above its link list (that list is what a GitHub reader follows), and
+// this section renders directly beneath it. Emitting a second heading would put
+// the word twice on the page for the sake of a surface that has it once.
+const atoms = (await getCollection('atoms'))
+  .filter((atom) => atom.data.source_chapter === entry.id)
+  .sort((a, b) => RUNGS.indexOf(a.data.rung) - RUNGS.indexOf(b.data.rung));
+const rendered = await Promise.all(
+  atoms.map(async (atom) => ({ atom, Body: (await render(atom)).Content })),
+);
 ---
 <Chapter entry={entry}>
   <Content />
+  {rendered.length > 0 && (
+    <section class="atoms">
+      {rendered.map(({ atom, Body }) => (
+        <article class="atom">
+          <p class="facets">
+            <a href={`/atoms/${atom.id}/`}>{atom.id}</a>
+            <span>{atom.data.rung} · {atom.data.level} · {atom.data.evidence} · {atom.data.minutes} min</span>
+          </p>
+          <Body />
+        </article>
+      ))}
+    </section>
+  )}
 </Chapter>
+
+<style>
+  /* The transcluded atom is a distinct register from the chapter prose: it is a
+     teachable unit lifted out of a source, not narration. The rule and the sunk
+     facet line say so without a second heading level competing with the atom's
+     own H1. */
+  .atoms { margin-top: var(--space-3); }
+  .atom { margin-top: var(--space-4); padding-left: var(--space-3); border-left: 2px solid var(--rule); }
+  .facets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+  }
+  .facets span { color: var(--fg-dim); }
+  .atom :global(h1) { font-size: var(--size-2); margin-top: var(--space-2); }
+</style>

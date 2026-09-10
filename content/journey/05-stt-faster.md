@@ -34,3 +34,7 @@ job, numbered steps, an effort and risk sizing, and the impact — closing with 
 execution order that grouped the ten into three passes. Asking what to change
 returns an inventory; asking for ten returns a ranking, because everything past
 the tenth has to be dropped.
+
+## Atoms
+
+- [A hard count forces the ranking](../atoms/planning--a-hard-count-forces-the-ranking.md)

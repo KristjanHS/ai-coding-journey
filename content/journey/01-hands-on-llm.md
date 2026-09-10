@@ -115,3 +115,7 @@ The second artifact is a line I had, and did not read, from the start. Ollama's 
 VRAM arithmetic before it commits a layer — the check I was doing by hand off published model sizes:
 
 > new model will fit in available VRAM in single GPU, loading ... required="5.9 GiB"
+
+## Atoms
+
+- [The log says whether the model fit, not the spec sheet](../atoms/asking--the-log-says-the-model-fit.md)
