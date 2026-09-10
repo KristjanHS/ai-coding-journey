@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionIndex from '../../components/SectionIndex.astro';
+import { RUNGS } from '../../content.config';
+
+// Rows sort by the ladder, not alphabetically: the rung IS the argument this
+// corpus makes, so an atom's position on it is the first thing a row states.
+const order = (rung: string) => RUNGS.indexOf(rung as never);
+const rows = (await getCollection('atoms'))
+  .sort((a, b) => order(a.data.rung) - order(b.data.rung) || a.id.localeCompare(b.id))
+  .map((entry) => ({
+    href: `/atoms/${entry.id}/`,
+    title: entry.data.title,
+    meta: `${entry.data.rung} · ${entry.data.level} · ${entry.data.minutes} min`,
+  }));
+---
+<Base
+  title="Atoms · ai-coding-journey"
+  description="One claim plus one shown piece of evidence, each tagged so a talk can be assembled as a query."
+>
+  <SectionIndex
+    title="Atoms"
+    lede="One claim, one shown piece of evidence, slide-ready as written. Each carries a rung, an audience and a level, so a talk is a query over this corpus rather than a file order — and an atom no deck currently uses is the design working, not a gap."
+    rows={rows}
+    empty="No atoms mined yet."
+  />
+</Base>

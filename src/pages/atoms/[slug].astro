@@ -1,0 +1,44 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const atoms = await getCollection('atoms');
+  return atoms.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Base title={`${entry.data.title} · ai-coding-journey`}>
+  <p class="back"><a href="/atoms/">← atoms</a></p>
+  <p class="question">{entry.data.question}</p>
+  <dl class="meta">
+    <div><dt>rung</dt><dd>{entry.data.rung}</dd></div>
+    <div><dt>level</dt><dd>{entry.data.level}</dd></div>
+    <div><dt>evidence</dt><dd>{entry.data.evidence}</dd></div>
+    <div><dt>minutes</dt><dd>{entry.data.minutes}</dd></div>
+    <div><dt>audience</dt><dd>{entry.data.audience.join(', ')}</dd></div>
+    <div><dt>topic</dt><dd><a href={`/topics/${entry.data.topic}/`}>{entry.data.topic}</a></dd></div>
+  </dl>
+  <article><Content /></article>
+</Base>
+
+<style>
+  .back { font-family: var(--font-mono); font-size: var(--size-0); margin: var(--space-4) 0 0; }
+  .question { color: var(--fg-dim); max-width: 52ch; margin: var(--space-3) 0 0; }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: var(--space-2) var(--space-3);
+    margin: var(--space-3) 0 0;
+    padding: var(--space-3);
+    background: var(--bg-sunk);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+  }
+  dt { color: var(--fg-dim); }
+  dd { margin: 0; }
+  article :global(h1:first-child) { margin-top: var(--space-4); }
+</style>

@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionIndex from '../../components/SectionIndex.astro';
+
+// Atom counts are derived, never authored: a topic page that advertised atoms it
+// does not group would be the same failure the root page's count rule avoids.
+const atoms = await getCollection('atoms');
+const rows = (await getCollection('topics'))
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map((entry) => {
+    const n = atoms.filter((atom) => atom.data.topic === entry.id).length;
+    return {
+      href: `/topics/${entry.id}/`,
+      title: entry.data.title,
+      meta: `${n} ${n === 1 ? 'atom' : 'atoms'}`,
+    };
+  });
+---
+<Base
+  title="Topics · ai-coding-journey"
+  description="One idea per file, grouping the atoms mined for it."
+>
+  <SectionIndex
+    title="Topics"
+    lede="One idea per file, drawn from the source corpus's own filename prefixes. A topic is what an atom belongs to, which is how the corpus grows past the talks that currently exist."
+    rows={rows}
+    empty="No topics yet."
+  />
+</Base>

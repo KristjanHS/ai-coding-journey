@@ -1,0 +1,43 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { RUNGS } from '../../content.config';
+
+export async function getStaticPaths() {
+  const topics = await getCollection('topics');
+  return topics.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const order = (rung: string) => RUNGS.indexOf(rung as never);
+const atoms = (await getCollection('atoms'))
+  .filter((atom) => atom.data.topic === entry.id)
+  .sort((a, b) => order(a.data.rung) - order(b.data.rung) || a.id.localeCompare(b.id));
+---
+<Base title={`${entry.data.title} · ai-coding-journey`}>
+  <p class="back"><a href="/topics/">← topics</a></p>
+  <article><Content /></article>
+  <h2>Atoms</h2>
+  {atoms.length > 0 ? (
+    <ul class="rows">
+      {atoms.map((atom) => (
+        <li>
+          <a href={`/atoms/${atom.id}/`}>{atom.data.title}</a>
+          <span class="meta">{atom.data.rung}</span>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p class="empty">Nothing mined for this topic yet.</p>
+  )}
+</Base>
+
+<style>
+  .back { font-family: var(--font-mono); font-size: var(--size-0); margin: var(--space-4) 0 0; }
+  article :global(h1:first-child) { margin-top: var(--space-4); }
+  .rows { list-style: none; padding: 0; }
+  .rows li { padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
+  .meta { font-family: var(--font-mono); font-size: var(--size-0); color: var(--fg-dim); margin-left: var(--space-3); }
+  .empty { color: var(--fg-dim); }
+</style>

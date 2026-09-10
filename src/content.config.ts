@@ -36,6 +36,27 @@ export const VERSIONED = ['nothing', 'code', 'code-and-rules', 'governance'] as 
 export const VERIFIED_BY = ['nothing', 'me-reading', 'tests', 'agent-run-gate'] as const;
 export const COST_TO_LOOK = ['no-log', 'counts-only', 'floor', 'cache-reuse'] as const;
 
+// ---------------------------------------------------------------------------
+// inc7b — the atom corpus. A deck is a query over these facets, not a file
+// order, so every facet is a closed set: an open string would make the query
+// unwritable and the vitest pins vacuous.
+
+// Who a cut is for. Fixed by the vision, not chosen here.
+export const AUDIENCES = ['taltech', 'sharemind', 'meetup', 'linkedin'] as const;
+
+// What the atom DOES to a listener — deliberately not a reader-experience scale
+// (intro/practitioner/expert), which maps near-1:1 onto `audience[]` and would
+// encode one axis in two keys. `orient` says what changed, `show` puts the thing
+// on screen, `govern` names the gate that holds it.
+export const LEVELS = ['orient', 'show', 'govern'] as const;
+
+// NAME COLLISION, on purpose: the frontmatter facet `evidence:` is the KIND of
+// the atom's one verbatim line; the `## Evidence` section is the line itself.
+// The four values are cut by what a line can display, which is why the eight
+// sidecar types are not reused — `era`, `misconception` and `method` are never
+// a shown line, so those members would be unreachable by construction.
+export const EVIDENCE_KINDS = ['defect', 'number', 'artifact', 'transcript'] as const;
+
 const journey = defineCollection({
   loader: glob({ pattern: ['*.md', '!00-experiments.md', '!README.md'], base: './content/journey' }),
   schema: z.object({
@@ -145,4 +166,45 @@ const measurements = defineCollection({
   schema: provisional,
 });
 
-export const collections = { journey, artifacts, 'case-study': caseStudy, course, measurements };
+// A topic groups one idea: its atom(s) and (from Stage 2) its sidecars. Topics
+// are files rather than a free-text tag so that "every sidecar resolves a topic"
+// is a referential-integrity check over the filesystem rather than prose.
+const topics = defineCollection({
+  loader: glob({ pattern: '*.md', base: './content/topics' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string().optional(),
+  }),
+});
+
+// One claim plus one shown piece of evidence, ~15 lines, slide-ready as written.
+// `minutes` is a spoken-duration estimate and the only unfalsifiable value in the
+// repo: the suite bounds the SUM over an audience, never a single value.
+const atoms = defineCollection({
+  loader: glob({ pattern: '*.md', base: './content/atoms' }),
+  schema: z.object({
+    title: z.string(),
+    // Required, all of them: an atom missing a facet is not queryable, and an
+    // unqueryable atom cannot reach a deck. This is the one collection where an
+    // optional facet would defeat the schema's whole job.
+    topic: z.string(),
+    rung: z.enum(RUNGS),
+    question: z.string(),
+    audience: z.array(z.enum(AUDIENCES)).nonempty(),
+    evidence: z.enum(EVIDENCE_KINDS),
+    minutes: z.number(),
+    level: z.enum(LEVELS),
+    // The chapter this was mined for. Stage 4's transclusion query keys on it.
+    source_chapter: z.string(),
+  }),
+});
+
+export const collections = {
+  journey,
+  artifacts,
+  'case-study': caseStudy,
+  course,
+  measurements,
+  topics,
+  atoms,
+};

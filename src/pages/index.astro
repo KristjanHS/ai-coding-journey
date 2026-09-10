@@ -53,6 +53,22 @@ const sections = [
     whenEmpty: 'none yet',
   },
   {
+    href: '/topics/',
+    title: 'Topics',
+    blurb: 'One idea per file, grouping the atoms mined for it.',
+    count: (await getCollection('topics')).length,
+    unit: ['topic', 'topics'] as const,
+    whenEmpty: 'arrives at inc7',
+  },
+  {
+    href: '/atoms/',
+    title: 'Atoms',
+    blurb: 'One claim, one shown piece of evidence, tagged so a talk is a query.',
+    count: (await getCollection('atoms')).length,
+    unit: ['atom', 'atoms'] as const,
+    whenEmpty: 'arrives at inc7',
+  },
+  {
     href: '/deck/',
     title: 'The deck',
     // inc6: the count is the number of chapters that opted in via `deck: true`,

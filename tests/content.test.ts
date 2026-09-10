@@ -407,6 +407,89 @@ describe('context artifacts', () => {
 });
 
 
+// inc7b — the atom corpus. `astro build` already gates each atom's own schema,
+// but it cannot see two things: that a `topic:` names a topic file that exists
+// (Zod validates a string, not a reference), and that the facet vocabularies the
+// pages and a future deck query against are still the ones declared. Both are
+// asserted here, over the source text — vitest has no Astro resolution, so the
+// consts are regex-parsed out of the config exactly as ARTIFACT_KINDS is.
+const ATOM_DIR = join(CONTENT, 'atoms');
+const TOPIC_DIR = join(CONTENT, 'topics');
+const ATOMS = contentFiles(ATOM_DIR);
+
+/** A `const` array as DECLARED in the collection schema, not a hand-copy. */
+function configEnum(name: string): string[] {
+  const config = read(join('src', 'content.config.ts'));
+  const decl = config.match(new RegExp(`^export const ${name} = \\[([^\\]]*)\\]`, 'm'));
+  expect(decl, `no ${name} in src/content.config.ts`).not.toBeNull();
+  return [...decl![1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+}
+
+describe('atom corpus', () => {
+  const topicSlugs = new Set(
+    readdirSync(TOPIC_DIR)
+      .filter((name) => name.endsWith('.md'))
+      .map((name) => name.replace(/\.md$/, '')),
+  );
+
+  it('there are atoms and topics to check', () => {
+    expect(ATOMS.length, `no atoms found under ${ATOM_DIR}`).toBeGreaterThan(0);
+    expect(topicSlugs.size, `no topics found under ${TOPIC_DIR}`).toBeGreaterThan(0);
+  });
+
+  // Referential integrity. This is the whole reason topics are files rather than
+  // a free-text tag: a typo'd `topic:` is a broken link on the site and a dead
+  // group in the corpus, and nothing else in the gate can see it.
+  it.each(ATOMS)('%s: `topic` resolves to a topic file', (path) => {
+    const topic = frontmatter(read(path), 'topic');
+    expect(topic, `${path}: no \`topic:\` in frontmatter`).toBeDefined();
+    expect(
+      [...topicSlugs],
+      `${path}: \`topic: ${topic}\` has no ${join(TOPIC_DIR, `${topic}.md`)}`,
+    ).toContain(topic);
+  });
+
+  // Mirror-totality pins. RUNG_META's precedent: a Record declared total over an
+  // enum does not gate a ship, because `make check` runs `astro build`, never
+  // `astro check`. These name the members instead, so dropping one reds here.
+  it('the six rungs are the ladder the atoms are sorted by', () => {
+    expect(configEnum('RUNGS')).toEqual([
+      'asking',
+      'suggesting',
+      'delegating',
+      'planning',
+      'configuring',
+      'governing',
+    ]);
+  });
+
+  it('the three levels are what an atom does to a listener', () => {
+    expect(configEnum('LEVELS')).toEqual(['orient', 'show', 'govern']);
+  });
+
+  it('the four evidence kinds are what a shown line can be', () => {
+    expect(configEnum('EVIDENCE_KINDS')).toEqual(['defect', 'number', 'artifact', 'transcript']);
+  });
+
+  it('the four audiences are the cuts one corpus emits', () => {
+    expect(configEnum('AUDIENCES')).toEqual(['taltech', 'sharemind', 'meetup', 'linkedin']);
+  });
+
+  // Fidelity rule: paraphrase everywhere, exactly one verbatim line per atom, and
+  // that line carries its date. A second quote block is the leak surface widening
+  // one idea at a time, which is what the one-quote ceiling exists to hold.
+  it.each(ATOMS)('%s: `## Evidence` carries exactly one dated quote', (path) => {
+    const evidence = section(read(path), 'Evidence');
+    expect(evidence, `${path}: no \`## Evidence\` section`).toBeDefined();
+    const quotes = evidence!.split(/\n(?!>)/).filter((block) => block.trimStart().startsWith('>'));
+    expect(quotes.length, `${path}: expected exactly one blockquote in \`## Evidence\``).toBe(1);
+    expect(quotes[0], `${path}: the quoted line carries no bracketed date`).toMatch(
+      /\[\d{4}-\d{2}(-\d{2})?(\.\.\d{4}-\d{2}(-\d{2})?)?\]/,
+    );
+  });
+});
+
+
 // /measurements shipped in inc5a with no link to it from anywhere: the root
 // page's `sections` array listed four of the five top-level routes, so the page
 // was reachable only by typing the URL. This guard derives the route set from
