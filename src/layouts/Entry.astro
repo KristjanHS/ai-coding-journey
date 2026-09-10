@@ -1,0 +1,56 @@
+---
+/**
+ * One collection entry: back-link, optional lead slot, meta `<dl>`, article.
+ * Serves atoms, artifacts and sidecars; topics and case-study render their
+ * own bodies and stay off this layout on purpose.
+ */
+import Base from './Base.astro';
+
+export interface Field {
+  label: string;
+  value: string | number;
+  href?: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  back: { href: string; label: string };
+  fields: Field[];
+  /** Minimum `<dl>` column width; artifacts' long values want a wider one. */
+  columnMin?: string;
+}
+
+const { title, description, back, fields, columnMin = '9rem' } = Astro.props;
+---
+<Base title={`${title} · ai-coding-journey`} description={description}>
+  <p class="back"><a href={back.href}>← {back.label}</a></p>
+  <slot name="lead" />
+  <dl class="meta" style={`--column-min: ${columnMin}`}>
+    {fields.map((f) => (
+      <div>
+        <dt>{f.label}</dt>
+        <dd>{f.href ? <a href={f.href}>{f.value}</a> : f.value}</dd>
+      </div>
+    ))}
+  </dl>
+  <article><slot /></article>
+</Base>
+
+<style>
+  .back { font-family: var(--font-mono); font-size: var(--size-0); margin: var(--space-4) 0 0; }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--column-min), 1fr));
+    gap: var(--space-2) var(--space-3);
+    margin: var(--space-3) 0 0;
+    padding: var(--space-3);
+    background: var(--bg-sunk);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+  }
+  dt { color: var(--fg-dim); }
+  dd { margin: 0; }
+  article :global(h1:first-child) { margin-top: var(--space-4); }
+</style>
