@@ -64,7 +64,8 @@ export const EVIDENCE_KINDS = ['defect', 'number', 'artifact', 'transcript'] as 
 
 // The governance concern an atom answers — the ledger's five fields grouped:
 // could-see + retrieved → control, versioned → provenance, verified-by →
-// quality, cost-to-look → cost. Rung × concern is the coverage grid.
+// quality, cost-to-look → cost; control also takes who keeps the decision.
+// The concern follows what the `## Evidence` line shows. Rung × concern is the coverage grid.
 export const CONCERNS = ['control', 'provenance', 'quality', 'cost'] as const;
 
 const journey = defineCollection({

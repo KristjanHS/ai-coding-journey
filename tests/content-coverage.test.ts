@@ -20,9 +20,9 @@ const KNOWN_GAPS: Record<string, string> = {
   'planning/quality': 'queued',
   'planning/cost': 'queued',
   'configuring/quality': 'queued',
+  'governing/control': 'queued',
   'governing/provenance': 'queued',
   'governing/quality': 'queued',
-  'governing/cost': 'queued',
 };
 
 const RUNGS = configEnum('RUNGS');
@@ -47,7 +47,10 @@ describe('rung × concern coverage', () => {
   });
 
   it('every KNOWN_GAPS key names a grid cell', () => {
-    for (const cell of Object.keys(KNOWN_GAPS)) expect(CELLS, `KNOWN_GAPS '${cell}' is not a cell`).toContain(cell);
+    for (const [cell, why] of Object.entries(KNOWN_GAPS)) {
+      expect(CELLS, `KNOWN_GAPS '${cell}' is not a cell`).toContain(cell);
+      expect(why.trim(), `KNOWN_GAPS '${cell}' carries no reason`).not.toBe('');
+    }
   });
 
   it('every cell holds an atom or a reasoned KNOWN_GAPS entry — never both', () => {
