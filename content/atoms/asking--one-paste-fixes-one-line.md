@@ -8,7 +8,7 @@ evidence: defect
 minutes: 3
 level: show
 source_chapter: 04-llm-eng-template
-slot: climb
+slot: open
 ---
 
 # One paste fixes one line, not the class

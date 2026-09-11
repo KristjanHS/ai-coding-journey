@@ -3,7 +3,8 @@
 //   (1) every atom's `slot` is a declared slot, and the schema's SLOTS tuple
 //       equals deck.json's slot ids IN ORDER (the route groups by that order);
 //   (2) every `fallback` names a real `deck: true` chapter, or is null;
-//   (3) the running order still sums to the lecture's 90 minutes.
+//   (3) the running order still sums to the lecture's 90 minutes;
+//   (4) no slot's `university` atoms run past that slot's `minutes`.
 // SLOTS and deck.json are deliberately two sources — z.enum needs a literal
 // tuple — so this file is the only thing preventing them from drifting apart.
 
@@ -53,5 +54,21 @@ describe('deck slots', () => {
 
   it('the running order sums to 90 minutes', () => {
     expect(deck.slots.reduce((total, slot) => total + slot.minutes, 0)).toBe(90);
+  });
+
+  it("no slot's university atoms overrun its minutes", () => {
+    const cut = ATOMS.filter((path) => /\buniversity\b/.test(frontmatter(read(path), 'audience') ?? ''));
+    expect(cut.length, 'no university atoms — the check cannot establish').toBeGreaterThan(0);
+
+    const used = new Map(deck.slots.map((slot) => [slot.id, 0]));
+    for (const path of cut) {
+      const slot = frontmatter(read(path), 'slot')!;
+      used.set(slot, (used.get(slot) ?? 0) + Number(frontmatter(read(path), 'minutes')));
+    }
+    for (const slot of deck.slots) {
+      expect(used.get(slot.id), `slot '${slot.id}' runs ${used.get(slot.id)} of ${slot.minutes} minutes`).toBeLessThanOrEqual(
+        slot.minutes,
+      );
+    }
   });
 });

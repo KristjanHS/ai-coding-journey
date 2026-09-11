@@ -8,7 +8,7 @@ evidence: artifact
 minutes: 3
 level: show
 source_chapter: 01-hands-on-llm
-slot: climb
+slot: open
 quote_from: content/journey/01-hands-on-llm.md
 ---
 
