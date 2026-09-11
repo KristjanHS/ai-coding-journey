@@ -19,7 +19,7 @@ tokens on every task, including tasks it has nothing to say about, so its
 design problem is subtraction.
 
 In the private app it stays around sixty lines: pointers to where the truth
-lives, the list of files an agent may edit, and four absolute rules. Anything
+lives, the list of files an agent may edit, a source map and four absolute rules. Anything
 that matters only for certain files moves out to those files.
 
 ## Evidence
