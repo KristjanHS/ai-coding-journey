@@ -111,6 +111,7 @@ twice and needs a linked `.vercel/`), and no separate build step (`check` alread
 ⚠ **A green push is not a green site.** Until the dashboard import has happened a push publishes nothing
 but the GitHub-rendered markdown; after it, the Vercel build can still fail on its own. Confirm the
 deployment — never infer it from a successful push. A stale `timeline.json` never blocks a release.
+Probe a live route with `curl -sL` — `/deck/` 308s to `/deck`, so a probe without `-L` reads the redirect.
 
 The output is **static** — no adapter. Never install `@astrojs/vercel`: it switches the build to a server
 output nothing here needs. `vercel.json` states framework, build command and `dist` explicitly rather than
