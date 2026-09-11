@@ -2,6 +2,7 @@
 title: What the machine could see went flat, then jumped
 topic: the-governance-layer
 rung: asking
+concern: control
 question: How did what the agent could see change across the journey — gradually, or all at once?
 audience: [university, rnd-engineers]
 evidence: artifact

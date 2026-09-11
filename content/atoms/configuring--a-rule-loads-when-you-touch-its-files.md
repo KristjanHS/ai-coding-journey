@@ -2,6 +2,7 @@
 title: A rule loads when you touch its files
 topic: the-governance-layer
 rung: configuring
+concern: control
 question: How do you give an agent a convention without paying for it on every task?
 audience: [university, rnd-engineers]
 evidence: artifact

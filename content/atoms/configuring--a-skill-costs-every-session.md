@@ -2,6 +2,7 @@
 title: A skill costs every session, not just the job it was for
 topic: the-config-tree
 rung: configuring
+concern: cost
 question: What does adding one more skill to the config tree actually cost?
 audience: [university, rnd-engineers]
 evidence: defect

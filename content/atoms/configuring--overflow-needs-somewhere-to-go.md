@@ -2,6 +2,7 @@
 title: A rule that caps text needs somewhere for the overflow to go
 topic: the-config-tree
 rung: configuring
+concern: provenance
 question: Why does a file-based rule hold where the same correction typed into chat did not?
 audience: [university, rnd-engineers]
 evidence: artifact

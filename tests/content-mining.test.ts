@@ -98,21 +98,11 @@ describe('the mined corpus is in English', () => {
   });
 });
 
-// (d) The lecture is 90 minutes. The spec's 82..90 band is a corpus-COMPLETENESS
-// property and cannot pass while the corpus is being built, so only the ceiling
-// ships now; the >= 82 floor arms at the inc6b content freeze. The audience must
-// be non-empty first, or the sum is trivially under any ceiling.
-describe('the university cut fits the lecture', () => {
-  const MINUTES_CEILING = 90;
-  const cut = ATOMS.filter((path) => /\buniversity\b/.test(frontmatter(read(path), 'audience') ?? ''));
-
+// (d) The deck renders the university cut, so it must be non-empty. `minutes`
+// gates nothing (ruled 2026-09-11): coverage is pinned in content-coverage.test.ts.
+describe('the university cut', () => {
   it('the university audience is non-empty', () => {
+    const cut = ATOMS.filter((path) => /\buniversity\b/.test(frontmatter(read(path), 'audience') ?? ''));
     expect(cut.length, 'no atom carries `audience: [... university ...]`').toBeGreaterThan(0);
-  });
-
-  it(`the university cut runs at most ${MINUTES_CEILING} minutes`, () => {
-    const total = cut.reduce((sum, path) => sum + Number(frontmatter(read(path), 'minutes')), 0);
-    expect(Number.isFinite(total), 'an atom in the cut has a non-numeric `minutes`').toBe(true);
-    expect(total, `the university cut sums to ${total} minutes`).toBeLessThanOrEqual(MINUTES_CEILING);
   });
 });

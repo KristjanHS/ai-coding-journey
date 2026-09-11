@@ -2,6 +2,7 @@
 title: Ask for proposals, not edits
 topic: rag-simplify-align
 rung: planning
+concern: control
 question: What changes when you stop asking a model to edit and start asking it to propose?
 audience: [university, rnd-engineers]
 evidence: artifact

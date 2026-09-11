@@ -2,6 +2,7 @@
 title: The log says whether the model fit, not the spec sheet
 topic: models-on-the-home-box
 rung: asking
+concern: quality
 question: Once you have picked a model on paper, how do you know the box can actually run it?
 audience: [university, rnd-engineers]
 evidence: artifact

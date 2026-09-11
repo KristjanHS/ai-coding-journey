@@ -62,6 +62,11 @@ export const LEVELS = ['orient', 'show', 'govern'] as const;
 // a shown line, so those members would be unreachable by construction.
 export const EVIDENCE_KINDS = ['defect', 'number', 'artifact', 'transcript'] as const;
 
+// The governance concern an atom answers — the ledger's five fields grouped:
+// could-see + retrieved → control, versioned → provenance, verified-by →
+// quality, cost-to-look → cost. Rung × concern is the coverage grid.
+export const CONCERNS = ['control', 'provenance', 'quality', 'cost'] as const;
+
 const journey = defineCollection({
   loader: glob({ pattern: ['*.md', '!00-experiments.md', '!README.md'], base: './content/journey' }),
   schema: z.object({
@@ -183,8 +188,7 @@ const topics = defineCollection({
 });
 
 // One claim plus one shown piece of evidence, ~15 lines, slide-ready as written.
-// `minutes` is a spoken-duration estimate and the only unfalsifiable value in the
-// repo: the suite bounds the SUM over an audience, never a single value.
+// `minutes` is a spoken-duration estimate, informational only: nothing gates on it.
 const atoms = defineCollection({
   loader: glob({ pattern: '*.md', base: './content/atoms' }),
   schema: z.object({
@@ -194,6 +198,7 @@ const atoms = defineCollection({
     // optional facet would defeat the schema's whole job.
     topic: z.string(),
     rung: z.enum(RUNGS),
+    concern: z.enum(CONCERNS),
     question: z.string(),
     audience: z.array(z.enum(AUDIENCES)).nonempty(),
     evidence: z.enum(EVIDENCE_KINDS),

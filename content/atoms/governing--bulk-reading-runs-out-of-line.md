@@ -2,6 +2,7 @@
 title: The session reads the brief, not the files
 topic: the-governance-layer
 rung: governing
+concern: control
 question: When an agent needs to survey a large part of a repo, what should end up in its context?
 audience: [university, rnd-engineers]
 evidence: artifact

@@ -2,6 +2,7 @@
 title: Ask which stack to build on and you get a catalogue
 topic: rag-stack-choices
 rung: asking
+concern: control
 question: When you ask a model which framework or stack to build on, what does the answer actually give you?
 audience: [university, rnd-engineers]
 evidence: transcript

@@ -2,6 +2,7 @@
 title: A budget check has to fail open
 topic: the-config-tree
 rung: configuring
+concern: cost
 question: When the agent's own configuration watches its spend, what must that check never be able to do?
 audience: [university, rnd-engineers]
 evidence: artifact

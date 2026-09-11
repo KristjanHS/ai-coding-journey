@@ -1,0 +1,62 @@
+import { describe, expect, it } from 'vitest';
+
+import { ATOMS, configEnum, frontmatter, read } from './helpers';
+
+// The corpus target (ruled 2026-09-11): ≥1 atom per rung × concern cell. An empty
+// cell must be listed here with its reason; a listed cell that fills reds, so the
+// list drains as atoms land. `queued` = not yet attempted by the chain's §S5.
+const KNOWN_GAPS: Record<string, string> = {
+  'asking/provenance': 'queued',
+  'asking/cost': 'queued',
+  'suggesting/control': 'queued',
+  'suggesting/provenance': 'queued',
+  'suggesting/quality': 'queued',
+  'suggesting/cost': 'queued',
+  'delegating/control': 'queued',
+  'delegating/provenance': 'queued',
+  'delegating/quality': 'queued',
+  'delegating/cost': 'queued',
+  'planning/provenance': 'queued',
+  'planning/quality': 'queued',
+  'planning/cost': 'queued',
+  'configuring/quality': 'queued',
+  'governing/provenance': 'queued',
+  'governing/quality': 'queued',
+  'governing/cost': 'queued',
+};
+
+const RUNGS = configEnum('RUNGS');
+const CONCERNS = configEnum('CONCERNS');
+const CELLS = RUNGS.flatMap((rung) => CONCERNS.map((concern) => `${rung}/${concern}`));
+
+function filledCells(): Map<string, number> {
+  const filled = new Map<string, number>();
+  for (const path of ATOMS) {
+    const cell = `${frontmatter(read(path), 'rung')}/${frontmatter(read(path), 'concern')}`;
+    filled.set(cell, (filled.get(cell) ?? 0) + 1);
+  }
+  return filled;
+}
+
+describe('rung × concern coverage', () => {
+  it('the grid is the declared enums, and every atom lands in one of its cells', () => {
+    expect(RUNGS.length, 'RUNGS parsed empty').toBeGreaterThan(0);
+    expect(CONCERNS.length, 'CONCERNS parsed empty').toBeGreaterThan(0);
+    expect(ATOMS.length, 'no atoms — the grid cannot establish').toBeGreaterThan(0);
+    for (const cell of filledCells().keys()) expect(CELLS, `atom cell '${cell}' is off the grid`).toContain(cell);
+  });
+
+  it('every KNOWN_GAPS key names a grid cell', () => {
+    for (const cell of Object.keys(KNOWN_GAPS)) expect(CELLS, `KNOWN_GAPS '${cell}' is not a cell`).toContain(cell);
+  });
+
+  it('every cell holds an atom or a reasoned KNOWN_GAPS entry — never both', () => {
+    const filled = filledCells();
+    for (const cell of CELLS) {
+      const has = filled.has(cell);
+      const gap = cell in KNOWN_GAPS;
+      expect(has || gap, `empty cell '${cell}' is not in KNOWN_GAPS`).toBe(true);
+      expect(has && gap, `cell '${cell}' has an atom — delete its KNOWN_GAPS entry`).toBe(false);
+    }
+  });
+});

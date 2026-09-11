@@ -2,6 +2,7 @@
 title: The always-loaded file is paid for on every task
 topic: the-governance-layer
 rung: configuring
+concern: cost
 question: What belongs in the one instruction file an agent reads at the start of every session?
 audience: [university, rnd-engineers]
 evidence: artifact

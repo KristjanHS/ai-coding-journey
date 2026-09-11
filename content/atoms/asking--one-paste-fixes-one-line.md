@@ -2,6 +2,7 @@
 title: One paste fixes one line, not the class
 topic: the-template-repo
 rung: asking
+concern: quality
 question: When you paste an error and apply the fix that comes back, why does the same error keep returning?
 audience: [university, rnd-engineers]
 evidence: defect
