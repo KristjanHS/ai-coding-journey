@@ -9,8 +9,8 @@ captured: "2026-09-08"
 
 A rule is an instruction and a skill is a procedure. Both are text the model reads and may or may
 not act on. A **hook** is neither: it is a program the harness runs at a fixed event, and its output
-is injected into the transcript. It is the only one of the five kinds that does not depend on the
-model agreeing.
+is injected into the transcript. With a settings file, it is one of the two kinds that do not depend
+on the model agreeing.
 
 This one fires after every tool call and answers one question: *how full is the context window?*
 

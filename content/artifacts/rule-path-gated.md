@@ -66,7 +66,7 @@ confirmed red, because a check that cannot fail proves nothing.
 ## Where it came from
 
 `.claude/rules/content-writing.md` in **this repository** — 43 lines, and diffable against what you
-just read. It is the only one of the five artifacts here with a public address; the other four are
-excerpted from private or per-machine files and have to be taken as quoted.
+just read. Artifacts quoting a public repo name it and can be checked; those excerpted from private
+or per-machine files say so and have to be taken as quoted.
 
 Ledger field it evidences: **could see**.

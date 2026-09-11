@@ -122,11 +122,11 @@ const journey = defineCollection({
   }),
 });
 
-// The context-artifact collection: a prompt is one of FIVE kinds of thing you put
-// in front of a model, and `kind` is what makes the other four sayable at all.
+// The context-artifact collection: a prompt is one of SIX kinds of thing you put
+// in front of a model, and `kind` is what makes the other five sayable at all.
 // `captured` is a free-form span ("2025-12-07/2026-06-21"), not a single date —
 // the source undates individual entries, so no ISO shape is imposed on it.
-export const ARTIFACT_KINDS = ['prompt', 'rule', 'skill', 'hook', 'memory'] as const;
+export const ARTIFACT_KINDS = ['prompt', 'rule', 'skill', 'hook', 'memory', 'settings'] as const;
 
 const artifacts = defineCollection({
   loader: glob({ pattern: '*.md', base: './content/artifacts' }),

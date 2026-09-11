@@ -4,7 +4,7 @@ import { ATOMS, configEnum, frontmatter, read } from './helpers';
 
 // The corpus target (ruled 2026-09-11): ≥1 atom per rung × concern cell. An empty
 // cell must be listed here with its reason; a listed cell that fills reds, so the
-// list drains as atoms land. `queued` = not yet attempted by the chain's §S5.
+// list drains as atoms land.
 const KNOWN_GAPS: Record<string, string> = {
   'asking/provenance': 'chat era: nothing versioned; Cursor .mdc rule lines are web-cited model answers, no chapter',
   'asking/cost': '00-copilot chat logged no token/cost field; no positive dated figure and no cost topic',
@@ -17,10 +17,6 @@ const KNOWN_GAPS: Record<string, string> = {
   'delegating/quality': "04's broken-tooling commit line never attributes the Makefile/hooks to an agent — delegation unproven",
   'delegating/cost': 'Codex token floor (37% of rollouts from 2025-09-23) is a logging-coverage floor across all rollouts — not a task-unit cost',
   'planning/cost': 'no measured cost of writing or reading a plan; the plan-rule path-gating line is a configuring-unit file',
-  'configuring/quality': 'queued',
-  'governing/control': 'queued',
-  'governing/provenance': 'queued',
-  'governing/quality': 'queued',
 };
 
 const RUNGS = configEnum('RUNGS');

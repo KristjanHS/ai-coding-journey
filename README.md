@@ -62,7 +62,7 @@ in [`00-experiments.md`](content/journey/00-experiments.md) instead of a chapter
 | Where | What is there |
 | --- | --- |
 | [`content/journey/`](content/journey/README.md) | one chapter per repo — the spine of the book |
-| [`content/artifacts/`](content/artifacts/agent-loop.md) | the five kinds of context artifact — prompt, rule, skill, hook, memory — reproduced as written |
+| [`content/artifacts/`](content/artifacts/agent-loop.md) | the six kinds of context artifact — prompt, rule, skill, hook, memory, settings — reproduced as written |
 | `content/case-study/` | the sanitised `.md` layer of a private production repo *(empty until inc5)* |
 | `content/course/` | the course skeleton — module, outcome, chapters it draws on *(empty until inc5)* |
 | `content/timeline.json` | the generated spine every index and frontmatter block is synced from |

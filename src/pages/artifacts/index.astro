@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import SectionIndex from '../../components/SectionIndex.astro';
 import { ARTIFACT_KINDS } from '../../content.config';
 
-// Rows sort by the enum's declared order, not alphabetically: the five kinds are
+// Rows sort by the enum's declared order, not alphabetically: the six kinds are
 // the page's argument, and `prompt` leading is the point it is arguing against.
 const order = (kind: string) => ARTIFACT_KINDS.indexOf(kind as never);
 const rows = (await getCollection('artifacts'))
@@ -17,11 +17,11 @@ const rows = (await getCollection('artifacts'))
 ---
 <Base
   title="Context artifacts · ai-coding-journey"
-  description="Five kinds of thing you put in front of a model: a prompt, a rule, a skill, a hook, a memory entry."
+  description="Six kinds of thing you put in front of a model: a prompt, a rule, a skill, a hook, a memory entry, a settings file."
 >
   <SectionIndex
     title="Context artifacts"
-    lede="A prompt is one of five kinds of thing you put in front of a model — the others are a rule file with its paths gate, a skill, a hook and a memory entry. Reproduced as written."
+    lede="A prompt is one of six kinds of thing you put in front of a model — the others are a rule file with its paths gate, a skill, a hook, a memory entry and a settings file. Reproduced as written."
     rows={rows}
     empty="No artifacts published yet."
   />
