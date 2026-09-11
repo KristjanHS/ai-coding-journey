@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -12,6 +13,34 @@ import { fileURLToPath } from 'node:url';
 // unless @astrojs/markdown-remark is installed alongside it.
 const CONTENT_DIR = resolve(process.cwd(), 'content');
 const RELATIVE_MD = /^\.\.?\//;
+
+// The deck ships on a USB stick and opens from `file://`, where Astro's default
+// `/_astro/…` image asset would resolve to filesystem root and vanish — the same
+// failure `tests/deck-offline.test.ts` guards for stylesheets. A markdown image
+// under `content/media/` is therefore inlined as a `data:` URI at build time, so
+// the `.md` source stays a plain relative path (GitHub renders it as a file) while
+// the built HTML carries no external reference. Rewriting the mdast node's url
+// before Astro's `collect-images` sees it keeps the src out of `localImagePaths`,
+// so the asset pipeline never tries to emit it.
+const MEDIA_DIR = resolve(CONTENT_DIR, 'media');
+const MEDIA_MIME = {
+  gif: 'image/gif',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  svg: 'image/svg+xml',
+  webp: 'image/webp',
+};
+
+/** A relative image url resolving into `content/media/` → a `data:` URI; null otherwise. */
+export const dataUriForImage = (url, fromFile) => {
+  if (typeof url !== 'string' || !RELATIVE_MD.test(url)) return null;
+  const abs = resolve(dirname(fromFile), url.split(/[?#]/)[0]);
+  if (relative(MEDIA_DIR, abs).startsWith('..')) return null;
+  const mime = MEDIA_MIME[abs.slice(abs.lastIndexOf('.') + 1).toLowerCase()];
+  if (!mime) return null;
+  return `data:${mime};base64,${readFileSync(abs).toString('base64')}`;
+};
 
 // The site's REAL route table, not "every file under content/". `measurements`
 // has an index page and no `[slug]` route, so a link into it would rewrite to a
@@ -62,6 +91,11 @@ export default function mdLinksPlugin() {
       if (!ctx.fileURL) return;
       const next = rewriteMdLink(node.url, fileURLToPath(ctx.fileURL));
       if (next) ctx.setProperty(node, 'url', next);
+    },
+    image(node, ctx) {
+      if (!ctx.fileURL) return;
+      const uri = dataUriForImage(node.url, fileURLToPath(ctx.fileURL));
+      if (uri) ctx.setProperty(node, 'url', uri);
     },
   };
 }

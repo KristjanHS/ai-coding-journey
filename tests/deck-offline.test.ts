@@ -40,6 +40,15 @@ describe('the deck is self-contained under file://', () => {
     expect(built ?? '').toMatch(/<style[^>]*>/);
   });
 
+  it('inlines a content/media image as a data URI, not an /_astro asset', () => {
+    // The `live` slot's atom embeds `content/media/statusline.gif`. Astro would
+    // rewrite that relative image to `/_astro/…`, which is root-absolute and dies
+    // under `file://` (the assertion above would red on it). `src/md-links.mjs`
+    // inlines it as a data URI instead; this reds the day that image reference is
+    // dropped from the deck or the inlining regresses to an emitted asset.
+    expect(built ?? '').toContain('src="data:image/gif;base64,');
+  });
+
   it('absolutises in-content site links instead of leaving them root-relative', () => {
     // `91-the-close.md` links `/course/skeleton/`; on a USB stick that path is dead,
     // so `Slides.astro` rewrites it against `site`. If the chapter ever stops linking
