@@ -1,0 +1,89 @@
+---
+// S5b: the instruction-file history, one bespoke route under /measurements/ (no [slug]).
+// Every figure is read from the generated JSON; server-rendered, no client JS, no island.
+import Base from '../../layouts/Base.astro';
+import history from '../../../content/measurements/data/instruction-history.json';
+
+const series = history.globalClaudeMd.series;
+const peak = Math.max(...series.map((p) => p.lines));
+const GH =
+  'https://github.com/KristjanHS/ai-coding-journey/blob/main/content/measurements/06-instruction-history.md';
+---
+<Base
+  title="Instruction-file history · ai-coding-journey"
+  description="When each class of agent-instruction file first appeared across the repos, how the global CLAUDE.md grew and was cut back, and the days one change reached most of the fleet — dated from git."
+>
+  <h1>Instruction-file history</h1>
+  <p class="lede">
+    Dated from the git histories of <code>{history.repos}</code> repos, read to their current HEAD.
+    The <a href={GH}>citable narrative</a> says how each figure was measured and what stays
+    unpublished; <a href="/measurements/">the numbers</a> covers the eras themselves.
+  </p>
+
+  <h2>First appearance per class</h2>
+  <table>
+    <thead>
+      <tr><th>class</th><th>first commit</th><th>repo</th><th>repos carrying it</th></tr>
+    </thead>
+    <tbody>
+      {history.classes.map((c) => (
+        <tr>
+          <td><code>{c.class}</code></td>
+          <td>{c.first}</td>
+          <td>{c.repo}</td>
+          <td>{c.repos} of {history.repos}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <h2>The global CLAUDE.md, lines per day</h2>
+  <p class="lede">
+    The last commit of each day that touched it. Every session loads this file, so its length is a
+    cost paid on every call.
+  </p>
+  <table class="series">
+    <thead>
+      <tr><th>date</th><th>lines</th><th aria-hidden="true"></th></tr>
+    </thead>
+    <tbody>
+      {series.map((p) => (
+        <tr>
+          <td>{p.date}</td>
+          <td>{p.lines}</td>
+          <td aria-hidden="true"><span class="bar" style={`width:${(p.lines / peak) * 100}%`}></span></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <h2>Fleet sweeps</h2>
+  <p class="lede">
+    Days on which instruction files changed in at least <code>{history.fleetSweeps.minRepos}</code>
+    of the <code>{history.repos}</code> repos.
+  </p>
+  <table>
+    <thead>
+      <tr><th>date</th><th>repos changed</th></tr>
+    </thead>
+    <tbody>
+      {history.fleetSweeps.days.map((d) => (
+        <tr>
+          <td>{d.date}</td>
+          <td>{d.repos} of {history.repos}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</Base>
+
+<style>
+  .lede { color: var(--fg-dim); margin-top: 0; }
+  .series td:last-child { width: 50%; }
+  .bar {
+    display: block;
+    height: 0.6em;
+    background: var(--stage-governing);
+    border-radius: var(--radius);
+  }
+</style>

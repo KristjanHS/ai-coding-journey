@@ -15,7 +15,7 @@ VITEST := node_modules/.bin/vitest
 # the shared include at the bottom must not be able to steal the default goal.
 .DEFAULT_GOAL := help
 
-.PHONY: help brief check lint site test timeline measurements ship dev build preview
+.PHONY: help brief check lint site test timeline measurements instruction-history ship dev build preview
 
 # The gate stamp `check` writes on green and `brief` reads. Gitignored: it is a
 # local verdict about a local tree, never a fact about the repo.
@@ -207,6 +207,11 @@ measurements: ## regenerate the measurement store (private full + public redacte
 	@python3 scripts/measurements.py governance
 	@python3 scripts/measurements.py stt
 	@python3 scripts/measurements-public.py
+
+# Same contract as `timeline` (live HEAD, not in `make check`), and never figure-neutral:
+# commit the regen together with the narrative and atom edits its mirror pins demand.
+instruction-history: ## regenerate the instruction-file history JSON from git
+	@python3 scripts/instruction-history.py
 
 # ── Astro site ──
 # The npm scripts these delegate to are real as of inc3 Stage 1. The guard now
