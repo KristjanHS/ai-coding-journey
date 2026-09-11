@@ -8,8 +8,10 @@ import { ATOMS, configEnum, frontmatter, read } from './helpers';
 const KNOWN_GAPS: Record<string, string> = {
   'asking/provenance': 'chat era: nothing versioned; Cursor .mdc rule lines are web-cited model answers, no chapter',
   'asking/cost': '00-copilot chat logged no token/cost field; no positive dated figure and no cost topic',
+  'suggesting/control': 'Continue figures count all token events, chat included — no completion-only measurement',
   'suggesting/provenance': 'Continue cross-check & Cursor client-estimate fit no provenance topic in content/topics/',
-  'suggesting/quality': 'no suggesting-era verified-by line maps to a quality topic; Continue cross-check has no topic',
+  'suggesting/quality': 'no quality topic covers the Continue era; its two-store cross-check has no topic home',
+  'suggesting/cost': 'eras.json withholds every cost figure; the 0.10% floor share is token volume, not cost',
   'delegating/control': 'queued',
   'delegating/provenance': 'queued',
   'delegating/quality': 'queued',
