@@ -97,12 +97,18 @@ def global_series(found: dict[str, Path]) -> list[dict]:
         sys.exit(f"error: {GLOBAL_REPO} is required for the global CLAUDE.md series")
     repo = found[GLOBAL_REPO]
     log = git(
-        repo, "log", "--follow", "--name-only", "--format=%as %H", "--", GLOBAL_PATH
+        repo, "log", "--follow", "--name-only", "--format=@%as %H", "--", GLOBAL_PATH
     )
     by_day: dict[str, int] = {}
-    entries = [line for line in log.splitlines() if line]
-    for header, path in zip(entries[::2], entries[1::2]):
-        day, sha = header.split()
+    # `@` marks a header, so a commit listing no path (a merge) cannot shift the pairing.
+    commits: list[tuple[str, str, str]] = []
+    day = sha = ""
+    for line in filter(None, log.splitlines()):
+        if line.startswith("@"):
+            day, sha = line[1:].split()
+        else:
+            commits.append((day, sha, line))
+    for day, sha, path in commits:
         if day in by_day:  # newest first: the first commit seen per day is its last
             continue
         shown = subprocess.run(

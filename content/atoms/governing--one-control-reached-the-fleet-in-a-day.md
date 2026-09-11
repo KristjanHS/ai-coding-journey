@@ -16,7 +16,7 @@ quote_from: content/measurements/06-instruction-history.md
 # One control reached the fleet in a day
 
 A control that lives in one repo protects one repo. The deny list was moved into the harness
-settings of almost every repo on a single day, and the git history dates it.
+settings of many repos in one sweep, and the git history dates it and counts them.
 
 ## Evidence
 

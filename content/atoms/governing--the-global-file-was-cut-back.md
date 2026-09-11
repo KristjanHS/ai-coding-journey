@@ -16,7 +16,7 @@ quote_from: content/measurements/06-instruction-history.md
 # The global file grew, then was cut back
 
 Every session loads the global instruction file, so each line in it is paid for on every call.
-It grew for three months, then was cut, with the removed lines moved to rules that load on demand.
+It grew to a peak, then was cut, with the removed lines moved to rules that load on demand.
 
 ## Evidence
 

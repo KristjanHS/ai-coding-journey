@@ -30,10 +30,10 @@ removed moved into path-gated rules and references that load only when needed.
 
 On 2026-09-06, instruction files changed in 12 of the 15 repos on the same day. Days reaching the
 5-repo threshold: 1. That day is when the ignore-file deny list moved into `.claude/settings.json`
-across the fleet — one control, pushed everywhere at once.
+in those repos: one control, pushed in one sweep.
 
-That sweep also sets the latest instruction-file date for nearly every repo, so a repo's last
-instruction change is never read as its last working day.
+A sweep like this moves a repo's latest instruction-file date without any other work in it, so a
+repo's last instruction change is never read as its last working day.
 
 ## What is not published
 

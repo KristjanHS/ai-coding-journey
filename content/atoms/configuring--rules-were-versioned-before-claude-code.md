@@ -16,7 +16,7 @@ quote_from: content/measurements/06-instruction-history.md
 # Rules were versioned before Claude Code
 
 Instruction files committed to the repo were already there in the Cursor era.
-Claude Code did not start the habit of setup that outlives the session; the history dates it eight months earlier.
+Claude Code did not start the habit of setup that outlives the session; the history dates it to the Cursor era.
 
 ## Evidence
 
