@@ -47,7 +47,7 @@ human owns whether the answer is true.
 ## Artifact
 
 The reviewer's own note from the project's working page (2025-12-06), which became two same-day fix
-commits (home path sanitised):
+commits (home path and run id sanitised):
 
 > the links in pdf don't work: they should refer to the same folder as pdf itself, but currently they
 > refer to home:
