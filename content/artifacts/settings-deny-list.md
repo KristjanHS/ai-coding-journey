@@ -27,8 +27,8 @@ An excerpt of the file it wrote (the full list has 33 entries):
 {
   "permissions": {
     "deny": [
-      "Read(**/.venv/**)",
       "Read(**/__pycache__/**)",
+      "Read(**/.venv/**)",
       "Read(**/.cursor/**)",
       "Read(**/.gemini/**)",
       "Read(**/AGENTS.md)",

@@ -7,7 +7,7 @@ captured: "2026-09-08"
 
 # Memory · the one file the next session reads first
 
-The other four artifacts shape a session while it runs. A memory entry is the only one that crosses
+The other five kinds shape a session while it runs. A memory entry is the only one that crosses
 the boundary between sessions — it is what survives when the window is thrown away.
 
 The failure mode is obvious once you have seen it: a memory file becomes a diary. Every session
@@ -59,7 +59,7 @@ file that stays under a screen and one that does not.
 ## Where it came from
 
 This project's auto-memory directory, which is **not** part of this repository and has no public
-address — it is per-machine, per-project state. Unlike the other four artifacts on this page, you
+address — it is per-machine, per-project state. Unlike the other five kinds on this page, you
 cannot diff this one against anything; the excerpt above is the whole evidence.
 
 Ledger field it evidences: **versioned**.
