@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Timeline from '../../components/Timeline.astro';
 import { MIN_COMMITS, experiments } from '../../lib/timeline';
 import { RUNGS } from '../../content.config';
+import { RUNG_META } from '../../lib/rungs';
 
 const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeCompare(b.id));
 
@@ -22,15 +23,10 @@ const chapters = (await getCollection('journey')).sort((a, b) => a.id.localeComp
 // build at RENDER time (`Cannot read properties of undefined`), demoed red
 // 2026-09-09. That message names neither the rung nor this file, which is why
 // `tests/content-journey.test.ts` also asserts the pairing — the test is the legible
-// half of the gate, the build is the one that cannot be skipped.
-const RUNG_META: Record<(typeof RUNGS)[number], { from: string; unit: string }> = {
-  asking: { from: '2025-06', unit: 'a question' },
-  suggesting: { from: '2025-06', unit: 'a snippet' },
-  delegating: { from: '2025-07', unit: 'a task' },
-  planning: { from: '2026-02', unit: 'a plan' },
-  configuring: { from: '2026-04', unit: 'a policy' },
-  governing: { from: '2026-07', unit: 'a process' },
-};
+// half of the gate, the build is the one that cannot be skipped. `RUNG_META`
+// (the `from`/`unit` columns, declared total over `RUNGS`) now lives in
+// `src/lib/rungs.ts` so the vitest suite can import it; the markdown ladder
+// tables mirror it, guarded by `tests/content-ladder.test.ts`.
 
 const LEDGER_FIELDS = [
   { key: 'could_see', label: 'could see', concern: 'Control' },

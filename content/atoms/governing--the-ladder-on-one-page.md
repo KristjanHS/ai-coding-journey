@@ -15,8 +15,9 @@ quote_from: content/course/worksheet.md
 
 # The ladder on one page
 
-Six rungs, named by the unit of instruction you hand the agent. The two left columns are
-the site's own dates; the right two are what you fill in.
+Six rungs, named by the unit of instruction you hand the agent. The rung and the two dates
+in each row come from the site's own ladder table; the last two columns are for you to argue
+with.
 
 | rung | from | unit of instruction | you're here if… | the next move |
 | --- | --- | --- | --- | --- |

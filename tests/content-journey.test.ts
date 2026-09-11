@@ -2,13 +2,15 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { JOURNEY, read } from './helpers';
+import { RUNG_META } from '../src/lib/rungs';
 
 // The six rungs render on /journey/ from `RUNGS` itself, so the NAMES cannot
-// drift. What can drift is the metadata beside them: `RUNG_META` in
-// `src/pages/journey/index.astro` is a hand-written Record, and `astro build`
-// does not typecheck, so a seventh rung added to the enum reaches the build as
-// an opaque "Cannot read properties of undefined" at render time. This is the
-// legible half of that gate — it names the rung that has no row.
+// drift. What can drift is the metadata beside them: `RUNG_META` (in
+// `src/lib/rungs.ts` since the single-sourcing move) is a hand-written Record,
+// and `astro build` does not typecheck, so a seventh rung added to the enum
+// reaches the build as an opaque "Cannot read properties of undefined" at render
+// time. This is the legible half of that gate — it names the enum rung that has
+// no RUNG_META row.
 describe('the rung ladder reaches /journey/', () => {
   const rungs = (() => {
     const config = read(join('src', 'content.config.ts'));
@@ -18,23 +20,25 @@ describe('the rung ladder reaches /journey/', () => {
   })();
 
   const page = read(join('src', 'pages', 'journey', 'index.astro'));
-  const meta = page.match(/const RUNG_META[^=]*= \{([\s\S]*?)\n\};/);
 
-  it('there are rungs to check, and a table to check them against', () => {
+  it('there are rungs to check, and metadata to check them against', () => {
     expect(rungs.length).toBeGreaterThan(1);
-    expect(meta, 'no RUNG_META in src/pages/journey/index.astro').not.toBeNull();
+    expect(Object.keys(RUNG_META).length).toBeGreaterThan(1);
   });
 
   it.each(rungs)('%s: has a date and a unit handed over', (rung) => {
-    const row = meta![1].match(new RegExp(`^\\s*${rung}: \\{([^}]*)\\}`, 'm'));
-    expect(row, `${rung} is in RUNGS with no RUNG_META row`).not.toBeNull();
-    expect(row![1], `${rung}: no from: date`).toMatch(/from: '\d{4}-\d{2}'/);
-    expect(row![1], `${rung}: no unit handed over`).toMatch(/unit: '[^']+'/);
+    const row = (RUNG_META as Record<string, { from: string; unit: string }>)[rung];
+    expect(row, `${rung} is in RUNGS with no RUNG_META row`).toBeDefined();
+    expect(row.from, `${rung}: no from: date`).toMatch(/^\d{4}-\d{2}$/);
+    expect(row.unit, `${rung}: no unit handed over`).toMatch(/\S/);
   });
 
-  it('the table renders from the enum rather than hand-typed rows', () => {
+  it('the table renders from the enum, sourcing RUNG_META from the shared lib', () => {
     expect(page, '/journey/ does not import RUNGS').toMatch(
       /import \{ RUNGS \} from '\.\.\/\.\.\/content\.config'/,
+    );
+    expect(page, '/journey/ does not import RUNG_META from src/lib/rungs').toMatch(
+      /import \{ RUNG_META \} from '\.\.\/\.\.\/lib\/rungs'/,
     );
     expect(page, '/journey/ does not map its table over RUNGS').toMatch(/RUNGS\.map\(/);
   });
