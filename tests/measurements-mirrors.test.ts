@@ -17,6 +17,7 @@ const STATE_PHRASE: Record<string, RegExp> = {
 /** Each era's share, formatted the way the prose must print it. */
 const SHARE_TEXT: [string, string][] = [
   ['01-continue.md', `${(byId('continue').share * 100).toFixed(2)}%`],
+  ['01-continue.md', `${(byId('continue').coverage.localProviderEventShare * 100).toFixed(1)}%`],
   ['02-codex.md', `${(byId('codex').share * 100).toFixed(1)}%`],
   ['03-cursor.md', `${(byId('cursor').share * 100).toFixed(1)}%`],
   ['04-claude-code.md', `${(byId('claude-code').share * 100).toFixed(1)}%`],

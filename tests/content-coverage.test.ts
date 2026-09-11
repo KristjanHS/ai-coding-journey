@@ -6,12 +6,10 @@ import { ATOMS, configEnum, frontmatter, read } from './helpers';
 // cell must be listed here with its reason; a listed cell that fills reds, so the
 // list drains as atoms land. `queued` = not yet attempted by the chain's §S5.
 const KNOWN_GAPS: Record<string, string> = {
-  'asking/provenance': 'queued',
-  'asking/cost': 'queued',
-  'suggesting/control': 'queued',
-  'suggesting/provenance': 'queued',
-  'suggesting/quality': 'queued',
-  'suggesting/cost': 'queued',
+  'asking/provenance': 'chat era: nothing versioned; Cursor .mdc rule lines are web-cited model answers, no chapter',
+  'asking/cost': '00-copilot chat logged no token/cost field; no positive dated figure and no cost topic',
+  'suggesting/provenance': 'Continue cross-check & Cursor client-estimate fit no provenance topic in content/topics/',
+  'suggesting/quality': 'no suggesting-era verified-by line maps to a quality topic; Continue cross-check has no topic',
   'delegating/control': 'queued',
   'delegating/provenance': 'queued',
   'delegating/quality': 'queued',
