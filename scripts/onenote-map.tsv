@@ -20,7 +20,7 @@ Learn_ RAG for org tooling.md	kri-local-rag	? title + RAG subject
 Stt-faster problem summary.md	stt-faster	? title
 Stt-faster ToDo - Plans.md	stt-faster	? title
 Xls analysis.md	xls-analyser	? title
-EDF project xls.md	edf-budget-planner	? title
+EDF project xls.md	fte-budget-planner	? title
 08.12.2025 bashrc.md	dotfiles	? shell config subject
 Claude code_ memory, commands, sub-agents.md	dotfiles	? could equally be claudeconf
 Local llm server performance test.md	hands-on-llm	? local-LLM subject

@@ -1,6 +1,6 @@
 ---
-title: edf-budget-planner
-repo: edf-budget-planner
+title: fte-budget-planner
+repo: fte-budget-planner
 start: 2026-03-31
 end: 2026-07-27
 commits: 668
@@ -15,7 +15,7 @@ deck: false
 artifact: present
 ---
 
-# 08 · edf-budget-planner
+# 08 · fte-budget-planner
 
 ## What I was trying to do
 

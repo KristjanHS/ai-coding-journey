@@ -47,7 +47,7 @@ demand a demonstration of failure before accepting a claim of coverage.
 
 **Outcome:** the learner can describe an engineered review system — independent reviewers, evidence
 requirements, what gets escalated to a person — and argue for or against relying on it in a given project.
-**Draws on:** `13-crash-dash`, the case study, `08-edf-budget-planner`.
+**Draws on:** `13-crash-dash`, the case study, `08-fte-budget-planner`.
 
 ## 7. Choosing tools, and being wrong about them
 

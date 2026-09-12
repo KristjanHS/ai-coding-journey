@@ -56,7 +56,7 @@
     "stage": "planning"
   },
   {
-    "repo": "edf-budget-planner",
+    "repo": "fte-budget-planner",
     "first_commit": "2026-03-31",
     "last_commit": "2026-07-27",
     "commits": 668,
@@ -80,7 +80,7 @@
     "repo": "dotfiles",
     "first_commit": "2026-04-05",
     "last_commit": "2026-09-12",
-    "commits": 875,
+    "commits": 876,
     "stage": "configuring"
   },
   {
@@ -94,7 +94,7 @@
     "repo": "crash-dash",
     "first_commit": "2026-06-25",
     "last_commit": "2026-09-12",
-    "commits": 5167,
+    "commits": 5168,
     "stage": "configuring"
   }
 ]

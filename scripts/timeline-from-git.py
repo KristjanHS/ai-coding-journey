@@ -72,7 +72,7 @@ AI_CONFIG_PATHS = [
 REPO_GROUPS = {
     "dewpoint": ["dewpoint-app", "dewpoint-ts"],
     # The 08 repo's directory was renamed; the public row key is the chapter slug.
-    "edf-budget-planner": ["budget-planner"],
+    "fte-budget-planner": ["budget-planner"],
 }
 
 # The six-rung ladder (design §7), assigned MECHANICALLY by a repo's first-commit
