@@ -20,7 +20,7 @@ otherwise:
 Search the web for answers, then provide clear (but not restrictive) answers that I can lean on when creating my next step plan. I want my solution to be aligned with best practices but not over-engineered.
 ```
 
-The issue statement then ends on a fixed header and its own numbered questions:
+The issue statement then ends on a fixed header and its own list of questions:
 
 > Research questions to pursue:
 >
