@@ -7,7 +7,6 @@ commits: 668
 stage: planning
 stage_peak: configuring
 could_see: path-gated-rules
-retrieved: grep-on-demand
 versioned: code-and-rules
 verified_by: tests
 cost_to_look: counts-only
@@ -45,9 +44,10 @@ ownership question, not a cleanup — re-pin the suite to the advisory contract 
 restore blocking where the hook itself lives — so it belongs in front of the person who owns the
 hook, not inside the config-adoption session that tripped over it.
 
-The second lesson is cheaper. The biggest token waster in a routine session was not the code or the
-instructions; it was the test runner's own green output, which is almost entirely progress dots.
-Filtering those out is a one-line change to how the command is invoked, and it measures.
+The second lesson is smaller and concrete. A passing test run's output is almost entirely progress
+dots, and filtering them out is a one-line change to how the command is invoked: one run's stdout
+went from 672 bytes to 32. What that saves across a whole session I never measured — the byte count
+on a single run is the whole claim.
 
 ## Artifact
 
