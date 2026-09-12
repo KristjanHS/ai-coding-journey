@@ -4,7 +4,7 @@ topic: the-governance-layer
 rung: governing
 concern: control
 question: How do you know a control you wrote down is actually being enforced?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup, linkedin]
 evidence: artifact
 minutes: 2
 level: govern

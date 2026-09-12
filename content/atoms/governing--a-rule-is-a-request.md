@@ -4,7 +4,7 @@ topic: the-governance-layer
 rung: governing
 concern: quality
 question: What turns a writing rule for an agent into something that holds?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup, linkedin]
 evidence: artifact
 minutes: 2
 level: govern

@@ -4,7 +4,7 @@ topic: the-governance-layer
 rung: configuring
 concern: control
 question: How do you give an agent a convention without paying for it on every task?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup]
 evidence: artifact
 minutes: 2
 level: show

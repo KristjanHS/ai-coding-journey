@@ -4,7 +4,7 @@ topic: the-governance-layer
 rung: governing
 concern: control
 question: Your agent is about to build — when should it stop and ask you?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup]
 evidence: artifact
 minutes: 8
 level: orient

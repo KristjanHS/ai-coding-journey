@@ -4,7 +4,7 @@ topic: rag-simplify-align
 rung: planning
 concern: control
 question: What changes when you stop asking a model to edit and start asking it to propose?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup, linkedin]
 evidence: artifact
 minutes: 3
 level: orient

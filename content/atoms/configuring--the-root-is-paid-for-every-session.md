@@ -4,7 +4,7 @@ topic: the-governance-layer
 rung: configuring
 concern: cost
 question: What belongs in the one instruction file an agent reads at the start of every session?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup]
 evidence: artifact
 minutes: 2
 level: show

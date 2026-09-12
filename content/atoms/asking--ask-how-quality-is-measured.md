@@ -4,7 +4,7 @@ topic: evaluating-code-models
 rung: asking
 concern: quality
 question: When you cannot yet judge the answer, what is the first thing worth asking a model?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup]
 evidence: artifact
 minutes: 2
 level: orient

@@ -4,7 +4,7 @@ topic: the-governance-layer
 rung: governing
 concern: cost
 question: When an agent needs to survey a large part of a repo, what should end up in its context?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup]
 evidence: artifact
 minutes: 2
 level: govern

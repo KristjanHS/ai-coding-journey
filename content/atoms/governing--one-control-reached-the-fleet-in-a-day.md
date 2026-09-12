@@ -4,7 +4,7 @@ topic: the-governance-layer
 rung: governing
 concern: control
 question: How does a control written once reach every repo that needs it?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, linkedin]
 evidence: number
 minutes: 2
 level: govern

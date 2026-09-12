@@ -4,7 +4,7 @@ topic: the-config-tree
 rung: configuring
 concern: cost
 question: What does adding one more skill to the config tree actually cost?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup, linkedin]
 evidence: defect
 minutes: 2
 level: govern

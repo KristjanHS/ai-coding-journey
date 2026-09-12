@@ -4,7 +4,7 @@ topic: the-template-repo
 rung: asking
 concern: quality
 question: When you paste an error and apply the fix that comes back, why does the same error keep returning?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup, linkedin]
 evidence: defect
 minutes: 3
 level: show

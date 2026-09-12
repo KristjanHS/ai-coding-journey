@@ -4,7 +4,7 @@ topic: cutting-a-repo-back-to-one-job
 rung: planning
 concern: control
 question: Why does asking for a fixed number of changes get you something different from asking what to change?
-audience: [university, rnd-engineers]
+audience: [university, rnd-engineers, meetup]
 evidence: artifact
 minutes: 3
 level: show
