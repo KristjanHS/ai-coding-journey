@@ -160,7 +160,7 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
         {/* The selected period, banded through every row. Same grid as the seams,
             so the band lands on the track column and not under the labels. */}
         {selectedLane && (
-          <div class="tl-seams tl-band">
+          <div class="tl-seams">
             {full && <span />}
             <div class="tl-track">
               <span

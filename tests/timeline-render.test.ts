@@ -250,8 +250,13 @@ describe('accessibility floor: the text equivalent', () => {
       expect(html, `no sr-only periods table on ${name}`).toMatch(/class="sr-only" data-tl-era-table/);
       expect(count(html, /data-tl-era-row/g), `wrong era row count on ${name}`).toBe(STAGES.length);
       for (const period of RUNG_PERIODS) {
-        expect(html, `${period.rung} has no source cell on ${name}`).toContain(
+        expect(html, `${period.rung} has no start source on ${name}`).toContain(
           `(${period.startSource})`,
+        );
+        // Both halves: §6 of the plan lists the END source too, and a regen that
+        // garbled one would otherwise stay green on a start-source-only pin.
+        expect(html, `${period.rung} has no end source on ${name}`).toContain(
+          `(${period.endSource})`,
         );
       }
     }
