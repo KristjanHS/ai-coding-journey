@@ -101,9 +101,9 @@ same way I pin a dependency, with a standing instruction not to update it global
 
 ## Artifact
 
-Ollama's scheduler states the VRAM arithmetic before it commits a layer — the check I was doing by
-hand off published model sizes, `new model will fit in available VRAM in single GPU, loading ...
-required="5.9 GiB"` — and reading that one line is the whole skill:
+Ollama's scheduler states the VRAM arithmetic before it commits a layer: one startup line naming
+the memory the model needs beside the memory the card has free, which is the check I had been doing by
+hand off published model sizes. Reading that line is the whole skill:
 [The log says whether the model fit, not the spec sheet](../atoms/asking--the-log-says-the-model-fit.md)
 
 ## Atoms

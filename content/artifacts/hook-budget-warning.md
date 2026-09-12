@@ -57,6 +57,14 @@ mean a compaction or a rewind, so the bands re-arm:
 COMPACTION_RESET_DROP = 20_000
 ```
 
+The one thing the hook may never do is stop the session. Its module docstring says so in two lines,
+added 2026-04-23:
+
+```python
+Fail-open: any failure (unreadable transcript, stat error) exits 0 so commits
+are never blocked.
+```
+
 ## What didn't work
 
 Reading the whole transcript to measure the context. A 130k-token session is many megabytes of

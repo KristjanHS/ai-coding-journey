@@ -10,7 +10,7 @@ minutes: 3
 level: show
 source_chapter: 12-claudeconf
 slot: climb
-quote_from: content/journey/12-claudeconf.md
+quote_from: content/artifacts/hook-budget-warning.md
 ---
 
 # A budget check has to fail open
@@ -26,7 +26,4 @@ call through, so the worst it can do is stay silent.
 
 ## Evidence
 
-> [2026-06..2026-07] "fails open — an error here never blocks the tool call"
-
-The date is the repo's active span, not a day: the line is quoted from the
-chapter's summary of the hook, not from a dated commit.
+> [2026-04-23] "Fail-open: any failure (unreadable transcript, stat error) exits 0 so commits are never blocked."

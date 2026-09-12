@@ -52,8 +52,8 @@ when a path matches, most of them cost nothing most of the time.
 ## Artifact
 
 The governor is four lines of arithmetic — the exact context size summed from the transcript, a
-130k threshold, compaction-aware — carried by one design decision, that it fails open — an error
-here never blocks the tool call — so the worst it can do is stay silent:
+130k threshold, compaction-aware — carried by one design decision about what it does when it breaks,
+stated in the hook's own docstring rather than inferred from its behaviour:
 [A budget check has to fail open](../atoms/configuring--a-budget-check-fails-open.md)
 
 ## Atoms

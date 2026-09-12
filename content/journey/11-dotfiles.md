@@ -51,10 +51,9 @@ whether an addition is a real gain or just more text the model has to read first
 
 ## Artifact
 
-The most-cited rule in the tree is a budget on prose, not on code: a unit of agent-written text
-"Never extends to a third line, nested bullet, or sibling unit — overflow goes to the commit
-message: durable, greppable, attached to the diff." — and why that overflow clause is what makes
-the rule hold is in
+The most-cited rule in the tree is a budget on prose, not on code: two lines per unit, with one
+further clause naming where the text that does not fit is sent instead — which is the half that makes
+the cap hold:
 [A rule that caps text needs somewhere for the overflow to go](../atoms/configuring--overflow-needs-somewhere-to-go.md)
 
 ## Atoms

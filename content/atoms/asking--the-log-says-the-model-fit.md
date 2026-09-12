@@ -10,7 +10,6 @@ minutes: 3
 level: show
 source_chapter: 01-hands-on-llm
 slot: open
-quote_from: content/journey/01-hands-on-llm.md
 ---
 
 # The log says whether the model fit, not the spec sheet
