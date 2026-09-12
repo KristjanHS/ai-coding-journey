@@ -53,24 +53,9 @@ whose pin was bumped 4.4.0 → 4.6.2 on 2026-05-21.
 
 ## Artifact
 
-The research thread was dated 2025-12-07. Its useful move was not an answer but a
-correction of the premise — verbatim:
-
-> On **x86_64 Linux/WSL2 with Python 3.12** you do *not* need a special `+cu125`/`+cu129` CTranslate2 wheel. The **standard PyPI wheels for Linux/Windows already include CUDA support** (compiled with CUDA ≥ 11, targeting CUDA 12.x at runtime). If you're seeing "CPU-only" behaviour, it's almost certainly because:
->
-> - You're **not actually running the PyPI wheel** (e.g. Nix/conda/distro package compiled without CUDA), or
-> - CUDA libs are **not visible inside WSL**, so the GPU backend can't initialize.
-
-The fix was a reinstall, not a download:
-
-```bash
-pip install --upgrade --force-reinstall --no-cache-dir "ctranslate2==4.6.2"
-```
-
-The thread ended on the model's diagnosis, without a reply confirming the GPU came up.
-The repo confirms it took hold anyway: the same `4.6.2` force-reinstall (as `uv pip`) is
-the repair command printed by `scripts/check_gpu.py`, whose pin was bumped from `4.4.0` on
-2026-05-21 — the fix is baked in where the next failing machine will read it.
+The 2025-12-07 research thread's useful move was not an answer but a correction of the false
+premise — there was no CUDA wheel to find, only the wrong CTranslate2 in the venv:
+[The useful answer corrected the premise](../atoms/delegating--the-answer-corrected-the-premise.md)
 
 ## Atoms
 
@@ -78,3 +63,4 @@ Over its seven months the same repo produced a separate lesson at the planning r
 Asked one line — "audit the project for unnecessary complexity and overengineering, and create .md plan for 10 highest value refactors" — the model returned a ranked plan file rather than a patch: the hard count is what forced the ranking.
 
 - [A hard count forces the ranking](../atoms/planning--a-hard-count-forces-the-ranking.md)
+- [The useful answer corrected the premise](../atoms/delegating--the-answer-corrected-the-premise.md)

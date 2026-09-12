@@ -71,29 +71,9 @@ verification layer reaches, and no further.
 
 ## Artifact
 
-From the repo's indicator rules — the rule that ended the duplicated-threshold problem. The rule file
-was created 2026-07-25; this wording entered it on 2026-07-28:
-
-```text
-A retune is a ONE-place edit — never restate a cut's value. registry.ts is the
-single source for an indicator's cuts. Do not copy the current numbers into a
-docblock, a test fixture, a mock level, a plan doc, or docs/public prose —
-every copy is a second source that has to be hand-found on the next retune.
-```
-
-And from the research-probe rules — the rule that ended the false-confidence problem. That file dates
-from 2026-07-25 too, but this rule was written only after the failure it describes, on 2026-08-07:
-
-```text
-sim:notify is not evidence. It synthesizes confirmed STATES directly, so it
-never reaches resolveCuts, never emits delta20/evaluateLegs, and carries no
-fold history — a green sim says nothing about a cut-layer, leg-attribution,
-within-band or stateful-trigger change. Verify by real-close replay.
-```
-
-Both are written as prohibitions with named mechanisms rather than as advice. That is deliberate: an
-agent can comply with "never restate a cut's value" and cannot meaningfully comply with "keep
-configuration DRY".
+The rule that ended the duplicated-threshold problem — and its sibling that ended the
+false-confidence one — are prohibitions with named mechanisms, not advice:
+[A retune is a one-place edit](../atoms/governing--a-retune-is-a-one-place-edit.md)
 
 ## Atoms
 
@@ -102,3 +82,4 @@ configuration DRY".
 - [A rule loads when you touch its files](../atoms/configuring--a-rule-loads-when-you-touch-its-files.md)
 - [The always-loaded file is paid for on every task](../atoms/configuring--the-root-is-paid-for-every-session.md)
 - [The session reads the brief, not the files](../atoms/governing--bulk-reading-runs-out-of-line.md)
+- [A retune is a one-place edit](../atoms/governing--a-retune-is-a-one-place-edit.md)

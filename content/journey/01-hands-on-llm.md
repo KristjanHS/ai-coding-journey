@@ -91,30 +91,20 @@ load and each generated for a fraction of a second. The versions differ, the Oob
 weights and produced nothing, and the fourth setup was never logged. "X is fastest" survived in my own
 README for months because I never asked which number said so.
 
+**A reviewer reading for intent found working-by-coincidence code.** Commit `53c5f5f` (2026-04-11)
+replaced the `pyproject.toml` glob-based package discovery — correct only because no directory
+happened to match it — with an explicit `packages = []`. The test suite was green before and after;
+nothing observable changed, and no amount of running the code would have found it.
+
 **Pin the tool, not just the library.** After being broken by an upgrade I pinned the agent CLI the
 same way I pin a dependency, with a standing instruction not to update it globally.
 
 ## Artifact
 
-A review comment on this repo caught a bug that was passing. The `pyproject.toml` package discovery
-used a glob that resolved correctly only because no directory happened to match it — working code,
-for a reason that had nothing to do with intent. Commit `53c5f5f` (2026-04-11):
-
-```text
-Fix review issue: use explicit empty packages list in setuptools config
-
-Replace glob-based find (which worked by coincidence of no matching
-directory name) with explicit packages = [] for clear intent.
-```
-
-That is the argument for the review step in one commit. The test suite was green before and after;
-nothing observable changed. A reviewer reading for intent found it, and no amount of running the
-code would have.
-
-The second artifact is a line I had, and did not read, from the start. Ollama's scheduler states the
-VRAM arithmetic before it commits a layer — the check I was doing by hand off published model sizes:
-
-> new model will fit in available VRAM in single GPU, loading ... required="5.9 GiB"
+Ollama's scheduler states the VRAM arithmetic before it commits a layer — the check I was doing by
+hand off published model sizes, `new model will fit in available VRAM in single GPU, loading ...
+required="5.9 GiB"` — and reading that one line is the whole skill:
+[The log says whether the model fit, not the spec sheet](../atoms/asking--the-log-says-the-model-fit.md)
 
 ## Atoms
 

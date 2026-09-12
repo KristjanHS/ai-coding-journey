@@ -51,21 +51,11 @@ whether an addition is a real gain or just more text the model has to read first
 
 ## Artifact
 
-The most-cited rule in the tree is a budget on prose, not on code — it exists because agent-written
-documentation grows without a natural stopping point:
-
-```text
-# Unasked prose — two lines, three admitted kinds
-
-A unit is at most two lines. [Applies to every surface
-a session writes: docs, plans, memory, rules, docblocks,
-comments, test names.] Never extends to a third line,
-nested bullet, or sibling unit — overflow goes to the
-commit message: durable, greppable, attached to the diff.
-```
-
-It is enforced by nothing but the model reading it, and it still works: the overflow clause gives the
-text somewhere to go, so the rule is not asking for information to be dropped.
+The most-cited rule in the tree is a budget on prose, not on code: a unit of agent-written text
+"Never extends to a third line, nested bullet, or sibling unit — overflow goes to the commit
+message: durable, greppable, attached to the diff." — and why that overflow clause is what makes
+the rule hold is in
+[A rule that caps text needs somewhere for the overflow to go](../atoms/configuring--overflow-needs-somewhere-to-go.md)
 
 ## Atoms
 

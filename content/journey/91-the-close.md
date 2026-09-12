@@ -39,17 +39,11 @@ not the other way round.
 
 ## Artifact
 
-The rule the whole skeleton is built on, from its own opening:
-
-```text
-Every module draws its evidence from chapters of this journey,
-so nothing is asserted that the repo cannot show.
-```
-
-The test of it is module 5, which asks the learner to distinguish a check that passes from a check that
-*could have failed* — and to demand the demonstration. That is the one habit from this whole journey
-that transfers to any job, with or without an agent.
+The rule the whole skeleton is built on is its own opening sentence — the evidence rule turned on
+the course itself:
+[Nothing is asserted that the repo cannot show](../atoms/governing--nothing-the-repo-cannot-show.md)
 
 ## Atoms
 
 - [A rule is a request until a test enforces it](../atoms/governing--a-rule-is-a-request.md)
+- [Nothing is asserted that the repo cannot show](../atoms/governing--nothing-the-repo-cannot-show.md)

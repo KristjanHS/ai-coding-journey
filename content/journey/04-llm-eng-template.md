@@ -44,25 +44,12 @@ impression of the project rather than a minor annoyance of mine.
 
 ## Artifact
 
-The turning point was a question about my own repo, asked while four files still had my project name
-baked into them:
-
-> right now i have "llm-eng-template" hardcoded in the 4 open files. How can I enable the user of this
-> github repo template, to easily use his own project name in all these files? should I remove my
-> hardcoded names from these, or are there other best-practice alternatives?
-
-The answer was to stop treating it as a repo to copy and make it a Cookiecutter template. The
-hardcoded names became generation-time variables, and the README now opens with the prompts a user
-answers instead of the name I happened to pick:
-
-```text
-cookiecutter gh:<user>/llm-eng-template
-
-  project_name  – human readable title (`My LLM Project`)
-  project_slug  – directory/package name
-  author_name   – used in licensing and docs
-```
+The turning point was a question asked while four files still had my project name baked into them,
+and the answer — stop treating it as a repo to copy, make it a Cookiecutter template — is what
+turned the hardcoded names into generation-time variables:
+[The second user turns a name into a variable](../atoms/delegating--the-name-becomes-a-variable.md)
 
 ## Atoms
 
 - [One paste fixes one line, not the class](../atoms/asking--one-paste-fixes-one-line.md)
+- [The second user turns a name into a variable](../atoms/delegating--the-name-becomes-a-variable.md)

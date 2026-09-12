@@ -51,18 +51,10 @@ when a path matches, most of them cost nothing most of the time.
 
 ## Artifact
 
-The governor is four lines of arithmetic and two design decisions:
-
-```python
-# PostToolUse hook: the exact context size, not an estimate
-sum(input_tokens + cache_creation_input_tokens + cache_read_input_tokens)
-# fires at 130k
-# fails open — an error here never blocks the tool call
-# compaction-aware — a post-compact turn reports the reset context
-```
-
-Failing open is the load-bearing one. A budget check that can block work becomes a second thing that
-can break the session, and the whole point of it was to make the first failure visible.
+The governor is four lines of arithmetic — the exact context size summed from the transcript, a
+130k threshold, compaction-aware — carried by one design decision, that it fails open — an error
+here never blocks the tool call — so the worst it can do is stay silent:
+[A budget check has to fail open](../atoms/configuring--a-budget-check-fails-open.md)
 
 ## Atoms
 
