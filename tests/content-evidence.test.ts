@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+
 import { CHAPTERS, frontmatter, read, section } from './helpers';
 
 describe('evidence rule', () => {
@@ -51,6 +54,16 @@ const LEDGER_KEYS = ['could_see', 'retrieved', 'versioned', 'verified_by', 'cost
 /** A fenced block or a blockquote: the artifact itself, rather than prose about it. */
 const SHOWS_ARTIFACT = /^(?:```|>)/m;
 
+// Link 3, second form (arm A): `## Artifact` = one framing sentence + a relative link to the atom
+// whose `## Evidence` carries the dated blockquote; the gate follows the link. Stage 3.2 retires the inline form.
+const ATOM_LINK = /\]\((\.\.\/atoms\/[^)\s]+\.md)\)/g;
+const DATED_QUOTE = /^>.*\[\d{4}-\d{2}(-\d{2})?(\.\.\d{4}-\d{2}(-\d{2})?)?\]/m;
+
+/** The `content/atoms/` files a chapter's Artifact section links, chapter-relative. */
+function linkedAtoms(chapterPath: string, artifact: string): string[] {
+  return [...artifact.matchAll(ATOM_LINK)].map((m) => join(dirname(chapterPath), m[1]));
+}
+
 describe('context ledger', () => {
   it.each(CHAPTERS)('%s: a chapter carrying a ledger shows its artifact', (path) => {
     const body = read(path);
@@ -63,11 +76,22 @@ describe('context ledger', () => {
       `${path}: ledger keys ${filled.join(', ')} claimed, but the Artifact section is empty`,
     ).not.toBe('');
 
+    if (SHOWS_ARTIFACT.test(artifact!)) return; // transitional inline form (Stage 3.2 drops it)
+
+    const atoms = linkedAtoms(path, artifact!);
     expect(
-      artifact,
+      atoms,
       `${path}: ledger keys ${filled.join(', ')} claimed, but the Artifact section only ` +
-        `describes the evidence -- it must quote or fence it`,
-    ).toMatch(SHOWS_ARTIFACT);
+        `describes the evidence -- it must quote or fence it, or link the atom that does`,
+    ).not.toEqual([]);
+    for (const atom of atoms) {
+      expect(existsSync(atom), `${path}: Artifact links ${atom}, which does not exist`).toBe(true);
+      const evidence = section(read(atom), 'Evidence');
+      expect(
+        evidence,
+        `${path}: Artifact links ${atom}, whose \`## Evidence\` has no dated blockquote`,
+      ).toMatch(DATED_QUOTE);
+    }
   });
 
   // Vacuity anchor. Every `filled.length === 0` chapter returns before asserting

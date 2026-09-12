@@ -100,23 +100,11 @@ were written deliberately, one reasonable decision at a time.
 
 ## Artifact
 
-The rule that keeps LangChain contained, from `.claude/rules/langchain.md` (2026-06-23):
-
-```text
-LangChain is used **only in `backend/ingest.py`** (the `Document` type + text
-splitting); deps: `langchain-core`/`-text-splitters`, NOT `langchain-community`
-(dropped — PDFs load via `pypdf`, text via stdlib) and NOT the `langchain`
-umbrella. `qa_loop.py` uses custom Weaviate/Ollama clients.
-Keep API keys and endpoints in environment variables (`.env`), never hardcoded.
-Wrap external calls (Ollama, Weaviate, LangChain) in explicit error handling.
-Log the app↔LangChain interaction so retrieval and generation steps are traceable.
-```
-
-The parenthetical is the load-bearing part. It does not say "prefer fewer dependencies" — it names the
-three packages that were dropped and what replaced them, so the rule can be checked against the
-lockfile rather than interpreted.
+The rule that keeps LangChain contained, and the one sentence in it that can be checked against the
+lockfile: [The rule names what was dropped](../atoms/configuring--the-rule-names-what-was-dropped.md)
 
 ## Atoms
 
+- [The rule names what was dropped](../atoms/configuring--the-rule-names-what-was-dropped.md)
 - [Ask which stack to build on and you get a catalogue](../atoms/asking--which-stack-gets-a-catalogue.md)
 - [Ask for proposals, not edits](../atoms/planning--proposals-not-edits.md)
