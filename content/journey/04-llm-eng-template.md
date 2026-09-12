@@ -31,7 +31,7 @@ one that other people generate from cannot.
 ## What didn't work
 
 The template's own tooling was the part that kept breaking, not the code it generated. The commit log
-across 69 commits reads `makefile syntax fix`, then `makefile fixes 2`, then
+across 70 commits reads `makefile syntax fix`, then `makefile fixes 2`, then
 `pre-commit fixed for unit tests`, and `pip-audit fix` twice. Shipping a scaffold means its build,
 hooks and audit step have to be green on someone else's machine on the first try, and mine repeatedly
 were not.

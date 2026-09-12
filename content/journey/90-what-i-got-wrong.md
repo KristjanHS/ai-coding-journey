@@ -70,7 +70,7 @@ The finding, as the generator emits it — an availability matrix rather than a 
 the honest content of two of these rows is a named absence:
 
 ```json
-{ "id": "cursor",  "tokens": "floor", "share": 0.2583 }
+{ "id": "cursor",  "tokens": "floor", "share": 0.267 }
 { "id": "copilot", "tokens": "none",  "share": null   }
 ```
 

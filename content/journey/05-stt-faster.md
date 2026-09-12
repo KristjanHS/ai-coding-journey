@@ -20,7 +20,7 @@ artifact: present
 
 ## What I was trying to do
 
-This is the longest-running repo in the journey: batch speech-to-text for Estonian
+This is one of the longer-running repos in the journey: batch speech-to-text for Estonian
 meeting recordings — phone-mic audio with quiet and far speakers, silence and room
 noise — running faster-whisper over a CTranslate2 build of an Estonian Whisper model.
 By December 2025 the pipeline transcribed fine on CPU, but I wanted it on the GPU: an
