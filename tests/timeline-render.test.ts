@@ -290,7 +290,8 @@ describe('accessibility floor: the text equivalent', () => {
 // inc-era-labels: the compact strip used to name each era by absolutely
 // positioning grey text ON its own 6px coloured lane. These pin the replacement.
 describe('era pills (compact)', () => {
-  const PILLS = /class="tl-pill(?: is-right)?" data-tl-pill="true" data-era="([a-z-]+)" style="left:([0-9.]+)%/g;
+  // The seam is carried as a custom property: the CSS clamps `left` off it.
+  const PILLS = /class="tl-pill" data-tl-pill="true" data-era="([a-z-]+)" style="--tl-pill-left:([0-9.]+)%/g;
 
   const pills = (html: string) =>
     [...html.matchAll(PILLS)].map((m) => ({ rung: m[1]!, left: Number(m[2]) }));

@@ -48,8 +48,8 @@ export interface TimelinePill {
   left: number;
   /** Which pill row it was greedily assigned to, 0 = topmost. */
   row: number;
-  /** True when the pill hangs its RIGHT edge on `left` to stay on the page. */
-  alignRight: boolean;
+  /** Estimated pill width in px: the clamp that keeps it on the track. */
+  widthPx: number;
 }
 
 export interface TimelineProps {
@@ -147,11 +147,11 @@ export default function Timeline({
                 .filter((pill) => pill.row === row)
                 .map((pill) => (
                   <span
-                    class={`tl-pill${pill.alignRight ? ' is-right' : ''}`}
+                    class="tl-pill"
                     data-tl-pill
                     data-era={pill.rung}
                     key={pill.rung}
-                    style={{ left: `${pill.left}%` }}
+                    style={{ '--tl-pill-left': `${pill.left}%`, '--tl-pill-w': `${pill.widthPx}px` }}
                   >
                     <span class="tl-pill-dot" style={{ background: `var(--stage-${pill.rung})` }} />
                     {label(pill.rung)}
@@ -161,46 +161,12 @@ export default function Timeline({
           ))}
         </div>
       )}
-      <div class="tl-strip" aria-hidden={full ? undefined : 'true'}>
-        {lanes.map((lane) => (
-          <div class="tl-lane-row" key={lane.rung} style={{ height: `${lanePx + gap}px` }}>
-            {full && (
-              <button
-                type="button"
-                class="tl-lane-btn"
-                data-era={lane.rung}
-                aria-pressed={selected === lane.rung}
-                onClick={() => setSelected(selected === lane.rung ? null : lane.rung)}
-              >
-                <span class="tl-swatch" style={{ background: `var(--stage-${lane.rung})` }} aria-hidden="true" />
-                {label(lane.rung)}
-              </button>
-            )}
-            <div class="tl-track" aria-hidden="true">
-              <div
-                class="tl-lane"
-                data-tl-lane
-                data-era={lane.rung}
-                data-era-start={lane.start}
-                data-era-end={lane.end ?? 'open'}
-                style={{
-                  left: `${lane.left}%`,
-                  width: `${lane.width}%`,
-                  height: `${lanePx}px`,
-                  background: laneFill(lane),
-                }}
-              />
-              {lane.live && <span class="tl-live" style={{ left: `${lane.left + lane.width}%` }}>▶</span>}
-            </div>
-            {full && <span class="tl-era-dates" aria-hidden="true">{lane.end ?? 'open'}</span>}
-          </div>
-        ))}
-      </div>
-      {/* Decorative: the sr-only tables below are the accessible tree, so nothing
-          in here is focusable — the table's repo cells carry the real links. */}
-      <div class="tl-chart" aria-hidden="true">
-        {/* One dashed vertical per rung start, dropped through every row. */}
-        <div class="tl-seams">
+      {/* Strip and chart share one positioned body, so a seam is ONE line from
+          the era lane it opens down through every repo row: split in two, it
+          vanished exactly where the eye crossed from the lanes to the bars. */}
+      <div class="tl-body">
+        {/* One dashed vertical per rung start, through the lanes AND every row. */}
+        <div class="tl-seams" aria-hidden="true">
           {full && <span />}
           <div class="tl-track">
             {seams.map((seam) => (
@@ -215,59 +181,98 @@ export default function Timeline({
           </div>
           {full && <span />}
         </div>
-        {/* The selected period, banded through every row. Same grid as the seams,
-            so the band lands on the track column and not under the labels. */}
-        {selectedLane && (
-          <div class="tl-seams">
-            {full && <span />}
-            <div class="tl-track">
-              <span
-                class="tl-band-fill"
-                data-tl-band
-                data-era={selectedLane.rung}
-                style={{ left: `${selectedLane.left}%`, width: `${selectedLane.width}%` }}
-              />
-            </div>
-            {full && <span />}
-          </div>
-        )}
-        {bars.map((bar) => {
-          // Dimming follows the PERIOD, not `bar.stage`: a repo is undimmed when
-          // it was alive at any point inside the selected rung's span.
-          const dimmed = selected !== null && !bar.lived.includes(selected);
-          const rect = (
-            <div
-              class="tl-bar"
-              data-tl-bar
-              data-repo={bar.repo}
-              data-stage={bar.stage}
-              style={{
-                height: `${barHeight(bar)}px`,
-                background: 'var(--bar-ink)',
-              }}
-            />
-          );
-          // The span, not the bar, is the pointer target: it spans the full row
-          // height, so a 3px hairline is still hoverable and clickable.
-          const span = { left: `${bar.left}%`, width: `${bar.width}%` };
-          return (
-            <div
-              class={`tl-row${dimmed ? ' is-dimmed' : ''}${hovered?.repo === bar.repo ? ' is-hovered' : ''}`}
-              key={bar.repo}
-              style={{ height: `${barHeight(bar) + gap}px` }}
-              onMouseEnter={() => setHovered(bar)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              {full && <span class="tl-label">{bar.repo}</span>}
-              <div class="tl-track">
-                {bar.href
-                  ? <a class="tl-link" href={bar.href} tabIndex={-1} data-tl-bar-link style={span}>{rect}</a>
-                  : <div class="tl-hit" style={span}>{rect}</div>}
+        <div class="tl-strip" aria-hidden={full ? undefined : 'true'}>
+          {lanes.map((lane) => (
+            <div class="tl-lane-row" key={lane.rung} style={{ height: `${lanePx + gap}px` }}>
+              {full && (
+                <button
+                  type="button"
+                  class="tl-lane-btn"
+                  data-era={lane.rung}
+                  aria-pressed={selected === lane.rung}
+                  onClick={() => setSelected(selected === lane.rung ? null : lane.rung)}
+                >
+                  <span class="tl-swatch" style={{ background: `var(--stage-${lane.rung})` }} aria-hidden="true" />
+                  {label(lane.rung)}
+                </button>
+              )}
+              <div class="tl-track" aria-hidden="true">
+                <div
+                  class="tl-lane"
+                  data-tl-lane
+                  data-era={lane.rung}
+                  data-era-start={lane.start}
+                  data-era-end={lane.end ?? 'open'}
+                  style={{
+                    left: `${lane.left}%`,
+                    width: `${lane.width}%`,
+                    height: `${lanePx}px`,
+                    background: laneFill(lane),
+                  }}
+                />
+                {lane.live && <span class="tl-live" style={{ left: `${lane.left + lane.width}%` }}>▶</span>}
               </div>
-              {full && <span class="tl-count">{bar.commits.toLocaleString('en-US')} commits</span>}
+              {full && <span class="tl-era-dates" aria-hidden="true">{lane.end ?? 'open'}</span>}
             </div>
-          );
-        })}
+          ))}
+        </div>
+        {/* Decorative: the sr-only tables below are the accessible tree, so nothing
+            in here is focusable — the table's repo cells carry the real links. */}
+        <div class="tl-chart" aria-hidden="true">
+          {/* The selected period, banded through every row. Same grid as the seams,
+              so the band lands on the track column and not under the labels. */}
+          {selectedLane && (
+            <div class="tl-seams">
+              {full && <span />}
+              <div class="tl-track">
+                <span
+                  class="tl-band-fill"
+                  data-tl-band
+                  data-era={selectedLane.rung}
+                  style={{ left: `${selectedLane.left}%`, width: `${selectedLane.width}%` }}
+                />
+              </div>
+              {full && <span />}
+            </div>
+          )}
+          {bars.map((bar) => {
+            // Dimming follows the PERIOD, not `bar.stage`: a repo is undimmed when
+            // it was alive at any point inside the selected rung's span.
+            const dimmed = selected !== null && !bar.lived.includes(selected);
+            const rect = (
+              <div
+                class="tl-bar"
+                data-tl-bar
+                data-repo={bar.repo}
+                data-stage={bar.stage}
+                style={{
+                  height: `${barHeight(bar)}px`,
+                  background: 'var(--bar-ink)',
+                }}
+              />
+            );
+            // The span, not the bar, is the pointer target: it spans the full row
+            // height, so a 3px hairline is still hoverable and clickable.
+            const span = { left: `${bar.left}%`, width: `${bar.width}%` };
+            return (
+              <div
+                class={`tl-row${dimmed ? ' is-dimmed' : ''}${hovered?.repo === bar.repo ? ' is-hovered' : ''}`}
+                key={bar.repo}
+                style={{ height: `${barHeight(bar) + gap}px` }}
+                onMouseEnter={() => setHovered(bar)}
+                onMouseLeave={() => setHovered(null)}
+              >
+                {full && <span class="tl-label">{bar.repo}</span>}
+                <div class="tl-track">
+                  {bar.href
+                    ? <a class="tl-link" href={bar.href} tabIndex={-1} data-tl-bar-link style={span}>{rect}</a>
+                    : <div class="tl-hit" style={span}>{rect}</div>}
+                </div>
+                {full && <span class="tl-count">{bar.commits.toLocaleString('en-US')} commits</span>}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* the time axis survives in compact — bars encode time, so both variants need its endpoints */}

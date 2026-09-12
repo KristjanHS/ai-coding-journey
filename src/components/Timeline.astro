@@ -85,22 +85,27 @@ const PILL_CHROME_PX = 30;
 const ASSUMED_TRACK_PX = 620;
 const PILL_GAP_PCT = 1.5;
 
-const pillWidth = (rung: string) =>
-  ((rung.length * PILL_CHAR_PX + PILL_CHROME_PX) / ASSUMED_TRACK_PX) * 100;
+const pillWidthPx = (rung: string) => rung.length * PILL_CHAR_PX + PILL_CHROME_PX;
+const pillWidth = (rung: string) => (pillWidthPx(rung) / ASSUMED_TRACK_PX) * 100;
+// The pill is shifted left so its DOT sits on the seam, not its border: the
+// same inset the CSS applies, as a percentage of the assumed track.
+const PILL_INSET_PX = 12;
+const PILL_INSET_PCT = (PILL_INSET_PX / ASSUMED_TRACK_PX) * 100;
 
 // Right edge of the last pill placed on each row, in axis percent.
 const rowEnds: number[] = [];
 
 const pills = lanes.map((lane) => {
   const width = pillWidth(lane.rung);
-  // A pill that would run off the right edge hangs its RIGHT edge on the era
-  // start instead, so the anchor is still the seam and the text stays on page.
-  const right = lane.left + width > 100;
-  const [from, to] = right ? [lane.left - width, lane.left] : [lane.left, lane.left + width];
+  // A pill that would run off the right edge slides left only as far as it
+  // must to stay on the track (the CSS clamps it the same way), so its dot
+  // stays as near the seam as the page allows instead of flipping across it.
+  const from = Math.min(lane.left, 100 - width) - PILL_INSET_PCT;
+  const to = from + width;
   let row = rowEnds.findIndex((end) => from >= end + PILL_GAP_PCT);
   if (row === -1) row = rowEnds.push(0) - 1;
   rowEnds[row] = to;
-  return { rung: lane.rung, left: lane.left, row, alignRight: right };
+  return { rung: lane.rung, left: lane.left, row, widthPx: pillWidthPx(lane.rung) };
 });
 
 const pillRows = rowEnds.length;
@@ -131,7 +136,7 @@ const pillRows = rowEnds.length;
   .tl-lane-row { display: grid; align-items: center; gap: var(--space-2); }
   .tl[data-variant='compact'] .tl-lane-row { grid-template-columns: 1fr; }
   .tl[data-variant='full'] .tl-lane-row { grid-template-columns: 9rem 1fr 7rem; }
-  .tl-strip { margin-bottom: var(--space-2); padding-bottom: var(--space-2); border-bottom: 1px solid var(--rule); }
+  .tl-strip { margin-bottom: var(--space-2); padding: var(--space-1) 0 var(--space-2); border-bottom: 1px solid var(--rule); }
   .tl-lane { position: absolute; top: 50%; transform: translateY(-50%); border-radius: var(--radius); min-width: 2px; }
   .tl-era-dates {
     font-family: var(--font-mono);
@@ -144,7 +149,9 @@ const pillRows = rowEnds.length;
      painted onto a 6px coloured lane was unreadable at every width. Each pill is
      anchored at its era's start and carries that era's colour as a dot, so the
      pill, the seam below it and the lane all say the same thing in one hue. */
-  .tl-pills { position: relative; margin-bottom: var(--space-1); }
+  .tl-pills { position: relative; }
+  /* Strip + chart in one positioned box, so the seams span both. */
+  .tl-body { position: relative; }
   .tl-pill-row { position: relative; height: 1.5rem; }
   .tl-pill {
     position: absolute;
@@ -152,7 +159,6 @@ const pillRows = rowEnds.length;
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
-    max-width: 100%;
     padding: 0.1rem 0.5rem;
     border: 1px solid var(--rule);
     border-radius: 999px;
@@ -163,8 +169,15 @@ const pillRows = rowEnds.length;
     color: var(--fg);
     white-space: nowrap;
   }
-  /* A pill at the right end hangs its right edge on the era start instead. */
-  .tl-pill.is-right { transform: translateX(-100%); }
+  /* Anchored by the DOT, not the border: `--tl-pill-left` is the seam, the
+     inset (border + padding + half a dot) pulls the pill back so the dot's
+     centre lands on the 2px seam. `min()` clamps a pill that would overrun the
+     track to its right edge instead of flipping it across its own seam. */
+  .tl-pill {
+    --tl-pill-inset: calc(0.75rem + 1px);
+    left: min(var(--tl-pill-left), calc(100% - var(--tl-pill-w)));
+    transform: translateX(calc(-1 * var(--tl-pill-inset)));
+  }
   .tl-pill-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; flex: none; }
   /* Carries a pill on an upper row down to the strip: the same colour, so the
      eye follows one line from the name to the lane to the seam in the chart. */
@@ -173,8 +186,8 @@ const pillRows = rowEnds.length;
     top: 0;
     bottom: 0;
     width: 0;
-    border-left: 1px dashed;
-    opacity: 0.6;
+    border-left: 2px dashed;
+    opacity: 0.7;
   }
   .tl-live { position: absolute; top: 50%; transform: translate(2px, -50%); color: var(--stage-governing); }
 
@@ -196,8 +209,8 @@ const pillRows = rowEnds.length;
     top: 0;
     bottom: 0;
     width: 0;
-    border-left: 1px dashed var(--rule);
-    opacity: 0.55;
+    border-left: 2px dashed var(--rule);
+    opacity: 0.7;
   }
   /* The selected period, banded through every row. Translucent, so the bars
      under it keep their own ink and the band reads as a wash, not a block. */
