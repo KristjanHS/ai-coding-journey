@@ -74,6 +74,11 @@ const STAGE_LABEL: Record<string, string> = {
 
 const label = (stage: string) => STAGE_LABEL[stage] ?? stage;
 
+// Every era name and every era bar links to the ONE place that defines the
+// rung: its row in the six-rung table on /journey/ (`id="rung-<rung>"`). No
+// per-era pages exist, and none should — the table row is the description.
+const rungHref = (rung: string) => `/journey/#rung-${rung}`;
+
 // Vertical gutter between one bar and the next. Rows are sized from the bar
 // they hold PLUS this, so a 22px bar can never bleed into its neighbours'
 // rows -- the old fixed row height was shorter than the thickest bars.
@@ -126,10 +131,10 @@ export default function Timeline({
           the decorative halves carry their own aria-hidden instead. `compact`
           ships no controls, so the whole strip stays hidden. */}
       {/* The era names, compact only: `full` has a label column whose buttons are
-          already readable. Decorative — the sr-only periods table below is the
-          text equivalent, and the strip it labels is aria-hidden here too. */}
+          already readable. Each pill is a LINK to the rung's row in the six-rung
+          table, so the nav is real and not aria-hidden. */}
       {!full && (
-        <div class="tl-pills" data-tl-pills aria-hidden="true">
+        <nav class="tl-pills" data-tl-pills aria-label="Eras">
           {Array.from({ length: pillRows }, (_, row) => (
             <div class="tl-pill-row" key={row}>
               {/* Drops first, so a pill never sits under its neighbour's line. */}
@@ -146,7 +151,8 @@ export default function Timeline({
               {pills
                 .filter((pill) => pill.row === row)
                 .map((pill) => (
-                  <span
+                  <a
+                    href={rungHref(pill.rung)}
                     class="tl-pill"
                     data-tl-pill
                     data-era={pill.rung}
@@ -155,11 +161,11 @@ export default function Timeline({
                   >
                     <span class="tl-pill-dot" style={{ background: `var(--stage-${pill.rung})` }} />
                     {label(pill.rung)}
-                  </span>
+                  </a>
                 ))}
             </div>
           ))}
-        </div>
+        </nav>
       )}
       {/* Strip and chart share one positioned body, so a seam is ONE line from
           the era lane it opens down through every repo row: split in two, it
@@ -197,7 +203,9 @@ export default function Timeline({
                 </button>
               )}
               <div class="tl-track" aria-hidden="true">
-                <div
+                <a
+                  href={rungHref(lane.rung)}
+                  tabIndex={-1}
                   class="tl-lane"
                   data-tl-lane
                   data-era={lane.rung}
@@ -345,7 +353,7 @@ export default function Timeline({
         <tbody>
           {lanes.map((lane) => (
             <tr key={lane.rung} data-tl-era-row>
-              <th scope="row">{label(lane.rung)}</th>
+              <th scope="row"><a href={rungHref(lane.rung)}>{label(lane.rung)}</a></th>
               <td>
                 {lane.start} ({lane.startSource})
               </td>

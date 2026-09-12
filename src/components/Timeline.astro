@@ -138,6 +138,8 @@ const pillRows = rowEnds.length;
   .tl[data-variant='full'] .tl-lane-row { grid-template-columns: 9rem 1fr 7rem; }
   .tl-strip { margin-bottom: var(--space-2); padding: var(--space-1) 0 var(--space-2); border-bottom: 1px solid var(--rule); }
   .tl-lane { position: absolute; top: 50%; transform: translateY(-50%); border-radius: var(--radius); min-width: 2px; }
+  /* A lane is a link to its rung's row; a hairline outline on hover says so. */
+  .tl-lane:hover { outline: 1px solid var(--fg); outline-offset: 1px; }
   .tl-era-dates {
     font-family: var(--font-mono);
     font-size: var(--size-0);
@@ -168,7 +170,9 @@ const pillRows = rowEnds.length;
     line-height: 1.2;
     color: var(--fg);
     white-space: nowrap;
+    text-decoration: none;
   }
+  .tl-pill:hover, .tl-pill:focus-visible { border-color: var(--fg); }
   /* Anchored by the DOT, not the border: `--tl-pill-left` is the seam, the
      inset (border + padding + half a dot) pulls the pill back so the dot's
      centre lands on the 2px seam. `min()` clamps a pill that would overrun the

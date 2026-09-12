@@ -95,7 +95,9 @@ const ledgerRows = repoBacked.filter((entry) =>
       </thead>
       <tbody>
         {RUNGS.map((rung, index) => (
-          <tr>
+          // The anchor the timeline's era pills and lanes link to — this row IS
+          // the rung's description page; there is no per-era page to send to.
+          <tr id={`rung-${rung}`}>
             <td>{index + 1}</td>
             <th scope="row">{rung}</th>
             <td>{RUNG_META[rung].from}</td>

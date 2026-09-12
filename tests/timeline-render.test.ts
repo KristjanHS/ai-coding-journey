@@ -383,3 +383,40 @@ describe('generated journey index lists non-repo chapters', () => {
     }
   });
 });
+
+// Every era name and every era bar links to the ONE page that defines the rung:
+// its row in the six-rung table on /journey/. There is no per-era page, and the
+// anchor is what makes the row reachable — so the target is pinned as hard as
+// the link, or a renamed `id` would leave six links scrolling to the top.
+describe('era labels and bars link to the rung table row', () => {
+  const target = (rung: string) => `/journey/#rung-${rung}`;
+
+  it('gives the journey rung table one anchored row per rung', () => {
+    for (const rung of STAGES) {
+      expect(markup(journey), `no id="rung-${rung}" row`).toMatch(
+        // Astro appends its scoped-style attribute after the id, hence the `[ >]`.
+        new RegExp(`<tr id="rung-${rung}"[ >]`),
+      );
+    }
+  });
+
+  it('makes every compact pill a link to its rung row', () => {
+    for (const rung of STAGES) {
+      expect(markup(home), `pill ${rung} is not a link`).toMatch(
+        new RegExp(`<a href="${target(rung)}" class="tl-pill" data-tl-pill="true" data-era="${rung}"`),
+      );
+    }
+  });
+
+  it('makes every lane, on both variants, a link to its rung row', () => {
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      for (const rung of STAGES) {
+        expect(markup(html), `lane ${rung} on ${name} is not a link`).toMatch(
+          new RegExp(`<a href="${target(rung)}" tabindex="-1" class="tl-lane" data-tl-lane="true" data-era="${rung}"`),
+        );
+      }
+      // The sr-only periods table carries the focusable copy of the same link.
+      expect(count(markup(html), /data-tl-era-row[\s\S]*?<a href="\/journey\/#rung-[a-z]+">/g), `sr-only rows on ${name}`).toBe(STAGES.length);
+    }
+  });
+});
