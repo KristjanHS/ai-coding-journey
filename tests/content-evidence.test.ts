@@ -45,17 +45,16 @@ describe('evidence rule', () => {
 // The chain is three links, and each one is a separate way to fail:
 //   1. a ledger key is filled            -- the chapter makes a claim
 //   2. the `## Artifact` body is non-empty -- it offers evidence for it
-//   3. that body quotes or fences        -- the evidence is SHOWN, not described
-// Link 3 is what stops a paragraph *about* an artifact from passing as one. All
-// six ledger-carrying chapters satisfy it today, so it costs nothing on arrival
-// and binds every chapter added after.
+//   3. that body links an atom whose `## Evidence` carries the dated quote -- the
+//      evidence is SHOWN once, in `content/atoms/`, never re-fenced in the chapter
+// Link 3 is what stops a paragraph *about* an artifact from passing as one.
 const LEDGER_KEYS = ['could_see', 'retrieved', 'versioned', 'verified_by', 'cost_to_look'];
 
-/** A fenced block or a blockquote: the artifact itself, rather than prose about it. */
+/** A fenced block or a blockquote in the chapter: evidence authored twice (chapter + atom), which link 3 refuses. */
 const SHOWS_ARTIFACT = /^(?:```|>)/m;
 
-// Link 3, second form (arm A): `## Artifact` = one framing sentence + a relative link to the atom
-// whose `## Evidence` carries the dated blockquote; the gate follows the link. Stage 3.2 retires the inline form.
+// Link 3 (arm A): `## Artifact` = one framing sentence + a relative link to the atom whose
+// `## Evidence` carries the dated blockquote; the gate follows the link and refuses inline evidence.
 const ATOM_LINK = /\]\((\.\.\/atoms\/[^)\s]+\.md)\)/g;
 const DATED_QUOTE = /^>.*\[\d{4}-\d{2}(-\d{2})?(\.\.\d{4}-\d{2}(-\d{2})?)?\]/m;
 
@@ -76,13 +75,16 @@ describe('context ledger', () => {
       `${path}: ledger keys ${filled.join(', ')} claimed, but the Artifact section is empty`,
     ).not.toBe('');
 
-    if (SHOWS_ARTIFACT.test(artifact!)) return; // transitional inline form (Stage 3.2 drops it)
+    expect(
+      artifact,
+      `${path}: the Artifact section fences or quotes evidence inline -- author it once, in the atom it links`,
+    ).not.toMatch(SHOWS_ARTIFACT);
 
     const atoms = linkedAtoms(path, artifact!);
     expect(
       atoms,
       `${path}: ledger keys ${filled.join(', ')} claimed, but the Artifact section only ` +
-        `describes the evidence -- it must quote or fence it, or link the atom that does`,
+        `describes the evidence -- it must link the atom that shows it`,
     ).not.toEqual([]);
     for (const atom of atoms) {
       expect(existsSync(atom), `${path}: Artifact links ${atom}, which does not exist`).toBe(true);
