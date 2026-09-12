@@ -17,9 +17,6 @@ const CORPUS = 14;
 // though no repo opens on it.
 const STAGES = ['asking', 'suggesting', 'delegating', 'planning', 'configuring', 'governing'];
 
-// The legend is still per-repo-opening-rung until the lane buttons land.
-const LEGEND_STAGES = STAGES.filter((s) => s !== 'governing');
-
 // Inlined CSS mentions every `.tl-*` selector, so a bare substring search would
 // report the legend as present on a page that never renders it.
 const markup = (html: string) => html.replace(/<style[\s\S]*?<\/style>/g, '');
@@ -73,8 +70,11 @@ describe('compact variant on /', () => {
     }
   });
 
-  it('drops the legend and the numeric count labels', () => {
-    expect(count(home, /tl-legend-item/g)).toBe(0);
+  // The lane names are the controls since stage 3, so compact shipping "no
+  // legend" now means shipping no lane BUTTON — the strip itself is there.
+  it('drops the controls and the numeric count labels', () => {
+    expect(count(home, /tl-lane-btn/g)).toBe(0);
+    expect(count(home, /<button/g)).toBe(0);
     expect(count(home, /class="tl-count"/g)).toBe(0);
   });
 });
@@ -184,19 +184,21 @@ describe('interaction hooks in the shipped HTML', () => {
     expect(count(journey, /<a class="tl-link" href="\/journey\/[^"]+"/g)).toBe(chapters);
   });
 
-  // Pinned as an exact SET, never per-slug presence: the legend dims by
-  // `bar.stage`, so a button for a rung no repo opened on dims all 14 bars at
-  // once. Stage 3 moves the legend onto the lanes and reds this deliberately.
-  it('makes every legend swatch a real button, and ships no button that dims everything', () => {
+  // Pinned as an exact SET, never per-slug presence: a loop over the six rungs
+  // asserting each is present cannot see a SEVENTH button, and the legend grew
+  // exactly such a dead entry once. Dimming follows the PERIOD now, so every
+  // rung earns a button — `governing`, which no repo opened on, included.
+  it('makes every lane name a real button, and ships no button that is not a lane', () => {
     const buttons = [...journey.matchAll(
-      /<button type="button" class="tl-legend-item" data-stage="([a-z-]+)" aria-pressed="/g,
+      /<button type="button" class="tl-lane-btn" data-era="([a-z-]+)" aria-pressed="/g,
     )].map((m) => m[1]);
-    expect(buttons).toEqual(LEGEND_STAGES);
+    expect(buttons).toEqual(STAGES);
+    expect(count(journey, /<button/g), 'a button ships that is not a lane').toBe(STAGES.length);
   });
 
   it('ships the text status line — dimming is never the only channel', () => {
     expect(journey).toMatch(/data-tl-status/);
-    expect(journey).toContain('showing all stages');
+    expect(journey).toContain('showing all eras');
   });
 });
 
@@ -237,6 +239,21 @@ describe('accessibility floor: the text equivalent', () => {
     for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
       expect(html, `no sr-only timeline table on ${name}`).toMatch(/class="sr-only" data-tl-table/);
       expect(count(html, /data-tl-table-row/g), `wrong row count on ${name}`).toBe(CORPUS);
+    }
+  });
+
+  // The strip is an island too, so it owes its own text equivalent: the six
+  // periods with the source of each date. Its rows are `data-tl-era-row` and
+  // never `data-tl-table-row`, which the repo-row count above parses.
+  it('ships the sr-only periods table on both variants', () => {
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      expect(html, `no sr-only periods table on ${name}`).toMatch(/class="sr-only" data-tl-era-table/);
+      expect(count(html, /data-tl-era-row/g), `wrong era row count on ${name}`).toBe(STAGES.length);
+      for (const period of RUNG_PERIODS) {
+        expect(html, `${period.rung} has no source cell on ${name}`).toContain(
+          `(${period.startSource})`,
+        );
+      }
     }
   });
 });

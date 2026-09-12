@@ -14,6 +14,8 @@ export interface TimelineBar {
   width: number;
   /** Bar thickness in px, on the log commit scale. */
   thickness: number;
+  /** The rungs whose period overlaps this repo's span, in ladder order. */
+  lived: string[];
   /** The repo's chapter, or null for a sub-MIN_COMMITS experiment. */
   href: string | null;
 }
@@ -22,8 +24,10 @@ export interface TimelineBar {
 export interface TimelineLane {
   rung: string;
   start: string;
+  startSource: string;
   /** `null` when no log measures an end — the lane fades out after `solidTo`. */
   end: string | null;
+  endSource: string;
   left: number;
   width: number;
   /** Where the fade begins, as a percentage of the LANE's own width. */
@@ -78,6 +82,10 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<TimelineBar | null>(null);
 
+  // The selection is a PERIOD now, not a repo-opening rung: picking one lights
+  // its band through the rows and dims every repo that did not live through it.
+  const selectedLane = lanes.find((lane) => lane.rung === selected) ?? null;
+
   const lanePx = full ? LANE_PX.full : LANE_PX.compact;
   const laneFill = (lane: TimelineLane) => {
     const hue = `var(--stage-${lane.rung})`;
@@ -91,12 +99,26 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
   return (
     <div class="tl" data-timeline data-variant={variant}>
       {/* The era strip: the rungs are periods of the journey, so they are drawn
-          once above every row rather than coloured into the bars. */}
-      <div class="tl-strip" aria-hidden="true">
+          once above every row rather than coloured into the bars. In `full` the
+          lane names ARE the controls, so the strip cannot be aria-hidden there;
+          the decorative halves carry their own aria-hidden instead. `compact`
+          ships no controls, so the whole strip stays hidden. */}
+      <div class="tl-strip" aria-hidden={full ? undefined : 'true'}>
         {lanes.map((lane) => (
           <div class="tl-lane-row" key={lane.rung} style={{ height: `${lanePx + gap}px` }}>
-            {full && <span class="tl-label tl-lane-name">{lane.rung}</span>}
-            <div class="tl-track">
+            {full && (
+              <button
+                type="button"
+                class="tl-lane-btn"
+                data-era={lane.rung}
+                aria-pressed={selected === lane.rung}
+                onClick={() => setSelected(selected === lane.rung ? null : lane.rung)}
+              >
+                <span class="tl-swatch" style={{ background: `var(--stage-${lane.rung})` }} aria-hidden="true" />
+                {label(lane.rung)}
+              </button>
+            )}
+            <div class="tl-track" aria-hidden="true">
               <div
                 class="tl-lane"
                 data-tl-lane
@@ -118,11 +140,11 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
               )}
               {lane.live && <span class="tl-live" style={{ left: `${lane.left + lane.width}%` }}>▶</span>}
             </div>
-            {full && <span class="tl-era-dates">{lane.end ?? 'open'}</span>}
+            {full && <span class="tl-era-dates" aria-hidden="true">{lane.end ?? 'open'}</span>}
           </div>
         ))}
       </div>
-      {/* Decorative: the sr-only table below is the accessible tree, so nothing
+      {/* Decorative: the sr-only tables below are the accessible tree, so nothing
           in here is focusable — the table's repo cells carry the real links. */}
       <div class="tl-chart" aria-hidden="true">
         {/* One dashed vertical per rung start, dropped through every row. */}
@@ -135,8 +157,26 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
           </div>
           {full && <span />}
         </div>
+        {/* The selected period, banded through every row. Same grid as the seams,
+            so the band lands on the track column and not under the labels. */}
+        {selectedLane && (
+          <div class="tl-seams tl-band">
+            {full && <span />}
+            <div class="tl-track">
+              <span
+                class="tl-band-fill"
+                data-tl-band
+                data-era={selectedLane.rung}
+                style={{ left: `${selectedLane.left}%`, width: `${selectedLane.width}%` }}
+              />
+            </div>
+            {full && <span />}
+          </div>
+        )}
         {bars.map((bar) => {
-          const dimmed = selected !== null && bar.stage !== selected;
+          // Dimming follows the PERIOD, not `bar.stage`: a repo is undimmed when
+          // it was alive at any point inside the selected rung's span.
+          const dimmed = selected !== null && !bar.lived.includes(selected);
           const rect = (
             <div
               class="tl-bar"
@@ -183,50 +223,31 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
         {hovered
           ? <>
               <strong>{hovered.repo}</strong> · {hovered.commits.toLocaleString('en-US')} commits ·{' '}
-              {label(hovered.stage)} · {hovered.first_commit} → {hovered.last_commit}
+              lived through: {hovered.lived.map(label).join(' → ')} · {hovered.first_commit} →{' '}
+              {hovered.last_commit}
             </>
           : 'hover a bar for its repo, commit count and span'}
       </p>
 
       {full && (
-        <>
-          {/* Still the rungs a repo OPENED on, and still dimming by `bar.stage`:
-              the legend moves onto the lanes in stage 3. A rung no repo opened
-              on would dim every bar at once. */}
-          <div class="tl-legend">
-            {lanes
-              .map((lane) => lane.rung)
-              .filter((stage) => bars.some((bar) => bar.stage === stage))
-              .map((stage) => (
-              <button
-                type="button"
-                class="tl-legend-item"
-                data-stage={stage}
-                key={stage}
-                aria-pressed={selected === stage}
-                onClick={() => setSelected(selected === stage ? null : stage)}
-              >
-                <span class="tl-swatch" style={{ background: `var(--stage-${stage})` }} aria-hidden="true" />
-                {label(stage)}
-              </button>
-              ))}
-          </div>
-          {/* Selection is never carried by opacity alone: this line and
-              aria-pressed are the other two channels. */}
-          <p class="tl-status" data-tl-status aria-live="polite">
-            {selected ? `showing: ${label(selected)}` : 'showing all stages'}
-          </p>
-        </>
+        // Selection is never carried by opacity alone: this line and the lane
+        // buttons' aria-pressed are the other two channels.
+        <p class="tl-status" data-tl-status aria-live="polite">
+          {selectedLane
+            ? `showing: ${label(selectedLane.rung)} · ${selectedLane.start} → ${selectedLane.end ?? 'open'}`
+            : 'showing all eras'}
+        </p>
       )}
 
       <table class="sr-only" data-tl-table>
         <caption>
-          Every repo in the journey, {domain[0]} to {domain[1]}: stage, commit count and active span.
+          Every repo in the journey, {domain[0]} to {domain[1]}: the eras it lived through, commit
+          count and active span.
         </caption>
         <thead>
           <tr>
             <th scope="col">Repo</th>
-            <th scope="col">Stage</th>
+            <th scope="col">Eras lived through</th>
             <th scope="col">Commits</th>
             <th scope="col">Span</th>
           </tr>
@@ -237,10 +258,36 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
               <th scope="row">
                 {bar.href ? <a href={bar.href}>{bar.repo}</a> : bar.repo}
               </th>
-              <td>{label(bar.stage)}</td>
+              <td>{bar.lived.map(label).join(', ')}</td>
               <td>{bar.commits.toLocaleString('en-US')}</td>
               <td>
                 {bar.first_commit} to {bar.last_commit}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* The strip's own text equivalent: the six periods and where each date
+          comes from. Renders on BOTH variants — the strip does too. */}
+      <table class="sr-only" data-tl-era-table>
+        <caption>The six rungs as periods of the journey, in ladder order.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Era</th>
+            <th scope="col">Start</th>
+            <th scope="col">End</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lanes.map((lane) => (
+            <tr key={lane.rung} data-tl-era-row>
+              <th scope="row">{label(lane.rung)}</th>
+              <td>
+                {lane.start} ({lane.startSource})
+              </td>
+              <td>
+                {lane.end ?? 'open'} ({lane.endSource})
               </td>
             </tr>
           ))}

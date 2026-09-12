@@ -6,7 +6,7 @@ import { getCollection } from 'astro:content';
 import Timeline from './Timeline.tsx';
 import type { TimelineBar, TimelineLane } from './Timeline.tsx';
 import { TIME_DOMAIN, commitThickness, dateFraction, rows } from '../lib/timeline';
-import { RUNG_PERIODS } from '../lib/rung-periods';
+import { RUNG_PERIODS, livedThrough } from '../lib/rung-periods';
 
 interface Props {
   variant: 'compact' | 'full';
@@ -31,6 +31,9 @@ const bars: TimelineBar[] = rows.map((row) => {
     left,
     width: Math.max(dateFraction(row.last_commit) * 100 - left, MIN_WIDTH_PCT),
     thickness: commitThickness(row.commits),
+    // The rungs the repo was alive through, precomputed here so the island
+    // stays a pure renderer: an open-ended period overlaps everything after it.
+    lived: livedThrough(row.first_commit, row.last_commit),
     href: hrefByRepo.get(row.repo) ?? null,
   };
 });
@@ -47,7 +50,9 @@ const lanes: TimelineLane[] = RUNG_PERIODS.map((period, i) => {
   return {
     rung: period.rung,
     start: period.start,
+    startSource: period.startSource,
     end: period.end,
+    endSource: period.endSource,
     left,
     width,
     // As a percentage of the LANE, not of the axis: the gradient stop is local.
@@ -121,6 +126,16 @@ const seams = lanes.map((lane) => ({ rung: lane.rung, left: lane.left }));
     width: 0;
     border-left: 1px dashed var(--rule);
   }
+  /* The selected period, banded through every row. Translucent, so the bars
+     under it keep their own ink and the band reads as a wash, not a block. */
+  .tl-band-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: var(--radius);
+    background: var(--fg);
+    opacity: 0.07;
+  }
   /* The hit area spans the row's full height; the bar inside carries only the
      thickness, so neighbouring bars stay separated by the row gutter. */
   .tl-link, .tl-hit {
@@ -149,31 +164,28 @@ const seams = lanes.map((lane) => ({ rung: lane.rung, left: lane.left }));
     border-top: 1px solid var(--rule);
     padding-top: var(--space-1);
   }
-  .tl-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-1) var(--space-3);
-    margin-top: var(--space-3);
-    font-family: var(--font-mono);
-    font-size: var(--size-0);
-    color: var(--fg-dim);
-  }
-  .tl-legend-item {
+  /* The legend IS the strip now: each lane's own name is its button. */
+  .tl-lane-btn {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
+    width: 100%;
     background: none;
     border: 1px solid transparent;
     border-radius: var(--radius);
     padding: 0 var(--space-1);
-    font: inherit;
-    color: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  .tl-legend-item[aria-pressed='true'] { border-color: var(--fg-dim); color: var(--fg); }
+  .tl-lane-btn[aria-pressed='true'] { border-color: var(--fg-dim); color: var(--fg); }
   .tl-row.is-dimmed { opacity: 0.22; }
-  /* Hover is carried by an outline, not by colour: the stage hue is the bar's
-     only meaning and must not shift under the pointer. */
+  /* Hover is carried by an outline, not by colour: every bar is the one neutral
+     ink, and a hue under the pointer would read as a rung the bar never claims. */
   .tl-row.is-hovered .tl-bar {
     outline: 1px solid var(--fg);
     outline-offset: 1px;
