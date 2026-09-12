@@ -8,8 +8,9 @@ above the code: the markdown that tells an agent how to work in that repo — an
 the part worth copying anyway.
 
 Each artifact below is a **rewrite**, not an excerpt. Domain identifiers are generalised to placeholders,
-paths are relative, and nothing here is a source file. Every artifact names the relative path it was
-rewritten from, so the shape stays checkable even though the original does not ship.
+paths are relative, and nothing here is a source file. Every artifact names where it was
+rewritten from — a relative path, or a description where the source is not one shipped file — so the shape
+stays checkable even though the original does not ship.
 
 ## Why these six
 

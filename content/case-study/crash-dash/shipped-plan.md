@@ -1,7 +1,7 @@
 ---
 title: "A shipped plan doc: the alternatives-rejected pattern"
 summary: "What a plan looks like before it is built — and why the rejected options are the part worth keeping."
-origin: "docs/plans/archive/2026-06-29-reusable-backfill-runner-design.md"
+origin: "docs/plans/archive/ — a shipped plan doc, 2026-06-29"
 date: 2026-06-29
 ---
 
