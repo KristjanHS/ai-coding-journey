@@ -37,6 +37,15 @@ heading was found — plus one unrelated high-count fixture only a broken walker
 Conversely, a guard asking only "did anything match at all" goes green on a degenerate arm: pin it to the
 **discriminating** property, not the total.
 
+## A per-slug presence loop cannot see an EXTRA item — pin the SET
+
+A loop asserting "each expected id is present" passes unchanged when the render grows a seventh,
+dead entry: presence is monotone in the population. The timeline legend grew exactly such a dead
+button and stayed green. Pin the **exact array** (`expect(found).toEqual(EXPECTED)` — order and
+membership at once), and where the extra could ship outside the parsed pattern, add a **total
+count** over the broader selector (`count(html, /<button/g)` alongside the lane-button array).
+The coupling to the whole page's inventory is the point, not a defect.
+
 ## A fixture derived from a constant goes vacuous when that constant is retired to zero
 
 Deriving fixtures from a constant (never restating it) is the standing rule — but the derivation is itself
