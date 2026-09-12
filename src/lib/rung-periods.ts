@@ -53,18 +53,18 @@ const TOOL_RUNG: Record<string, Rung> = {
 const toolsFor = (rung: Rung): string[] =>
   Object.keys(TOOL_RUNG).filter((id) => TOOL_RUNG[id] === rung);
 
-const minLogStart = (rung: Rung): string =>
-  toolsFor(rung)
-    .map((id) => byId(id).logStart)
+// Both throw rather than return `undefined`: a regen that nulls every log for a
+// rung would otherwise reach the DOM as `data-era-start="undefined"`, and the
+// failure would name an attribute instead of the rung that lost its source.
+const bound = (rung: Rung, field: 'logStart' | 'logEnd', pick: 'first' | 'last'): string => {
+  const dates = toolsFor(rung)
+    .map((id) => byId(id)[field])
     .filter((d): d is string => d !== null)
-    .sort()[0];
-
-const maxLogEnd = (rung: Rung): string =>
-  toolsFor(rung)
-    .map((id) => byId(id).logEnd)
-    .filter((d): d is string => d !== null)
-    .sort()
-    .slice(-1)[0];
+    .sort();
+  const date = pick === 'first' ? dates[0] : dates[dates.length - 1];
+  if (date === undefined) throw new Error(`no ${field} measures the ${rung} rung`);
+  return date;
+};
 
 /**
  * The six periods in ladder order. A `null` end means no proxy measures one:
@@ -90,9 +90,9 @@ export const RUNG_PERIODS: RungPeriod[] = [
   },
   {
     rung: 'delegating',
-    start: minLogStart('delegating'),
+    start: bound('delegating', 'logStart', 'first'),
     startSource: 'earliest logStart of continue/codex/cursor',
-    end: maxLogEnd('delegating'),
+    end: bound('delegating', 'logEnd', 'last'),
     endSource: 'latest logEnd of continue/codex/cursor',
     estimated: false,
   },

@@ -190,8 +190,14 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
 
       {full && (
         <>
+          {/* Still the rungs a repo OPENED on, and still dimming by `bar.stage`:
+              the legend moves onto the lanes in stage 3. A rung no repo opened
+              on would dim every bar at once. */}
           <div class="tl-legend">
-            {lanes.map(({ rung: stage }) => (
+            {lanes
+              .map((lane) => lane.rung)
+              .filter((stage) => bars.some((bar) => bar.stage === stage))
+              .map((stage) => (
               <button
                 type="button"
                 class="tl-legend-item"
@@ -203,7 +209,7 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
                 <span class="tl-swatch" style={{ background: `var(--stage-${stage})` }} aria-hidden="true" />
                 {label(stage)}
               </button>
-            ))}
+              ))}
           </div>
           {/* Selection is never carried by opacity alone: this line and
               aria-pressed are the other two channels. */}

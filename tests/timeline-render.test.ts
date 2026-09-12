@@ -184,12 +184,14 @@ describe('interaction hooks in the shipped HTML', () => {
     expect(count(journey, /<a class="tl-link" href="\/journey\/[^"]+"/g)).toBe(chapters);
   });
 
-  it('makes every legend swatch a real button carrying its stage slug', () => {
-    for (const stage of LEGEND_STAGES) {
-      expect(journey, `no legend button for ${stage}`).toMatch(
-        new RegExp(`<button type="button" class="tl-legend-item" data-stage="${stage}" aria-pressed="`),
-      );
-    }
+  // Pinned as an exact SET, never per-slug presence: the legend dims by
+  // `bar.stage`, so a button for a rung no repo opened on dims all 14 bars at
+  // once. Stage 3 moves the legend onto the lanes and reds this deliberately.
+  it('makes every legend swatch a real button, and ships no button that dims everything', () => {
+    const buttons = [...journey.matchAll(
+      /<button type="button" class="tl-legend-item" data-stage="([a-z-]+)" aria-pressed="/g,
+    )].map((m) => m[1]);
+    expect(buttons).toEqual(LEGEND_STAGES);
   });
 
   it('ships the text status line — dimming is never the only channel', () => {
