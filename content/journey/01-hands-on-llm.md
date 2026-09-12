@@ -12,6 +12,7 @@ versioned: code
 verified_by: tests
 cost_to_look: no-log
 tools: [copilot, gemini-code-assist, continue, cursor, claude-code]
+evaluated: [copilot-agent, gemini-cli]
 deck: true
 artifact: present
 ---
@@ -64,6 +65,20 @@ small number, a missing one.
   error. A second setting in that run was rejected just as quietly:
   `msg="quantized kv cache requested but flash attention disabled"`, because flash attention was off.
   Both were one log line each in a log I skimmed.
+
+## What I evaluated and dropped
+
+**GitHub Copilot's coding agent.** [2025-06-19..2026-04-11] — the chapter's own period, not a measured
+window: the trial left no git trace, so nothing narrower can be dated. The free plan does not run it,
+and nothing in the UI said so; *What didn't work* above records how I found out. Copilot Chat stays in
+`tools` because it wrote code here. The agent never did.
+
+**Gemini CLI.** [2025-07-04..2026-06-23] — the Gemini era's git-measured span across the eight repos
+that ever carried a `.gemini/` directory, and its first day is this repo: a Gemini code-review config
+landed on 2025-07-04 and a WSL setup guide on 2025-07-07, then nothing more. Across those eight repos
+the config commits sum to 18 and the `GEMINI.md` count is 0 — configured everywhere, instructed
+nowhere. Gemini Code Assist, the editor plugin, is a different product and stays in `tools`: it wrote
+code here, under the free tier's output cap.
 
 ## What I learned
 
