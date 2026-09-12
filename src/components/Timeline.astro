@@ -63,6 +63,11 @@ const lanes: TimelineLane[] = RUNG_PERIODS.map((period, i) => {
     solidTo: Math.min(100, ((solidRight - left) / width) * 100),
     open: period.end === null,
     live: next === undefined,
+    tools: period.tools,
+    // The repos alive at any point inside the period: the era's own footnote
+    // answers "which tools, from when, and how many repos" the way a bar's
+    // answers "which repo, how many commits, and which eras".
+    repos: bars.filter((bar) => bar.lived.includes(period.rung)).length,
   };
 });
 

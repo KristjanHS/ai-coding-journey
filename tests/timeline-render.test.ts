@@ -420,3 +420,32 @@ describe('era labels and bars link to the rung table row', () => {
     }
   });
 });
+
+// The era footnote: a pill or lane under the pointer names the era's tools,
+// repos and bounds in the same card a bar uses. The card's hover text is client
+// state, so the shipped HTML is pinned on what it CAN carry — the tools attribute
+// on every lane, the widened sr-only table, and the idle card naming both uses.
+describe('era footnotes carry tools, repos and bounds', () => {
+  it('stamps every lane with its tools, on both variants', () => {
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      for (const period of RUNG_PERIODS) {
+        expect(markup(html), `lane ${period.rung} on ${name} lacks its tools`).toMatch(
+          // Tool names carry parentheses ("Continue (VS Code)"), so the join is escaped.
+          new RegExp(`data-era="${period.rung}"[^>]*data-era-tools="${period.tools.join(', ').replace(/[()]/g, '\\$&')}"`),
+        );
+      }
+    }
+  });
+
+  it('idle card says an era can be hovered too', () => {
+    expect(markup(home)).toMatch(/data-tl-card[^>]*>[^<]*an era for its tools, repos and bounds/);
+  });
+
+  it('sr-only era table lists tools and a repo count per rung', () => {
+    const rows = [...markup(journey).matchAll(/data-tl-era-row="true">([\s\S]*?)<\/tr>/g)].map((m) => m[1]);
+    expect(rows).toHaveLength(STAGES.length);
+    for (const row of rows) {
+      expect(row).toMatch(/<td>[A-Z][^<]*<\/td><td>\d+<\/td>/);
+    }
+  });
+});

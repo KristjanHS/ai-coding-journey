@@ -34,6 +34,10 @@ export interface TimelineLane {
   solidTo: number;
   open: boolean;
   live: boolean;
+  /** The tools whose records bound the rung, by display name. */
+  tools: string[];
+  /** How many drawn repos were alive at some point inside the period. */
+  repos: number;
 }
 
 export interface TimelineSeam {
@@ -108,6 +112,11 @@ export default function Timeline({
     Math.round(full ? bar.thickness : Math.max(COMPACT_MIN_PX, bar.thickness * COMPACT_SCALE));
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<TimelineBar | null>(null);
+  // Era pills and lanes share the one card with the bars: hovering a name or a
+  // bar of an era names the era's tools, its bounds with their sources, and
+  // the repos alive inside it. A pill only knows its rung, so it looks up the lane.
+  const [hoveredLane, setHoveredLane] = useState<TimelineLane | null>(null);
+  const laneOf = (rung: string) => lanes.find((lane) => lane.rung === rung) ?? null;
 
   // The selection is a PERIOD now, not a repo-opening rung: picking one lights
   // its band through the rows and dims every repo that did not live through it.
@@ -158,6 +167,8 @@ export default function Timeline({
                     data-era={pill.rung}
                     key={pill.rung}
                     style={{ '--tl-pill-left': `${pill.left}%`, '--tl-pill-w': `${pill.widthPx}px` }}
+                    onMouseEnter={() => setHoveredLane(laneOf(pill.rung))}
+                    onMouseLeave={() => setHoveredLane(null)}
                   >
                     <span class="tl-pill-dot" style={{ background: `var(--stage-${pill.rung})` }} />
                     {label(pill.rung)}
@@ -217,6 +228,9 @@ export default function Timeline({
                     height: `${lanePx}px`,
                     background: laneFill(lane),
                   }}
+                  data-era-tools={lane.tools.join(', ')}
+                  onMouseEnter={() => setHoveredLane(lane)}
+                  onMouseLeave={() => setHoveredLane(null)}
                 />
                 {lane.live && <span class="tl-live" style={{ left: `${lane.left + lane.width}%` }}>▶</span>}
               </div>
@@ -289,7 +303,8 @@ export default function Timeline({
         <span>{domain[1]}</span>
       </div>
 
-      {/* Always rendered, so naming the hovered bar never reflows what is below it. */}
+      {/* Always rendered, so naming the hovered bar or era never reflows what is
+          below it. A bar wins over an era: the pointer is on the bar. */}
       <p class="tl-card" data-tl-card aria-hidden="true">
         {hovered
           ? <>
@@ -297,7 +312,13 @@ export default function Timeline({
               lived through: {hovered.lived.map(label).join(' → ')} · {hovered.first_commit} →{' '}
               {hovered.last_commit}
             </>
-          : 'hover a bar for its repo, commit count and span'}
+          : hoveredLane
+            ? <>
+                <strong>{label(hoveredLane.rung)}</strong> · {hoveredLane.tools.join(', ')} ·{' '}
+                {hoveredLane.repos} repos alive · {hoveredLane.start} ({hoveredLane.startSource}) →{' '}
+                {hoveredLane.end ?? 'open'} ({hoveredLane.endSource})
+              </>
+            : 'hover a bar for its repo, commit count and span; an era for its tools, repos and bounds'}
       </p>
 
       {full && (
@@ -346,6 +367,8 @@ export default function Timeline({
         <thead>
           <tr>
             <th scope="col">Era</th>
+            <th scope="col">Tools</th>
+            <th scope="col">Repos alive</th>
             <th scope="col">Start</th>
             <th scope="col">End</th>
           </tr>
@@ -354,6 +377,8 @@ export default function Timeline({
           {lanes.map((lane) => (
             <tr key={lane.rung} data-tl-era-row>
               <th scope="row"><a href={rungHref(lane.rung)}>{label(lane.rung)}</a></th>
+              <td>{lane.tools.join(', ')}</td>
+              <td>{lane.repos}</td>
               <td>
                 {lane.start} ({lane.startSource})
               </td>

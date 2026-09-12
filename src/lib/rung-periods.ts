@@ -6,6 +6,12 @@
 // `gemini` and `claude-code` are deliberately unmapped below: Claude Code spans
 // rungs 4-6 and so can end none of them, and Gemini left no log at all. The
 // three upper starts are therefore literals, each carrying its own source.
+//
+// `delegating` does NOT start at its tools' first log (2025-07-04, two chat-mode
+// Continue events on a local model — the wrong kind of evidence: Continue never
+// ran an agent mode). Ruled 2026-09-12: it opens the day a `.cursor/` directory
+// first entered a repo of the journey, which is `cursor.gitStart` — a git-dated
+// seam of the same kind the three upper rungs use.
 import eras from '../../content/measurements/data/eras.json';
 // `RUNGS` is imported for the totality typing only (a `typeof` type query, so
 // the import is erased at build time) — vitest has no `astro:content`
@@ -23,14 +29,18 @@ export interface RungPeriod {
   endSource: string;
   /** True when the boundary is inferred rather than read off a log. */
   estimated: boolean;
+  /** The tools whose records bound this rung, by their display name. */
+  tools: string[];
 }
 
 interface EraRow {
   id: string;
+  tool: string;
   dateLow: string | null;
   dateHigh: string | null;
   logStart: string | null;
   logEnd: string | null;
+  gitStart: string | null;
 }
 
 const rows = eras.eras as EraRow[];
@@ -52,6 +62,8 @@ const TOOL_RUNG: Record<string, Rung> = {
 
 const toolsFor = (rung: Rung): string[] =>
   Object.keys(TOOL_RUNG).filter((id) => TOOL_RUNG[id] === rung);
+
+const toolNames = (ids: string[]): string[] => ids.map((id) => byId(id).tool);
 
 // Both throw rather than return `undefined`: a regen that nulls every log for a
 // rung would otherwise reach the DOM as `data-era-start="undefined"`, and the
@@ -79,6 +91,7 @@ export const RUNG_PERIODS: RungPeriod[] = [
     end: byId('chat').dateHigh,
     endSource: 'chat.dateHigh (estimated)',
     estimated: true,
+    tools: toolNames(['chat']),
   },
   {
     rung: 'suggesting',
@@ -87,14 +100,16 @@ export const RUNG_PERIODS: RungPeriod[] = [
     end: byId('copilot').logEnd,
     endSource: 'copilot.logEnd',
     estimated: false,
+    tools: toolNames(['copilot']),
   },
   {
     rung: 'delegating',
-    start: bound('delegating', 'logStart', 'first'),
-    startSource: 'earliest logStart of continue/codex/cursor',
+    start: byId('cursor').gitStart!,
+    startSource: 'cursor.gitStart (first .cursor/ commit in a journey repo)',
     end: bound('delegating', 'logEnd', 'last'),
     endSource: 'latest logEnd of continue/codex/cursor',
     estimated: false,
+    tools: toolNames(toolsFor('delegating')),
   },
   {
     rung: 'planning',
@@ -103,6 +118,7 @@ export const RUNG_PERIODS: RungPeriod[] = [
     end: null,
     endSource: 'no proxy',
     estimated: false,
+    tools: toolNames(['claude-code']),
   },
   {
     rung: 'configuring',
@@ -111,6 +127,7 @@ export const RUNG_PERIODS: RungPeriod[] = [
     end: null,
     endSource: 'no proxy',
     estimated: false,
+    tools: toolNames(['claude-code']),
   },
   {
     rung: 'governing',
@@ -119,6 +136,7 @@ export const RUNG_PERIODS: RungPeriod[] = [
     end: null,
     endSource: 'live',
     estimated: false,
+    tools: toolNames(['claude-code']),
   },
 ];
 

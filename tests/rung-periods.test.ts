@@ -13,7 +13,7 @@ const RUNGS = configEnum('RUNGS');
 const PINNED: Record<string, { start: string; end: string | null }> = {
   asking: { start: '2025-06-14', end: '2025-07-06' },
   suggesting: { start: '2025-06-20', end: '2025-12-08' },
-  delegating: { start: '2025-07-04', end: '2026-05-18' },
+  delegating: { start: '2025-07-31', end: '2026-05-18' },
   planning: { start: '2026-02-28', end: null },
   configuring: { start: '2026-04-05', end: null },
   governing: { start: '2026-07-09', end: null },
@@ -32,6 +32,19 @@ describe('the six rungs as periods', () => {
   it.each(RUNG_PERIODS)('$rung: names a source for both boundaries', (period) => {
     expect(period.startSource).not.toHaveLength(0);
     expect(period.endSource).not.toHaveLength(0);
+  });
+
+  it.each(RUNG_PERIODS)('$rung: names at least one tool by its display name', (period) => {
+    expect(period.tools.length).toBeGreaterThan(0);
+    for (const tool of period.tools) expect(tool).toMatch(/^[A-Z]/);
+  });
+
+  // Ruled 2026-09-12: the rung opens on a git-dated seam, not on the first log
+  // line of a tool that never ran an agent mode (Continue, 2025-07-04).
+  it('delegating opens on the first .cursor/ commit, not on a log', () => {
+    const period = RUNG_PERIODS.find((p) => p.rung === 'delegating')!;
+    expect(period.startSource).toMatch(/gitStart/);
+    expect(period.tools).toContain('Cursor');
   });
 
   // The overlap is the whole point of the strip: rungs are not a partition of
