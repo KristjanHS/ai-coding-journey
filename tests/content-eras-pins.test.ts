@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { CHAPTERS, byId, read, section } from './helpers';
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { JOURNEY, byId, frontmatter, read, section } from './helpers';
 
 // Prose under content/journey/** that quotes a value eras.json GENERATES. Two
 // surfaces, each pinned so it reds instead of drifting:
@@ -15,12 +18,20 @@ import { CHAPTERS, byId, read, section } from './helpers';
 
 const JSON_FENCE_FILES: readonly string[] = [];
 
+// The ruling's scope is content/journey/** — wider than `CHAPTERS`, which drops
+// 00-experiments.md and the generated README; a fence in either must red too.
+const JOURNEY_FILES = readdirSync(JOURNEY)
+  .filter((f) => f.endsWith('.md'))
+  .map((f) => join(JOURNEY, f));
+
+// Tolerates fence attributes (```json title=x) and CRLF, so a decorated fence
+// cannot slip out of the guarded class.
 const jsonFences = (body: string): string[] =>
-  [...body.matchAll(/^```json\n([\s\S]*?)^```/gm)].map((m) => m[1]);
+  [...body.matchAll(/^```json[^\n]*\r?\n([\s\S]*?)^```/gm)].map((m) => m[1]);
 
 describe('json fences quoting eras.json', () => {
   it('the set of chapters holding a `json` fence is exactly the pinned one', () => {
-    const holders = CHAPTERS.filter((path) => jsonFences(read(path)).length > 0).sort();
+    const holders = JOURNEY_FILES.filter((path) => jsonFences(read(path)).length > 0).sort();
     expect(holders).toEqual([...JSON_FENCE_FILES].sort());
   });
 
@@ -51,5 +62,18 @@ describe('evaluated-and-dropped windows citing an era span', () => {
     expect(body, `${path}: no \`## What I evaluated and dropped\``).toBeDefined();
     const era = byId(id);
     expect(body).toContain(`**${tool}.** [${era.gitStart}..${era.gitEnd}]`);
+  });
+
+  // A window declared as "the chapter's own period" must track the frontmatter
+  // `start`/`end` that timeline-from-git.py resyncs — otherwise a resync moves
+  // the span and leaves the bracket quoting a period the chapter no longer has.
+  const CHAPTER_WINDOWS: [string, string][] = [
+    ['content/journey/01-hands-on-llm.md', "GitHub Copilot's coding agent"],
+  ];
+
+  it.each(CHAPTER_WINDOWS)('%s: the %s bracket equals the chapter start..end', (path, tool) => {
+    const doc = read(path);
+    const body = section(doc, 'What I evaluated and dropped');
+    expect(body).toContain(`**${tool}.** [${frontmatter(doc, 'start')}..${frontmatter(doc, 'end')}]`);
   });
 });
