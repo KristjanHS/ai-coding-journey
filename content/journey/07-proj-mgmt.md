@@ -5,7 +5,7 @@ start: 2026-03-29
 end: 2026-08-11
 commits: 11
 stage: planning
-stage_peak: planning
+stage_peak: configuring
 could_see: repo-index
 versioned: code-and-rules
 verified_by: tests
@@ -22,9 +22,10 @@ artifact: present
 Build a small project-management tool for myself — people and projects as JSON, an Excel importer and
 exporter around them, and a handful of repo-local commands to ask questions of the data.
 
-It was designed and built as a planning exercise. The first commit of the day adds a design document
-with a versioned roadmap; the last one of the day moves that document into a folder named
-`old_already_implemented`. Eight commits are dated 2026-03-29. The next commit in the repo is dated
+It was designed and built in an afternoon. The first commit of the day, at 12:55, adds a design
+document with a versioned roadmap; by 13:36 that document has been moved into a folder named
+`old_already_implemented` and v1 is declared complete. The day's last commit, at 16:26, is a
+documentation pass. Eight commits are dated 2026-03-29. The next commit in the repo is dated
 2026-08-11.
 
 ## What didn't work
@@ -47,11 +48,16 @@ v3 written down. Neither happened. Moving the design document to `old_already_im
 it was written made the roadmap's later versions invisible in the tree, and the thing that actually
 arrived in August was not v2: it was configuration copied in from another repo.
 
-**The configuration layer arrived by inheritance, not by authorship.** In August this repo took its
-rules, its settings and its skill file from chapter 08's repo and adapted them. That is consuming
-governance, not writing it, which is why this chapter's peak rung stays at `planning` even though the
-tree today looks like a configured repo. The dated evidence inside the repo is a design document and a
-review fix; there is no in-repo commit where a policy was authored for this project's own reasons.
+**The policy layer was written before the tool had earned it, and the borrowed half arrived after the
+tool was dead.** Between 13:09 and 13:29 this repo authored seven `/pm:` commands and a 62-line project
+`CLAUDE.md` — instruction files written for this project's own reasons, git-dated inside it, and the
+reason this chapter's peak rung is `configuring` rather than the `planning` it opened on. Three hours
+later the tool was finished and nobody ran any of them again.
+
+Then in August the repo took `.claude/rules/` and a skill edit from chapter 08's repo and adapted
+them — fifty-one lines of adopted governance landing in a repo with nothing left to govern. The
+distinction matters both ways round: the commands are authored and count, the rules are consumed and
+do not, and neither of them was ever load-bearing here.
 
 ## What I learned
 
@@ -66,14 +72,16 @@ five concrete defects, one of which was a dead quadratic block in the validation
 would have been found by the documentation pass, which was the more impressive-looking artifact of the
 two.
 
-**Planning is a rung you can stop on.** This repo reached a design document, a roadmap and a working
-v1, and then stopped. Nothing here was governed; the policy layer is borrowed. Reading the tree as it
-stands today would date that layer to March, and it belongs to August and to a different repo.
+**Reaching a rung is not living on it.** The peak this chapter records is a two-minute stretch of one
+afternoon. That is what the measurement says and it is all it says — a ladder built from the highest
+rung a repo touched will always read as more governed than the repo felt, and this one is the clearest
+case of it in the set. Reading today's tree would date the whole config layer to March, when half of
+it belongs to August and to a different repo.
 
 ## Artifact
 
-The review fix, verbatim from the repo's own git log — commit `3355e94`, dated 2026-03-29. One external
-tracker's field name is elided; nothing else is changed:
+The review fix, the commit message body verbatim from the repo's own git log — commit `3355e94`, dated
+2026-03-29. One external tracker's field name is elided, and the trailer is dropped:
 
 ```text
 Fix code review issues: type safety, dead code, consistency
@@ -99,3 +107,27 @@ learn_score = (100 × 0.5) + (100 × 0.3) + (100 × 0.2) = 100
 The three inputs are link resolution, a count of document types against a checklist, and a line-count
 limit. The weighted total is presented as a score for the documentation. It is a score for the
 formatting.
+
+And one of the seven commands authored in-repo that afternoon — the opening of
+`.claude/commands/pm/conflict-check.md`, committed 13:27 on 2026-03-29. This is the artifact that
+raises the chapter's peak to `configuring`: it is a checkable procedure written for this project, not
+a baseline adopted from elsewhere.
+
+```markdown
+Detect dependency conflicts and date inconsistencies within a project.
+
+$ARGUMENTS — project slug. If omitted and multiple projects exist, ask which one.
+
+## Steps
+
+1. **Load and validate data.**
+   Read `data/people.json` via `pm.loader.load_people`, then load the project via `pm.loader.load_project`. Stop on validation errors — schema issues are reported here, not below.
+
+2. **Check dependency chains.**
+   - **Circular dependencies**: walk the dependency graph (DFS). Report each cycle found. (The schema validator already catches these, but confirm and explain them in plain language.)
+   - **Finish-to-start violations**: for every `finish-to-start` dependency, verify the predecessor's end date is before the dependent task's start date. Flag violations with both task names and dates.
+```
+
+It names the loader functions it must call and the order it must check in, and it says where errors
+stop. That is the shape the later rules layer has too — which is exactly why adopting that layer read
+as progress when it was not.
