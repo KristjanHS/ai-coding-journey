@@ -2,8 +2,8 @@
 title: crash-dash
 repo: crash-dash
 start: 2026-06-25
-end: 2026-09-08
-commits: 5035
+end: 2026-09-12
+commits: 5167
 stage: configuring
 stage_peak: governing
 could_see: path-gated-rules
@@ -27,7 +27,7 @@ here quotes its source. What can be shown is the layer I *do* write and read: th
 the agent, the gates that have to go green, and the defects those gates caught.
 
 Scale is what forces the question. This repo's git log holds roughly 5,000 commits between
-2026-06-25 and 2026-09-08. The Claude Code era row in `eras.json` reports 15 commits for its own
+2026-06-25 and 2026-09-12. The Claude Code era row in `eras.json` reports 15 commits for its own
 window, 2026-06-23 to 2026-09-06, because it counts my `.claude` config repo, not this one. Repo
 scope and tool scope are separate measurements here and neither stands in for the other. A rate like the first number is survivable only if the
 review system, not my attention, is what holds quality.

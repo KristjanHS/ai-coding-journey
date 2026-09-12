@@ -106,7 +106,7 @@ describe('rule prose vs its machine half', () => {
     it('leaves only the genuinely-active repos dated on or after the sweep day', () => {
       const SWEEP_DAY = '2026-09-06';
       const since = rows.filter((r) => r.last_commit >= SWEEP_DAY).map((r) => r.repo);
-      expect(since.sort()).toEqual(['crash-dash', 'dotfiles']);
+      expect(since.sort()).toEqual(['claudeconf', 'crash-dash', 'dotfiles']);
     });
 
     it('never ends a repo before it started, or in the future', () => {

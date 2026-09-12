@@ -2,8 +2,8 @@
 title: claudeconf
 repo: claudeconf
 start: 2026-06-18
-end: 2026-07-09
-commits: 44
+end: 2026-09-09
+commits: 46
 stage: configuring
 stage_peak: configuring
 could_see: path-gated-rules

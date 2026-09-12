@@ -2,8 +2,8 @@
 title: dotfiles
 repo: dotfiles
 start: 2026-04-05
-end: 2026-09-08
-commits: 764
+end: 2026-09-12
+commits: 875
 stage: configuring
 stage_peak: governing
 could_see: path-gated-rules
