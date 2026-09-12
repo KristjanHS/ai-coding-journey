@@ -31,9 +31,9 @@ is titled "Optimize context subcommand for PostToolUse hook invocation". The thi
 out on day one is what the tool was being tuned for by day twenty.
 
 This is the repo whose first commit lands one day inside the `planning` band and is ruled
-`configuring` anyway: it opens with a 75-line `CLAUDE.md` that is itself a piece of governance — a
-two-level disclosure scheme with three numbered rules — and its purpose is to measure the cost of the
-governance the other repos were accumulating.
+`configuring` anyway: it opens with a 55-line `CLAUDE.md` carrying three numbered rules, rewritten
+thirty-one minutes later (`3ea4845`) into a two-level disclosure scheme, and its purpose is to measure
+the cost of the governance the other repos were accumulating.
 
 ## What didn't work
 
@@ -46,8 +46,8 @@ main repo.
 
 **The comprehensive test suite was one third padding.** Forty-four minutes after it was written,
 eighteen tests were deleted for verifying Python language guarantees — that `len` returns a length,
-that a dataclass has its defaults. Three more went for testing a string method instead of the
-production code. Ten tests of one function became three. What survived is a suite of a bit over a
+that a dataclass has its defaults. Three more fragile tests went next, one of them testing a string
+method instead of the production code. Ten tests of one function became three. What survived is a suite of a bit over a
 hundred, and the README still says the tool has a hundred and seven of them; the tree holds more,
 and no check ties the two.
 
@@ -106,7 +106,7 @@ dataclass defaults), redundant tests already covered by better tests,
 and cross-layer CLI duplicates covered by parser + integration tests.
 ```
 
-And the design document's scope line, from `docs/archive/2026-04-04-token-monitoring-design.md`,
+And the design document's out-of-scope list in full, from `docs/archive/2026-04-04-token-monitoring-design.md`,
 dated 2026-04-04, twenty days before the hook commit:
 
 ```text
@@ -115,4 +115,6 @@ dated 2026-04-04, twenty days before the hook commit:
 - Real-time hooks or warnings during sessions (add later if needed)
 - Hard token budgets or enforcement mechanisms
 - Session splitting rules (learn cadence from data first)
+- Automatic session management or context pruning
+- Plan document loading optimization (already handled by CLAUDE.md progressive disclosure)
 ```
