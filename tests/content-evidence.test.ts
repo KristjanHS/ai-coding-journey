@@ -67,12 +67,17 @@ describe('context ledger', () => {
   it.each(CHAPTERS)('%s: a chapter carrying a ledger shows its artifact', (path) => {
     const body = read(path);
     const filled = LEDGER_KEYS.filter((key) => frontmatter(body, key) !== undefined);
-    if (filled.length === 0) return;
+    // A chapter with no repo to read a ledger off can still CLAIM an artifact in
+    // frontmatter (90, 91); `artifact: present` is the same claim link 3 exists to
+    // check, so it enters the block on the same footing as a filled ledger key.
+    const claim =
+      filled.length > 0 ? `ledger keys ${filled.join(', ')}` : '`artifact: present`';
+    if (filled.length === 0 && frontmatter(body, 'artifact') !== 'present') return;
 
     const artifact = section(body, 'Artifact');
     expect(
       artifact,
-      `${path}: ledger keys ${filled.join(', ')} claimed, but the Artifact section is empty`,
+      `${path}: ${claim} claimed, but the Artifact section is empty`,
     ).not.toBe('');
 
     expect(
@@ -83,7 +88,7 @@ describe('context ledger', () => {
     const atoms = linkedAtoms(path, artifact!);
     expect(
       atoms,
-      `${path}: ledger keys ${filled.join(', ')} claimed, but the Artifact section only ` +
+      `${path}: ${claim} claimed, but the Artifact section only ` +
         `describes the evidence -- it must link the atom that shows it`,
     ).not.toEqual([]);
     for (const atom of atoms) {
@@ -96,9 +101,10 @@ describe('context ledger', () => {
     }
   });
 
-  // Vacuity anchor. Every `filled.length === 0` chapter returns before asserting
-  // anything, so a frontmatter parser that silently stopped matching would drain
-  // the population and leave the block above green over a row of no-ops. Anchor
+  // Vacuity anchor. A chapter with neither a filled ledger key nor `artifact:
+  // present` returns before asserting anything, so a frontmatter parser that
+  // silently stopped matching would drain the population on BOTH entry
+  // conditions and leave the block above green over a row of no-ops. Anchor
   // on both sides of the count the drafting order moves: a collapse to zero is a
   // broken parser, and a ledger on every repo-backed chapter means the stubs got
   // theirs back without the artifact that is supposed to buy it.
