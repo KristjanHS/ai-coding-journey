@@ -26,6 +26,12 @@ ever open Excel. By spring 2026 that part worked. The work these notes cover is 
 making my own sessions on the repo cheaper, and adopting the agent configuration I had refined in
 two other repos instead of maintaining a third copy of it here.
 
+Calling that adoption undersells one half of it. The hook the 2026-07-27 failure below is about was
+first written *here*: `.claude/hooks/docs-bloat-gate.py` was added in this repo on 2026-04-25
+(`feat(hooks): add docs-bloat-gate PreToolUse + companion rule trims`), rebuilt as v2 on 2026-04-27,
+and iterated six times before it was promoted into my global configuration in May. The inherited
+suite below is therefore a test for a hook this repo authored and later re-adopted from elsewhere.
+
 ## What didn't work
 
 Copying a configuration between repos quietly copies its assumptions. On 2026-07-27 `make check`
