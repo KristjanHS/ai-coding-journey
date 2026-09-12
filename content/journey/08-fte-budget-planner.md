@@ -19,7 +19,7 @@ artifact: present
 
 ## What I was trying to do
 
-An Excel workbook generator for a multi-year EU-funded project: planned FTE per work package,
+An Excel workbook generator for a multi-year grant-funded project: planned FTE per work package,
 actual EUR spend per month, and overcommitment detection per person. The binding rule was that
 Python writes *formulas*, never computed values, so the workbook stays live for people who only
 ever open Excel. By spring 2026 that part worked. The work these notes cover is the second job —

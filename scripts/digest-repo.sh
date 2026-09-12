@@ -9,7 +9,18 @@ REPO_NAME="${1:-}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TIMELINE="$ROOT/content/timeline.json"
 SRC="$ROOT/sources/onenote"
-WORK="$HOME/projects/$REPO_NAME"
+# A chapter slug is not always its directory name: REPO_GROUPS in the generator maps
+# one or more real directories onto one journey row, and the row key is the slug. Read
+# that mapping rather than mirroring it here -- a hand-copied copy would drift silently.
+WORK_DIR="$(python3 -c "
+import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location('tfg', '$ROOT/scripts/timeline-from-git.py')
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+members = mod.REPO_GROUPS.get('$REPO_NAME', ['$REPO_NAME'])
+root = pathlib.Path.home() / 'projects'
+print(next((m for m in members if (root / m / '.git').is_dir()), members[0]))
+")"
+WORK="$HOME/projects/$WORK_DIR"
 
 # A repo absent from timeline.json is not a chapter subject.
 if ! python3 -c "
