@@ -6,13 +6,10 @@ import { ATOMS, configEnum, frontmatter, read } from './helpers';
 // cell must be listed here with its reason; a listed cell that fills reds, so the
 // list drains as atoms land.
 const KNOWN_GAPS: Record<string, string> = {
-  'asking/cost': '00-copilot chat logged no token/cost field; no positive dated figure and no cost topic',
   'suggesting/control': 'Continue figures count all token events, chat included — no completion-only measurement',
   'suggesting/provenance': 'Continue cross-check & Cursor client-estimate fit no provenance topic in content/topics/',
   'suggesting/cost': 'eras.json withholds every cost figure; the 0.10% floor share is token volume, not cost',
-  'delegating/control': 'Codex 30.3% injected-context share is an all-rollouts aggregate — no line shows one handed-over task',
   'delegating/provenance': 'Codex history.jsonl stub is a measurement note; no content/topics/ home for a measurement-seeded atom',
-  'delegating/quality': "04's broken-tooling commit line never attributes the Makefile/hooks to an agent — delegation unproven",
   'delegating/cost': 'Codex token floor (37% of rollouts from 2025-09-23) is a logging-coverage floor across all rollouts — not a task-unit cost',
   'planning/cost': 'no measured cost of writing or reading a plan; the plan-rule path-gating line is a configuring-unit file',
 };

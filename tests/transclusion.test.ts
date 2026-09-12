@@ -15,11 +15,13 @@ import { describe, expect, it } from 'vitest';
 const page = (slug: string) => join(process.cwd(), 'dist', 'journey', slug, 'index.html');
 const read = (slug: string) => (existsSync(page(slug)) ? readFileSync(page(slug), 'utf8') : null);
 
-// `02-kri-local-rag` owns two atoms; `03-dewpoint` owns none. The pair is what
-// makes the filter falsifiable: an unfiltered query passes every assertion about
-// the first chapter and only ever reds on the second.
+// `02-kri-local-rag` owns the atom carrying ATOM_SENTENCE; `03-dewpoint` owns
+// atoms of its own but not that one. The pair is what makes the filter
+// falsifiable: an unfiltered query passes every assertion about the first chapter
+// and only ever reds on the second (every chapter owns ≥1 atom since 2026-09-12,
+// so "a chapter with no atoms section" is no longer a fixture that exists).
 const WITH_ATOMS = read('02-kri-local-rag');
-const WITHOUT_ATOMS = read('03-dewpoint');
+const OTHER_CHAPTER = read('03-dewpoint');
 
 // A sentence that exists in exactly one file in `content/` (the atom itself), so
 // counting it in the built chapter counts transclusions and nothing else.
@@ -30,7 +32,7 @@ describe('a chapter transcludes the atoms mined for it', () => {
   it('built both chapter pages', () => {
     expect(WITH_ATOMS, `no built page at ${page('02-kri-local-rag')} — run \`make build\``,
     ).not.toBeNull();
-    expect(WITHOUT_ATOMS, `no built page at ${page('03-dewpoint')} — run \`make build\``,
+    expect(OTHER_CHAPTER, `no built page at ${page('03-dewpoint')} — run \`make build\``,
     ).not.toBeNull();
   });
 
@@ -56,11 +58,10 @@ describe('a chapter transcludes the atoms mined for it', () => {
     expect(asking).toBeLessThan(planning);
   });
 
-  it('transcludes nothing into a chapter that owns no atom', () => {
+  it('transcludes only the chapter’s own atoms — another chapter’s never leaks in', () => {
     // The filter's only falsifier: drop `source_chapter` from the query and this
-    // is the assertion that reds.
-    expect(WITHOUT_ATOMS ?? '').not.toContain(ATOM_SENTENCE);
-    expect(WITHOUT_ATOMS ?? '').not.toContain('class="atoms');
+    // is the assertion that reds (03 would then carry 02's atom sentence).
+    expect(OTHER_CHAPTER ?? '').not.toContain(ATOM_SENTENCE);
   });
 
   it('rewrites the chapter’s own `## Atoms` links to site routes', () => {
