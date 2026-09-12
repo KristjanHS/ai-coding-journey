@@ -6,7 +6,6 @@ import { ATOMS, configEnum, frontmatter, read } from './helpers';
 // cell must be listed here with its reason; a listed cell that fills reds, so the
 // list drains as atoms land.
 const KNOWN_GAPS: Record<string, string> = {
-  'asking/provenance': 'chat era: nothing versioned; Cursor .mdc rule lines are web-cited model answers, no chapter',
   'asking/cost': '00-copilot chat logged no token/cost field; no positive dated figure and no cost topic',
   'suggesting/control': 'Continue figures count all token events, chat included — no completion-only measurement',
   'suggesting/provenance': 'Continue cross-check & Cursor client-estimate fit no provenance topic in content/topics/',
