@@ -94,3 +94,11 @@ within-band or stateful-trigger change. Verify by real-close replay.
 Both are written as prohibitions with named mechanisms rather than as advice. That is deliberate: an
 agent can comply with "never restate a cut's value" and cannot meaningfully comply with "keep
 configuration DRY".
+
+## Atoms
+
+- [Review sends the plan back, not the code](../atoms/planning--review-sends-the-plan-back.md)
+- [The rejections are what gets re-read](../atoms/planning--the-rejections-are-what-gets-re-read.md)
+- [A rule loads when you touch its files](../atoms/configuring--a-rule-loads-when-you-touch-its-files.md)
+- [The always-loaded file is paid for on every task](../atoms/configuring--the-root-is-paid-for-every-session.md)
+- [The session reads the brief, not the files](../atoms/governing--bulk-reading-runs-out-of-line.md)

@@ -66,3 +66,13 @@ commit message: durable, greppable, attached to the diff.
 
 It is enforced by nothing but the model reading it, and it still works: the overflow clause gives the
 text somewhere to go, so the rule is not asking for information to be dropped.
+
+## Atoms
+
+- [A skill costs every session, not just the job it was for](../atoms/configuring--a-skill-costs-every-session.md)
+- [Climb one rung](../atoms/configuring--climb-one-rung.md)
+- [A rule that caps text needs somewhere for the overflow to go](../atoms/configuring--overflow-needs-somewhere-to-go.md)
+- [Ask once the target is known](../atoms/governing--ask-once-the-target-is-known.md)
+- [One control reached the fleet in a day](../atoms/governing--one-control-reached-the-fleet-in-a-day.md)
+- [The global file grew, then was cut back](../atoms/governing--the-global-file-was-cut-back.md)
+- [The ladder on one page](../atoms/governing--the-ladder-on-one-page.md)

@@ -63,3 +63,9 @@ sum(input_tokens + cache_creation_input_tokens + cache_read_input_tokens)
 
 Failing open is the load-bearing one. A budget check that can block work becomes a second thing that
 can break the session, and the whole point of it was to make the first failure visible.
+
+## Atoms
+
+- [A budget check has to fail open](../atoms/configuring--a-budget-check-fails-open.md)
+- [The quality check warns, it does not block](../atoms/configuring--the-quality-check-only-warns.md)
+- [The statusline shows the cliff](../atoms/configuring--the-statusline-shows-the-cliff.md)

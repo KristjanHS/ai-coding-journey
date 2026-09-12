@@ -49,3 +49,7 @@ so nothing is asserted that the repo cannot show.
 The test of it is module 5, which asks the learner to distinguish a check that passes from a check that
 *could have failed* — and to demand the demonstration. That is the one habit from this whole journey
 that transfers to any job, with or without an agent.
+
+## Atoms
+
+- [A rule is a request until a test enforces it](../atoms/governing--a-rule-is-a-request.md)
