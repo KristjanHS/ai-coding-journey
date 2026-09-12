@@ -4,8 +4,9 @@
 import { getCollection } from 'astro:content';
 
 import Timeline from './Timeline.tsx';
-import type { TimelineBar } from './Timeline.tsx';
+import type { TimelineBar, TimelineLane } from './Timeline.tsx';
 import { TIME_DOMAIN, commitThickness, dateFraction, rows } from '../lib/timeline';
+import { RUNG_PERIODS } from '../lib/rung-periods';
 
 interface Props {
   variant: 'compact' | 'full';
@@ -34,15 +35,38 @@ const bars: TimelineBar[] = rows.map((row) => {
   };
 });
 
-// Legend order is the stage ramp, not first-seen order.
-const RAMP = ['asking', 'suggesting', 'delegating', 'planning', 'configuring', 'governing'];
-const stages = RAMP.filter((stage) => bars.some((bar) => bar.stage === stage));
+// The era strip. A rung with no measured end runs to the axis end, solid until
+// its successor opens and fading to nothing after that: the fade is exactly the
+// stretch where no log speaks. `governing` has no successor, so it stays solid.
+const lanes: TimelineLane[] = RUNG_PERIODS.map((period, i) => {
+  const next = RUNG_PERIODS[i + 1];
+  const left = dateFraction(period.start) * 100;
+  const right = period.end === null ? 100 : dateFraction(period.end) * 100;
+  const width = Math.max(right - left, MIN_WIDTH_PCT);
+  const solidRight = period.end !== null || !next ? right : dateFraction(next.start) * 100;
+  return {
+    rung: period.rung,
+    start: period.start,
+    end: period.end,
+    left,
+    width,
+    // As a percentage of the LANE, not of the axis: the gradient stop is local.
+    solidTo: Math.min(100, ((solidRight - left) / width) * 100),
+    open: period.end === null,
+    live: next === undefined,
+  };
+});
+
+// One dashed vertical per rung start, dropped through every repo row. The
+// `asking` start predates the first commit, so `dateFraction` clamps it to 0.
+const seams = lanes.map((lane) => ({ rung: lane.rung, left: lane.left }));
 ---
 <Timeline
   client:visible
   variant={variant}
   bars={bars}
-  stages={stages}
+  lanes={lanes}
+  seams={seams}
   domain={[TIME_DOMAIN[0], TIME_DOMAIN[1]]}
 />
 
@@ -54,6 +78,49 @@ const stages = RAMP.filter((stage) => bars.some((bar) => bar.stage === stage));
   .tl[data-variant='compact'] .tl-row { grid-template-columns: 1fr; }
   .tl[data-variant='full'] .tl-row { grid-template-columns: 9rem 1fr 7rem; }
   .tl-track { position: relative; height: 100%; }
+  .tl-chart { position: relative; }
+
+  /* The era strip. Lane rows mirror `.tl-row`'s grid but carry their own class:
+     the bar-geometry test parses every `.tl-row` height as a repo row. */
+  .tl-lane-row { display: grid; align-items: center; gap: var(--space-2); }
+  .tl[data-variant='compact'] .tl-lane-row { grid-template-columns: 1fr; }
+  .tl[data-variant='full'] .tl-lane-row { grid-template-columns: 9rem 1fr 7rem; }
+  .tl-strip { margin-bottom: var(--space-2); padding-bottom: var(--space-2); border-bottom: 1px solid var(--rule); }
+  .tl-lane { position: absolute; top: 50%; transform: translateY(-50%); border-radius: var(--radius); min-width: 2px; }
+  .tl-lane-name, .tl-era-dates {
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    color: var(--fg-dim);
+  }
+  .tl-era-dates { text-align: right; }
+  /* Unlabelled coloured lanes are illegible, so compact names them in place. */
+  .tl-lane-name.is-inline {
+    position: absolute;
+    top: 50%;
+    transform: translate(2px, -50%);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .tl-live { position: absolute; top: 50%; transform: translate(2px, -50%); color: var(--stage-governing); }
+
+  /* Seams: one dashed vertical per rung start, through every repo row. */
+  .tl-seams {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-items: stretch;
+    gap: var(--space-2);
+    pointer-events: none;
+  }
+  .tl[data-variant='compact'] .tl-seams { grid-template-columns: 1fr; }
+  .tl[data-variant='full'] .tl-seams { grid-template-columns: 9rem 1fr 7rem; }
+  .tl-seam {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 1px dashed var(--rule);
+  }
   /* The hit area spans the row's full height; the bar inside carries only the
      thickness, so neighbouring bars stay separated by the row gutter. */
   .tl-link, .tl-hit {
@@ -121,7 +188,10 @@ const stages = RAMP.filter((stage) => bars.some((bar) => bar.stage === stage));
   .tl-card strong { color: var(--fg); }
   .tl-swatch { display: inline-block; width: 0.75rem; height: 0.75rem; border-radius: var(--radius); }
   @media (max-width: 34rem) {
-    .tl[data-variant='full'] .tl-row { grid-template-columns: 7rem 1fr; }
-    .tl[data-variant='full'] .tl-count { display: none; }
+    .tl[data-variant='full'] .tl-row,
+    .tl[data-variant='full'] .tl-lane-row,
+    .tl[data-variant='full'] .tl-seams { grid-template-columns: 7rem 1fr; }
+    .tl[data-variant='full'] .tl-count,
+    .tl[data-variant='full'] .tl-era-dates { display: none; }
   }
 </style>

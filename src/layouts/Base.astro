@@ -62,6 +62,10 @@ const { title, description } = Astro.props;
     --stage-planning: #6d7a2e;
     --stage-configuring: #b07d2b;
     --stage-governing: #9a4b1f;
+
+    /* The repo bars' one neutral ink. Deliberately NOT --fg-dim: a bar means a
+       lifespan, never a rung, so tuning dimmed TEXT must not move a bar. */
+    --bar-ink: #4a4f5c;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -79,6 +83,8 @@ const { title, description } = Astro.props;
       --stage-planning: #b6bd5e;
       --stage-configuring: #d6a24e;
       --stage-governing: #e8956a;
+
+      --bar-ink: #8e939f;
     }
   }
 

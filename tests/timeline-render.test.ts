@@ -3,16 +3,22 @@ import { join } from 'node:path';
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
+import { RUNG_PERIODS } from '../src/lib/rung-periods';
+import { dateFraction } from '../src/lib/timeline';
+
 // Asserts the SHIPPED artifact, not a rendered-in-memory component: `make check`
 // runs `astro build` before vitest, so dist/ is fresh. Standalone: `make build`.
 const DIST = join(process.cwd(), 'dist');
 const CORPUS = 14;
 // The six-rung ladder is asking → suggesting → delegating → planning → configuring
-// → governing (Base.astro tokens, Timeline RAMP/STAGE_LABEL all carry six). The
-// legend renders only rungs a repo OPENED on, in ladder order: no repo in the corpus
-// opens on `governing` (it is reached as a `stage_peak`, never a `stage`), so the
-// rendered legend is these five. A sixth entry here would red against real markup.
-const STAGES = ['asking', 'suggesting', 'delegating', 'planning', 'configuring'];
+// → governing. Since inc-eras the rungs are PERIODS of the journey, not properties
+// of a repo, so the strip carries all six in ladder order — it is no longer
+// filtered by which rung a repo happened to open on. `governing` belongs here even
+// though no repo opens on it.
+const STAGES = ['asking', 'suggesting', 'delegating', 'planning', 'configuring', 'governing'];
+
+// The legend is still per-repo-opening-rung until the lane buttons land.
+const LEGEND_STAGES = STAGES.filter((s) => s !== 'governing');
 
 // Inlined CSS mentions every `.tl-*` selector, so a bare substring search would
 // report the legend as present on a page that never renders it.
@@ -79,13 +85,89 @@ describe('full variant on /journey/', () => {
     expect(count(journey, /data-tl-bar(?!-)/g)).toBe(CORPUS);
   });
 
-  it('names every stage in the legend', () => {
-    const named = [...journey.matchAll(/tl-legend-item" data-stage="([a-z-]+)"/g)].map((m) => m[1]);
+  it('names every rung in the era strip, in ladder order', () => {
+    const named = [...journey.matchAll(/data-tl-lane="true" data-era="([a-z-]+)"/g)].map((m) => m[1]);
     expect(named).toEqual(STAGES);
   });
 
   it('labels every bar with its commit count', () => {
     expect(count(journey, /class="tl-count"/g)).toBe(CORPUS);
+  });
+});
+
+// The rungs are periods, so a BAR must claim none of them: it says when a repo
+// lived, and the strip above it says which rung the journey was on.
+describe('the era strip carries the rungs, and the bars carry none', () => {
+  const BARS = /<div class="tl-bar"[^>]*>/g;
+
+  it('paints every bar in the one neutral ink, on both pages', () => {
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      const rendered = html.match(BARS) ?? [];
+      expect(rendered, `no bars parsed on ${name}`).toHaveLength(CORPUS);
+      for (const bar of rendered) {
+        expect(bar, `a bar still claims a rung on ${name}`).not.toMatch(/var\(--stage-/);
+        expect(bar, `a bar is not --bar-ink on ${name}`).toContain('background:var(--bar-ink)');
+      }
+    }
+  });
+
+  it('ships the strip and one seam per rung on BOTH variants', () => {
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      const lanes = [...html.matchAll(/data-tl-lane="true" data-era="([a-z-]+)"/g)].map((m) => m[1]);
+      expect(lanes, `wrong lanes on ${name}`).toEqual(STAGES);
+      expect(count(html, /data-tl-seam/g), `wrong seam count on ${name}`).toBe(STAGES.length);
+    }
+  });
+
+  // Pinned against the library the lanes are drawn from, so a measurements regen
+  // that moves a period reds here as well as in tests/rung-periods.test.ts.
+  it('gives each lane the start and end RUNG_PERIODS says it has', () => {
+    const attrs = [...journey.matchAll(
+      /data-era="([a-z-]+)" data-era-start="([0-9-]+)" data-era-end="([a-z0-9-]+)"/g,
+    )].map((m) => ({ rung: m[1], start: m[2], end: m[3] }));
+    expect(attrs).toHaveLength(STAGES.length);
+    for (const period of RUNG_PERIODS) {
+      const drawn = attrs.find((a) => a.rung === period.rung);
+      expect(drawn, `no lane drawn for ${period.rung}`).toBeDefined();
+      expect(drawn!.start).toBe(period.start);
+      expect(drawn!.end).toBe(period.end ?? 'open');
+    }
+  });
+});
+
+// The geometry the lanes are actually drawn with. `dateFraction` is the same
+// function the strip is built from, so this pins the WIRING — that each lane
+// got its own period's dates — not the arithmetic, which timeline-lib owns.
+describe('lane geometry follows the periods', () => {
+  const LANES = /data-era="([a-z-]+)" data-era-start="[0-9-]+" data-era-end="[a-z0-9-]+" style="left:([0-9.]+)%;width:([0-9.]+)%/g;
+
+  const drawn = (html: string) =>
+    [...html.matchAll(LANES)].map((m) => ({ rung: m[1], left: Number(m[2]), width: Number(m[3]) }));
+
+  it('places every lane at its own start, and none at the axis origin by accident', () => {
+    const lanes = drawn(journey);
+    expect(lanes, 'no lane geometry parsed').toHaveLength(RUNG_PERIODS.length);
+    for (const lane of lanes) {
+      const period = RUNG_PERIODS.find((p) => p.rung === lane.rung)!;
+      expect(lane.left, `${lane.rung} is not at its start`).toBeCloseTo(
+        dateFraction(period.start) * 100,
+        6,
+      );
+      expect(lane.width, `${lane.rung} has no width`).toBeGreaterThan(0);
+      expect(lane.left + lane.width, `${lane.rung} runs past the axis`).toBeLessThanOrEqual(100.001);
+    }
+    // `asking` starts before the first commit and clamps to the origin; every
+    // other lane must be strictly inside, or a zeroed `left` would pass above.
+    expect(lanes.filter((l) => l.left === 0).map((l) => l.rung)).toEqual(['asking']);
+  });
+
+  // The ruling: an open end runs SOLID to its successor's start, then fades to
+  // fully transparent. `governing` has no successor, so it never fades.
+  it('fades only the rungs nothing measures an end for', () => {
+    const fading = [...journey.matchAll(/data-era="([a-z-]+)"[^>]*background:linear-gradient/g)]
+      .map((m) => m[1]);
+    expect(fading).toEqual(['planning', 'configuring']);
+    expect(journey).toMatch(/data-era="governing"[^>]*background:var\(--stage-governing\)/);
   });
 });
 
@@ -103,7 +185,7 @@ describe('interaction hooks in the shipped HTML', () => {
   });
 
   it('makes every legend swatch a real button carrying its stage slug', () => {
-    for (const stage of STAGES) {
+    for (const stage of LEGEND_STAGES) {
       expect(journey, `no legend button for ${stage}`).toMatch(
         new RegExp(`<button type="button" class="tl-legend-item" data-stage="${stage}" aria-pressed="`),
       );

@@ -18,10 +18,30 @@ export interface TimelineBar {
   href: string | null;
 }
 
+/** One rung drawn as a period. Geometry is precomputed in Timeline.astro. */
+export interface TimelineLane {
+  rung: string;
+  start: string;
+  /** `null` when no log measures an end — the lane fades out after `solidTo`. */
+  end: string | null;
+  left: number;
+  width: number;
+  /** Where the fade begins, as a percentage of the LANE's own width. */
+  solidTo: number;
+  open: boolean;
+  live: boolean;
+}
+
+export interface TimelineSeam {
+  rung: string;
+  left: number;
+}
+
 export interface TimelineProps {
   variant: 'compact' | 'full';
   bars: TimelineBar[];
-  stages: string[];
+  lanes: TimelineLane[];
+  seams: TimelineSeam[];
   domain: [string, string];
 }
 
@@ -46,7 +66,11 @@ const ROW_GAP = { compact: 5, full: 6 };
 const COMPACT_SCALE = 0.55;
 const COMPACT_MIN_PX = 3;
 
-export default function Timeline({ variant, bars, stages, domain }: TimelineProps) {
+// Lanes are a constant thickness: a period has a duration, never a magnitude,
+// so varying their height would encode a quantity that does not exist.
+const LANE_PX = { compact: 6, full: 9 };
+
+export default function Timeline({ variant, bars, lanes, seams, domain }: TimelineProps) {
   const full = variant === 'full';
   const gap = full ? ROW_GAP.full : ROW_GAP.compact;
   const barHeight = (bar: TimelineBar) =>
@@ -54,11 +78,63 @@ export default function Timeline({ variant, bars, stages, domain }: TimelineProp
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<TimelineBar | null>(null);
 
+  const lanePx = full ? LANE_PX.full : LANE_PX.compact;
+  const laneFill = (lane: TimelineLane) => {
+    const hue = `var(--stage-${lane.rung})`;
+    // An open end fades to FULLY transparent: past its successor's start
+    // nothing measures this rung, and the lane says so by running out.
+    return lane.open && lane.solidTo < 100
+      ? `linear-gradient(to right, ${hue} 0%, ${hue} ${lane.solidTo}%, transparent 100%)`
+      : hue;
+  };
+
   return (
     <div class="tl" data-timeline data-variant={variant}>
+      {/* The era strip: the rungs are periods of the journey, so they are drawn
+          once above every row rather than coloured into the bars. */}
+      <div class="tl-strip" aria-hidden="true">
+        {lanes.map((lane) => (
+          <div class="tl-lane-row" key={lane.rung} style={{ height: `${lanePx + gap}px` }}>
+            {full && <span class="tl-label tl-lane-name">{lane.rung}</span>}
+            <div class="tl-track">
+              <div
+                class="tl-lane"
+                data-tl-lane
+                data-era={lane.rung}
+                data-era-start={lane.start}
+                data-era-end={lane.end ?? 'open'}
+                style={{
+                  left: `${lane.left}%`,
+                  width: `${lane.width}%`,
+                  height: `${lanePx}px`,
+                  background: laneFill(lane),
+                }}
+              />
+              {/* compact has no label column, so the lane names itself in place */}
+              {!full && (
+                <span class="tl-lane-name is-inline" style={{ left: `${lane.left}%` }}>
+                  {lane.rung}
+                </span>
+              )}
+              {lane.live && <span class="tl-live" style={{ left: `${lane.left + lane.width}%` }}>▶</span>}
+            </div>
+            {full && <span class="tl-era-dates">{lane.end ?? 'open'}</span>}
+          </div>
+        ))}
+      </div>
       {/* Decorative: the sr-only table below is the accessible tree, so nothing
           in here is focusable — the table's repo cells carry the real links. */}
       <div class="tl-chart" aria-hidden="true">
+        {/* One dashed vertical per rung start, dropped through every row. */}
+        <div class="tl-seams">
+          {full && <span />}
+          <div class="tl-track">
+            {seams.map((seam) => (
+              <span class="tl-seam" data-tl-seam data-era={seam.rung} key={seam.rung} style={{ left: `${seam.left}%` }} />
+            ))}
+          </div>
+          {full && <span />}
+        </div>
         {bars.map((bar) => {
           const dimmed = selected !== null && bar.stage !== selected;
           const rect = (
@@ -69,7 +145,7 @@ export default function Timeline({ variant, bars, stages, domain }: TimelineProp
               data-stage={bar.stage}
               style={{
                 height: `${barHeight(bar)}px`,
-                background: `var(--stage-${bar.stage})`,
+                background: 'var(--bar-ink)',
               }}
             />
           );
@@ -115,7 +191,7 @@ export default function Timeline({ variant, bars, stages, domain }: TimelineProp
       {full && (
         <>
           <div class="tl-legend">
-            {stages.map((stage) => (
+            {lanes.map(({ rung: stage }) => (
               <button
                 type="button"
                 class="tl-legend-item"
