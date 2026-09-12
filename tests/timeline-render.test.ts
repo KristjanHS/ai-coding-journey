@@ -4,12 +4,15 @@ import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { RUNG_PERIODS } from '../src/lib/rung-periods';
-import { dateFraction } from '../src/lib/timeline';
+import { chapters, dateFraction, experiments, rows } from '../src/lib/timeline';
 
 // Asserts the SHIPPED artifact, not a rendered-in-memory component: `make check`
 // runs `astro build` before vitest, so dist/ is fresh. Standalone: `make build`.
 const DIST = join(process.cwd(), 'dist');
-const CORPUS = 14;
+// What the chart DRAWS -- the chapter rows, not every row in timeline.json. Since
+// inc-era-labels a one-day repo is an experiment line, and the JSON keeps it
+// (it is git truth) while the chart does not.
+const CORPUS = chapters.length;
 // The six-rung ladder is asking → suggesting → delegating → planning → configuring
 // → governing. Since inc-eras the rungs are PERIODS of the journey, not properties
 // of a repo, so the strip carries all six in ladder order — it is no longer
@@ -48,8 +51,29 @@ describe('vacuity anchors', () => {
   });
 
   it('agrees with timeline.json on the corpus size', () => {
-    const rows = JSON.parse(readFileSync(join(process.cwd(), 'content', 'timeline.json'), 'utf8'));
-    expect(rows).toHaveLength(CORPUS);
+    const json = JSON.parse(readFileSync(join(process.cwd(), 'content', 'timeline.json'), 'utf8'));
+    expect(json).toHaveLength(rows.length);
+    // The drawn set is a STRICT subset: were it the whole file, every assertion
+    // below counting CORPUS bars would pass on a chart that drew experiments too.
+    expect(CORPUS).toBeGreaterThan(0);
+    expect(CORPUS).toBeLessThan(rows.length);
+    expect(CORPUS + experiments.length).toBe(rows.length);
+  });
+
+  // The demotion, asserted on the SHIPPED html rather than on the library: a
+  // one-day repo must reach neither chart, neither sr-only table, and no chapter
+  // link. `xls-analyser` and `gitlab-standup` cleared MIN_COMMITS and had
+  // chapters until this increment, so this is the assertion that would catch
+  // them coming back through a regen.
+  it('draws no one-day repo on either page', () => {
+    const oneDay = rows.filter((row) => row.last_commit === row.first_commit);
+    expect(oneDay.length).toBeGreaterThan(0);
+    for (const row of oneDay) {
+      for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+        expect(html, `${row.repo} still drawn on ${name}`).not.toContain(`data-repo="${row.repo}"`);
+        expect(html, `${row.repo} still linked on ${name}`).not.toContain(`/journey/${row.repo}`);
+      }
+    }
   });
 });
 
@@ -174,14 +198,14 @@ describe('lane geometry follows the periods', () => {
 describe('interaction hooks in the shipped HTML', () => {
   // The gate cannot see behaviour (dev-workflow.md), so these assert the static
   // hooks that enable it; the live hover/dim/nav is Stage 5's e2e.
-  it('links every chapter bar to its chapter, and no experiment bar', () => {
-    const rows = JSON.parse(readFileSync(join(process.cwd(), 'content', 'timeline.json'), 'utf8'));
-    const chapters = rows.filter((row: { commits: number }) => row.commits >= 5).length;
-    expect(chapters).toBeGreaterThan(0);
-    expect(chapters).toBeLessThan(CORPUS);
-
-    expect(count(journey, /data-tl-bar-link/g)).toBe(chapters);
-    expect(count(journey, /<a class="tl-link" href="\/journey\/[^"]+"/g)).toBe(chapters);
+  it('links every drawn bar to its chapter — every bar now has one', () => {
+    // Since inc-era-labels the drawn set IS the chapter set, so the old
+    // "some bars have no link" split is gone: a bar with no link would mean a
+    // row reached the chart that earned no chapter.
+    expect(CORPUS).toBeGreaterThan(0);
+    expect(count(journey, /data-tl-bar-link/g)).toBe(CORPUS);
+    expect(count(journey, /<a class="tl-link" href="\/journey\/[^"]+"/g)).toBe(CORPUS);
+    expect(count(journey, /class="tl-hit"/g), 'a drawn bar has no chapter behind it').toBe(0);
   });
 
   // Pinned as an exact SET, never per-slug presence: a loop over the six rungs
@@ -258,6 +282,64 @@ describe('accessibility floor: the text equivalent', () => {
         expect(html, `${period.rung} has no end source on ${name}`).toContain(
           `(${period.endSource})`,
         );
+      }
+    }
+  });
+});
+
+// inc-era-labels: the compact strip used to name each era by absolutely
+// positioning grey text ON its own 6px coloured lane. These pin the replacement.
+describe('era pills (compact)', () => {
+  const PILLS = /class="tl-pill(?: is-right)?" data-tl-pill="true" data-era="([a-z-]+)" style="left:([0-9.]+)%/g;
+
+  const pills = (html: string) =>
+    [...html.matchAll(PILLS)].map((m) => ({ rung: m[1]!, left: Number(m[2]) }));
+
+  it('names every rung in a pill, at its own era start', () => {
+    const drawn = pills(home);
+    // Sorted, not in ladder order: the pills are emitted ROW by row, so their
+    // document order is the greedy placement's, not the ladder's. Compared as a
+    // sorted array rather than a set, so a duplicate or a seventh pill still reds.
+    expect([...drawn.map((p) => p.rung)].sort()).toEqual([...STAGES].sort());
+    for (const p of drawn) {
+      const period = RUNG_PERIODS.find((r) => r.rung === p.rung)!;
+      expect(p.left, `${p.rung} pill is not at its start`).toBeCloseTo(
+        dateFraction(period.start) * 100,
+        6,
+      );
+    }
+  });
+
+  it('ships no label painted onto a lane any more', () => {
+    expect(count(home, /tl-lane-name/g)).toBe(0);
+  });
+
+  // The greedy row assignment: the six pills must land on rows that separate
+  // them. Read the rows back out of the html and assert that no two pills on the
+  // SAME row are closer than the gap the placement claims to keep.
+  it('separates the pills it puts on one row', () => {
+    // Slice the pill block out first, then split it on the row element: a
+    // page-wide regex would run past the strip and read the lanes as a row.
+    const block = home.slice(home.indexOf('class="tl-pills"'), home.indexOf('class="tl-strip"'));
+    const rowsHtml = block.split('<div class="tl-pill-row">').slice(1);
+    expect(rowsHtml.length, 'no pill rows parsed').toBeGreaterThan(1);
+    for (const rowHtml of rowsHtml) {
+      const lefts = pills(rowHtml).map((p) => p.left).sort((a, b) => a - b);
+      for (let i = 1; i < lefts.length; i += 1) {
+        expect(lefts[i]! - lefts[i - 1]!, 'two pills collide on one row').toBeGreaterThan(8);
+      }
+    }
+    // Vacuity anchor: the rows really do hold every pill between them.
+    expect(rowsHtml.reduce((n, html) => n + pills(html).length, 0)).toBe(STAGES.length);
+  });
+
+  it('colours every seam by the rung it opens, on both pages', () => {
+    for (const [name, html] of [['/', home], ['/journey/', journey]] as const) {
+      for (const rung of STAGES) {
+        const seam = new RegExp(
+          `data-tl-seam="true" data-era="${rung}"[^>]*border-left-color:var\\(--stage-${rung}\\)`,
+        );
+        expect(html, `${rung}'s seam is not its own colour on ${name}`).toMatch(seam);
       }
     }
   });

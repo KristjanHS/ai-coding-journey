@@ -80,7 +80,7 @@
     "repo": "dotfiles",
     "first_commit": "2026-04-05",
     "last_commit": "2026-09-12",
-    "commits": 876,
+    "commits": 884,
     "stage": "configuring"
   },
   {
@@ -94,7 +94,7 @@
     "repo": "crash-dash",
     "first_commit": "2026-06-25",
     "last_commit": "2026-09-12",
-    "commits": 5168,
+    "commits": 5185,
     "stage": "configuring"
   }
 ]

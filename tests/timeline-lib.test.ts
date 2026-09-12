@@ -11,7 +11,9 @@ import {
   TIME_DOMAIN,
   commitThickness,
   dateFraction,
+  chapters,
   experiments,
+  isChapter,
   rows,
 } from '../src/lib/timeline';
 
@@ -76,7 +78,7 @@ describe('dateFraction (pure core, fixed domain)', () => {
 
 describe('domains derived from content/timeline.json (data pins)', () => {
   it('pins the commit domain to the current corpus', () => {
-    expect(COMMIT_DOMAIN).toEqual([2, 5168]);
+    expect(COMMIT_DOMAIN).toEqual([11, 5185]);
   });
 
   it('pins the time domain to the current corpus', () => {
@@ -90,13 +92,54 @@ describe('domains derived from content/timeline.json (data pins)', () => {
 });
 
 describe('experiments', () => {
-  it('holds exactly the sub-MIN_COMMITS repos, oldest first', () => {
+  it('holds exactly the rows that earn no chapter, oldest first', () => {
     expect(experiments.length).toBeGreaterThan(0);
-    expect(experiments.every((row) => row.commits < MIN_COMMITS)).toBe(true);
-    expect(rows.filter((row) => row.commits < MIN_COMMITS)).toHaveLength(experiments.length);
+    expect(experiments.every((row) => !isChapter(row))).toBe(true);
+    expect(rows.filter((row) => !isChapter(row))).toHaveLength(experiments.length);
 
     const dates = experiments.map((row) => row.first_commit);
     expect([...dates].sort()).toEqual(dates);
+  });
+
+  // The inc-era-labels ruling: a repo whose first and last commit fall on the
+  // same date is a spike, not a project -- it gets a line, never a chapter and
+  // never a bar. Pinned by NAME as well as by the predicate, so a regen that
+  // quietly re-promoted one (or a predicate rewritten to `>=` on the dates)
+  // reds with the repo in the message.
+  it('demotes every one-day repo, whatever its commit count', () => {
+    const oneDay = rows.filter((row) => row.last_commit === row.first_commit);
+    expect(oneDay.map((row) => row.repo)).toEqual([
+      'docs-generator',
+      'xls-analyser',
+      'gitlab-standup',
+    ]);
+    for (const row of oneDay) {
+      expect(isChapter(row), `${row.repo} lived one day and still claims a chapter`).toBe(false);
+      expect(chapters.map((c) => c.repo)).not.toContain(row.repo);
+      expect(experiments.map((c) => c.repo)).toContain(row.repo);
+    }
+    // Vacuity anchor: two of the three clear MIN_COMMITS, so the assertion above
+    // is carried by the span test and not by the commit floor that predates it.
+    expect(oneDay.filter((row) => row.commits >= MIN_COMMITS)).toHaveLength(2);
+  });
+
+  it('splits every row into exactly one of chapters or experiments', () => {
+    expect(chapters.length + experiments.length).toBe(rows.length);
+    expect(chapters.length).toBeGreaterThan(0);
+  });
+
+  // The predicate has TWO readers -- this lib and scripts/timeline-from-git.py.
+  // A hand-copied Python rule that drifts is the failure this catches: the
+  // generator's own admission test is parsed out and pinned to name both halves.
+  it('the generator carries the same admission rule', () => {
+    const script = readFileSync(join(process.cwd(), 'scripts', 'timeline-from-git.py'), 'utf8');
+    const body = script.match(/^def is_chapter\(row: dict\) -> bool:[\s\S]*?\n    return ([^\n]+)/m);
+    expect(body, 'no is_chapter() in timeline-from-git.py').not.toBeNull();
+    expect(body![1]).toContain('row["commits"] >= MIN_COMMITS');
+    expect(body![1]).toContain('row["last_commit"] > row["first_commit"]');
+    // And it is the rule main() actually splits on, not a dead helper.
+    expect(script).toMatch(/big = \[r for r in rows if is_chapter\(r\)\]/);
+    expect(script).toMatch(/small = \[r for r in rows if not is_chapter\(r\)\]/);
   });
 
   // `MIN_COMMITS` has ONE source, `scripts/timeline-config.json`, read by this

@@ -38,6 +38,18 @@ MIN_COMMITS: int = json.loads((ROOT / "scripts" / "timeline-config.json").read_t
 ]
 
 
+def is_chapter(row: dict) -> bool:
+    """A repo earns a chapter when it cleared MIN_COMMITS AND lived past one day.
+
+    The second half is the inc-era-labels ruling: a repo whose first and last
+    commit fall on the same date is a spike, not a project -- nine commits in an
+    afternoon buy a line in 00-experiments.md, never a chapter and never a bar on
+    the chart. `src/lib/timeline.ts` carries the same predicate for the site;
+    `tests/timeline-lib.test.ts` pins the two readings equal against the JSON.
+    """
+    return row["commits"] >= MIN_COMMITS and row["last_commit"] > row["first_commit"]
+
+
 # Which repos are scanned is an explicit ALLOWLIST in scripts/repos.json, never a
 # directory scan: a scan made content/timeline.json a function of whatever else sat
 # under ~/projects, so an unrelated repo's commits staled it. Admission rule for that
@@ -266,11 +278,19 @@ def sync_frontmatter(path: Path, r: dict) -> bool:
 def experiments(rows: list[dict]) -> str:
     lines = [
         "# 00 · Experiments\n",
-        f"Repos with fewer than {MIN_COMMITS} commits: one line each, no chapter.\n",
+        (
+            f"Repos with fewer than {MIN_COMMITS} commits, or whose whole life was a single day: "
+            "one line each, no chapter.\n"
+        ),
     ]
     for r in rows:
+        span = (
+            "one day"
+            if r["last_commit"] == r["first_commit"]
+            else f"{r['first_commit']} → {r['last_commit']}"
+        )
         lines.append(
-            f"- **{r['repo']}** · {r['first_commit']} · {r['commits']} commits · outcome: pending"
+            f"- **{r['repo']}** · {r['first_commit']} · {r['commits']} commits · {span} · outcome: pending"
         )
     return "\n".join(lines) + "\n"
 
@@ -303,6 +323,10 @@ def index(chapters: list[tuple[int, dict]], small: list[dict]) -> str:
     ]
     for n, r in chapters:
         f = chapter_file(n, r["repo"]).name
+        # The number comes off the FILE when one exists, never off the position:
+        # demoting a repo mid-spine (inc-era-labels dropped 06 and 09) would
+        # otherwise renumber every chapter after it and break every inbound link.
+        n = int(f[:2])
         out.append(
             f"| {n:02d} | {r['repo']} | {r['first_commit']} | {r['last_commit']} | "
             f"{r['commits']} | {r['stage']} | [{f}]({f}) |"
@@ -328,8 +352,8 @@ def main() -> int:
     JOURNEY.mkdir(parents=True, exist_ok=True)
     TIMELINE.write_text(json.dumps(rows, indent=2) + "\n")
 
-    big = [r for r in rows if r["commits"] >= MIN_COMMITS]
-    small = [r for r in rows if r["commits"] < MIN_COMMITS]
+    big = [r for r in rows if is_chapter(r)]
+    small = [r for r in rows if not is_chapter(r)]
     chapters = list(enumerate(big, start=1))
 
     created = []

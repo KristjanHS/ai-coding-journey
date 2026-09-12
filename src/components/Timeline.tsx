@@ -41,11 +41,25 @@ export interface TimelineSeam {
   left: number;
 }
 
+/** One era name, placed above the strip. Row assignment is precomputed. */
+export interface TimelinePill {
+  rung: string;
+  /** The era's start on the axis, as a percentage. */
+  left: number;
+  /** Which pill row it was greedily assigned to, 0 = topmost. */
+  row: number;
+  /** True when the pill hangs its RIGHT edge on `left` to stay on the page. */
+  alignRight: boolean;
+}
+
 export interface TimelineProps {
   variant: 'compact' | 'full';
   bars: TimelineBar[];
   lanes: TimelineLane[];
   seams: TimelineSeam[];
+  pills: TimelinePill[];
+  /** How many rows the greedy placement needed. */
+  pillRows: number;
   domain: [string, string];
 }
 
@@ -74,7 +88,15 @@ const COMPACT_MIN_PX = 3;
 // so varying their height would encode a quantity that does not exist.
 const LANE_PX = { compact: 6, full: 9 };
 
-export default function Timeline({ variant, bars, lanes, seams, domain }: TimelineProps) {
+export default function Timeline({
+  variant,
+  bars,
+  lanes,
+  seams,
+  pills,
+  pillRows,
+  domain,
+}: TimelineProps) {
   const full = variant === 'full';
   const gap = full ? ROW_GAP.full : ROW_GAP.compact;
   const barHeight = (bar: TimelineBar) =>
@@ -103,6 +125,42 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
           lane names ARE the controls, so the strip cannot be aria-hidden there;
           the decorative halves carry their own aria-hidden instead. `compact`
           ships no controls, so the whole strip stays hidden. */}
+      {/* The era names, compact only: `full` has a label column whose buttons are
+          already readable. Decorative — the sr-only periods table below is the
+          text equivalent, and the strip it labels is aria-hidden here too. */}
+      {!full && (
+        <div class="tl-pills" data-tl-pills aria-hidden="true">
+          {Array.from({ length: pillRows }, (_, row) => (
+            <div class="tl-pill-row" key={row}>
+              {/* Drops first, so a pill never sits under its neighbour's line. */}
+              {pills
+                .filter((pill) => pill.row < row)
+                .map((pill) => (
+                  <span
+                    class="tl-pill-drop"
+                    data-tl-pill-drop
+                    key={pill.rung}
+                    style={{ left: `${pill.left}%`, borderLeftColor: `var(--stage-${pill.rung})` }}
+                  />
+                ))}
+              {pills
+                .filter((pill) => pill.row === row)
+                .map((pill) => (
+                  <span
+                    class={`tl-pill${pill.alignRight ? ' is-right' : ''}`}
+                    data-tl-pill
+                    data-era={pill.rung}
+                    key={pill.rung}
+                    style={{ left: `${pill.left}%` }}
+                  >
+                    <span class="tl-pill-dot" style={{ background: `var(--stage-${pill.rung})` }} />
+                    {label(pill.rung)}
+                  </span>
+                ))}
+            </div>
+          ))}
+        </div>
+      )}
       <div class="tl-strip" aria-hidden={full ? undefined : 'true'}>
         {lanes.map((lane) => (
           <div class="tl-lane-row" key={lane.rung} style={{ height: `${lanePx + gap}px` }}>
@@ -132,12 +190,6 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
                   background: laneFill(lane),
                 }}
               />
-              {/* compact has no label column, so the lane names itself in place */}
-              {!full && (
-                <span class="tl-lane-name is-inline" style={{ left: `${lane.left}%` }}>
-                  {lane.rung}
-                </span>
-              )}
               {lane.live && <span class="tl-live" style={{ left: `${lane.left + lane.width}%` }}>▶</span>}
             </div>
             {full && <span class="tl-era-dates" aria-hidden="true">{lane.end ?? 'open'}</span>}
@@ -152,7 +204,13 @@ export default function Timeline({ variant, bars, lanes, seams, domain }: Timeli
           {full && <span />}
           <div class="tl-track">
             {seams.map((seam) => (
-              <span class="tl-seam" data-tl-seam data-era={seam.rung} key={seam.rung} style={{ left: `${seam.left}%` }} />
+              <span
+                class="tl-seam"
+                data-tl-seam
+                data-era={seam.rung}
+                key={seam.rung}
+                style={{ left: `${seam.left}%`, borderLeftColor: `var(--stage-${seam.rung})` }}
+              />
             ))}
           </div>
           {full && <span />}

@@ -23,9 +23,23 @@ export const rows: TimelineRow[] = timeline as TimelineRow[];
 // for GitHub; the site reads the same rows straight out of timeline.json.
 export const MIN_COMMITS: number = config.minCommits;
 
-/** Repos below `MIN_COMMITS` -- the "also tried" list, oldest first. */
+/**
+ * A repo earns a chapter -- and a bar on the chart -- when it cleared
+ * `MIN_COMMITS` AND lived past a single day. The second half is the
+ * inc-era-labels ruling: a repo whose first and last commit fall on the same
+ * date is a spike, not a project. `scripts/timeline-from-git.py::is_chapter`
+ * is the same predicate on the generator side, and
+ * `tests/timeline-lib.test.ts` pins the two readings equal against the JSON.
+ */
+export const isChapter = (row: TimelineRow): boolean =>
+  row.commits >= MIN_COMMITS && row.last_commit > row.first_commit;
+
+/** The drawn rows: everything the chart and the chapter list carry, oldest first. */
+export const chapters: TimelineRow[] = rows.filter(isChapter);
+
+/** Everything else -- the "also tried" list, oldest first. */
 export const experiments: TimelineRow[] = rows
-  .filter((row) => row.commits < MIN_COMMITS)
+  .filter((row) => !isChapter(row))
   .sort((a, b) => a.first_commit.localeCompare(b.first_commit));
 
 /** A closed numeric or date range, `[min, max]`. */
@@ -36,14 +50,23 @@ export type Domain<T> = readonly [T, T];
 // exported (and pinned by a test) so that drifting data reds an assertion that
 // names the data -- the pure scale functions below take a domain argument, so
 // their own tests run on a fixed range and can only fail on a maths change.
+// Both are derived from `chapters`, not from every row: an experiment is never
+// drawn, so a two-commit spike sitting at the domain floor would give the whole
+// scale a bar nothing on the page can be compared against.
 export const COMMIT_DOMAIN: Domain<number> = [
-  Math.min(...rows.map((row) => row.commits)),
-  Math.max(...rows.map((row) => row.commits)),
+  Math.min(...chapters.map((row) => row.commits)),
+  Math.max(...chapters.map((row) => row.commits)),
 ];
 
 export const TIME_DOMAIN: Domain<string> = [
-  rows.reduce((min, row) => (row.first_commit < min ? row.first_commit : min), rows[0]!.first_commit),
-  rows.reduce((max, row) => (row.last_commit > max ? row.last_commit : max), rows[0]!.last_commit),
+  chapters.reduce(
+    (min, row) => (row.first_commit < min ? row.first_commit : min),
+    chapters[0]!.first_commit,
+  ),
+  chapters.reduce(
+    (max, row) => (row.last_commit > max ? row.last_commit : max),
+    chapters[0]!.last_commit,
+  ),
 ];
 
 /** Bar thickness in px at the domain floor and ceiling. */

@@ -53,5 +53,5 @@ requirements, what gets escalated to a person — and argue for or against relyi
 
 **Outcome:** the learner can evaluate a tool choice against the work rather than the marketing, and can
 name at least three abandoned approaches from this journey and why each was abandoned.
-**Draws on:** `03-dewpoint`, `04-llm-eng-template`, `06-xls-analyser`, `09-gitlab-standup`,
+**Draws on:** `03-dewpoint`, `04-llm-eng-template`,
 `00-experiments`.

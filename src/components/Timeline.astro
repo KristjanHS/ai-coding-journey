@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 
 import Timeline from './Timeline.tsx';
 import type { TimelineBar, TimelineLane } from './Timeline.tsx';
-import { TIME_DOMAIN, commitThickness, dateFraction, rows } from '../lib/timeline';
+import { TIME_DOMAIN, chapters, commitThickness, dateFraction } from '../lib/timeline';
 import { RUNG_PERIODS, livedThrough } from '../lib/rung-periods';
 
 interface Props {
@@ -17,10 +17,14 @@ const hrefByRepo = new Map(
   (await getCollection('journey')).map((entry) => [entry.data.repo, `/journey/${entry.id}/`]),
 );
 
-// A one-day repo would otherwise render zero-width and read as missing data.
+// A lane can still be narrower than a hairline; bars cannot, since inc-era-labels
+// demoted every one-day repo out of `chapters` and into the experiments list.
 const MIN_WIDTH_PCT = 0.6;
 
-const bars: TimelineBar[] = rows.map((row) => {
+// `chapters`, never `rows`: a repo that lived a single day is an experiment line
+// (src/lib/timeline.ts::isChapter), and drawing it here as a hairline bar with no
+// chapter behind it was the thing that read as missing data.
+const bars: TimelineBar[] = chapters.map((row) => {
   const left = dateFraction(row.first_commit) * 100;
   return {
     repo: row.repo,
@@ -65,6 +69,41 @@ const lanes: TimelineLane[] = RUNG_PERIODS.map((period, i) => {
 // One dashed vertical per rung start, dropped through every repo row. The
 // `asking` start predates the first commit, so `dateFraction` clamps it to 0.
 const seams = lanes.map((lane) => ({ rung: lane.rung, left: lane.left }));
+
+// The era pills (compact). The old strip named each era by absolutely
+// positioning grey text ON its own 6px lane, which is illegible at every width.
+// The names now sit ABOVE the lanes as pills anchored at their era's start, and
+// the rows are assigned GREEDILY here rather than by a hand-typed even/odd
+// stagger: a pill takes the first row whose last occupant it clears, so a
+// seventh rung would place itself instead of collapsing onto a neighbour.
+//
+// Width has to be ESTIMATED -- the server has no layout -- from the label's
+// character count at the strip's mono size, as a percentage of an assumed track.
+// Over-estimating is the safe direction: it buys an extra row, never an overlap.
+const PILL_CHAR_PX = 7.2;
+const PILL_CHROME_PX = 30;
+const ASSUMED_TRACK_PX = 620;
+const PILL_GAP_PCT = 1.5;
+
+const pillWidth = (rung: string) =>
+  ((rung.length * PILL_CHAR_PX + PILL_CHROME_PX) / ASSUMED_TRACK_PX) * 100;
+
+// Right edge of the last pill placed on each row, in axis percent.
+const rowEnds: number[] = [];
+
+const pills = lanes.map((lane) => {
+  const width = pillWidth(lane.rung);
+  // A pill that would run off the right edge hangs its RIGHT edge on the era
+  // start instead, so the anchor is still the seam and the text stays on page.
+  const right = lane.left + width > 100;
+  const [from, to] = right ? [lane.left - width, lane.left] : [lane.left, lane.left + width];
+  let row = rowEnds.findIndex((end) => from >= end + PILL_GAP_PCT);
+  if (row === -1) row = rowEnds.push(0) - 1;
+  rowEnds[row] = to;
+  return { rung: lane.rung, left: lane.left, row, alignRight: right };
+});
+
+const pillRows = rowEnds.length;
 ---
 <Timeline
   client:visible
@@ -72,6 +111,8 @@ const seams = lanes.map((lane) => ({ rung: lane.rung, left: lane.left }));
   bars={bars}
   lanes={lanes}
   seams={seams}
+  pills={pills}
+  pillRows={pillRows}
   domain={[TIME_DOMAIN[0], TIME_DOMAIN[1]]}
 />
 
@@ -92,19 +133,48 @@ const seams = lanes.map((lane) => ({ rung: lane.rung, left: lane.left }));
   .tl[data-variant='full'] .tl-lane-row { grid-template-columns: 9rem 1fr 7rem; }
   .tl-strip { margin-bottom: var(--space-2); padding-bottom: var(--space-2); border-bottom: 1px solid var(--rule); }
   .tl-lane { position: absolute; top: 50%; transform: translateY(-50%); border-radius: var(--radius); min-width: 2px; }
-  .tl-lane-name, .tl-era-dates {
+  .tl-era-dates {
     font-family: var(--font-mono);
     font-size: var(--size-0);
     color: var(--fg-dim);
   }
   .tl-era-dates { text-align: right; }
-  /* Unlabelled coloured lanes are illegible, so compact names them in place. */
-  .tl-lane-name.is-inline {
+
+  /* The era pills (compact). Names sit ABOVE the lanes, never on them: grey text
+     painted onto a 6px coloured lane was unreadable at every width. Each pill is
+     anchored at its era's start and carries that era's colour as a dot, so the
+     pill, the seam below it and the lane all say the same thing in one hue. */
+  .tl-pills { position: relative; margin-bottom: var(--space-1); }
+  .tl-pill-row { position: relative; height: 1.5rem; }
+  .tl-pill {
     position: absolute;
-    top: 50%;
-    transform: translate(2px, -50%);
+    top: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    max-width: 100%;
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--bg-sunk);
+    font-family: var(--font-mono);
+    font-size: var(--size-0);
+    line-height: 1.2;
+    color: var(--fg);
     white-space: nowrap;
-    pointer-events: none;
+  }
+  /* A pill at the right end hangs its right edge on the era start instead. */
+  .tl-pill.is-right { transform: translateX(-100%); }
+  .tl-pill-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; flex: none; }
+  /* Carries a pill on an upper row down to the strip: the same colour, so the
+     eye follows one line from the name to the lane to the seam in the chart. */
+  .tl-pill-drop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 1px dashed;
+    opacity: 0.6;
   }
   .tl-live { position: absolute; top: 50%; transform: translate(2px, -50%); color: var(--stage-governing); }
 
@@ -119,12 +189,15 @@ const seams = lanes.map((lane) => ({ rung: lane.rung, left: lane.left }));
   }
   .tl[data-variant='compact'] .tl-seams { grid-template-columns: 1fr; }
   .tl[data-variant='full'] .tl-seams { grid-template-columns: 9rem 1fr 7rem; }
+  /* Coloured by the rung it opens, not grey: the seam is the channel that
+     carries an era ACROSS the repo rows, and a neutral line carried nothing. */
   .tl-seam {
     position: absolute;
     top: 0;
     bottom: 0;
     width: 0;
     border-left: 1px dashed var(--rule);
+    opacity: 0.55;
   }
   /* The selected period, banded through every row. Translucent, so the bars
      under it keep their own ink and the band reads as a wash, not a block. */

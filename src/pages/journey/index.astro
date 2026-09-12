@@ -158,12 +158,19 @@ const ledgerRows = repoBacked.filter((entry) =>
   </div>
 
   <h2>Also tried</h2>
-  <p class="lede">Repos with fewer than {MIN_COMMITS} commits — no chapter of their own.</p>
+  <p class="lede">
+    Repos with fewer than {MIN_COMMITS} commits, or whose whole life was a single day — no chapter
+    of their own.
+  </p>
   <ul class="experiments">
     {experiments.map((row) => (
       <li>
         <span class="repo">{row.repo}</span>
-        <span class="span">{row.first_commit}</span>
+        <span class="span">
+          {row.first_commit === row.last_commit
+            ? `${row.first_commit} · one day`
+            : `${row.first_commit} → ${row.last_commit}`}
+        </span>
         <span class="commits">{row.commits} commits</span>
       </li>
     ))}
