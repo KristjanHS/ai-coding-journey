@@ -10,6 +10,7 @@ minutes: 3
 level: show
 source_chapter: 04-llm-eng-template
 slot: open
+quote_from: content/sidecars/failure/the-braces-cookiecutter-kept-rendering.md
 ---
 
 # One paste fixes one line, not the class
@@ -25,8 +26,10 @@ brace for some later tool trips the same engine error, but the traceback only
 ever names the one file being rendered when it stops. Fixing that file is
 progress you cannot see, because the next render fails the same way on a
 different file. What breaks the loop is reading the error as a class — every
-file with those braces — rather than as the single line in front of you.
+file with those braces — rather than as the single line in front of you. After
+each targeted fix the identical error returns unchanged, now from a file the last
+fix did not cover.
 
 ## Evidence
 
-> [2025-10-20] After each targeted fix the same error returns unchanged — `File "Makefile", line 187 ... TemplateSyntaxError: unexpected '.'` at the Docker `{{.State.Running}}` brace, now from a file the last fix did not cover.
+> [2025-10-20] jinja2.exceptions.TemplateSyntaxError: unexpected '.'

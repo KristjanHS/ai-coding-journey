@@ -1,6 +1,6 @@
 ---
 title: "Continue — tokens logged exactly, and almost none of them"
-summary: "The local-LLM era: the one era whose token log is exact and cross-checked, and the smallest share of the floor by three orders of magnitude."
+summary: "The local-LLM era: the one era whose token log is exact and cross-checked, and the smallest share of the floor, roughly 580× below the largest."
 ---
 
 # Continue (VS Code)
@@ -11,7 +11,7 @@ it the one era whose token state is `yes` in the strong sense — the record is
 cross-era floor.
 
 - **0.10% of the cross-era floor** — the smallest share of the four
-  token-bearing tools, three orders of magnitude below the largest. On the
+  token-bearing tools, roughly 580× below the largest. On the
   page's log-scaled bar it is visible; on a linear one it would not be.
 - **98.8% of token events ran on the local Ollama provider**, the rest on a
   hosted Gemini key. That split is why the era's marginal money is a rounding

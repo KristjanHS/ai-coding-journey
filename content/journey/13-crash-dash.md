@@ -26,10 +26,10 @@ That is the honest description, and the whole point of this chapter. The repo is
 here quotes its source. What can be shown is the layer I *do* write and read: the rules that constrain
 the agent, the gates that have to go green, and the defects those gates caught.
 
-Scale is what forces the question. This repo's git log holds 5,018 commits between 2026-06-25 and
-2026-09-07. The Claude Code era row in `eras.json` reports 15 commits for its own window,
-2026-06-23 to 2026-09-06, because it counts my `.claude` config repo, not this one. Repo scope and tool scope are separate measurements
-here and neither stands in for the other. A rate like the first number is survivable only if the
+Scale is what forces the question. This repo's git log holds roughly 5,000 commits between
+2026-06-25 and 2026-09-08. The Claude Code era row in `eras.json` reports 15 commits for its own
+window, 2026-06-23 to 2026-09-06, because it counts my `.claude` config repo, not this one. Repo
+scope and tool scope are separate measurements here and neither stands in for the other. A rate like the first number is survivable only if the
 review system, not my attention, is what holds quality.
 
 ## What didn't work

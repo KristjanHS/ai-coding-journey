@@ -15,9 +15,9 @@ quote_from: content/artifacts/chat-era.md
 
 # What the machine could see went flat, then jumped
 
-Read the *could see* column of the `/journey/` ledger top to bottom. Six chapters
-have a row: `pasted`, then `open-file`, then `path-gated-rules` four times.
-`repo-index` is in the closed set and no chapter ever reached it.
+Read the *could see* column of the `/journey/` ledger top to bottom. There is a
+row per chapter: `pasted` once, then `open-file`, then `path-gated-rules` for
+every chapter after. `repo-index` is in the closed set and no chapter ever reached it.
 
 There is no gradient. In the first era the model saw only what was typed, so
 the limits had to be typed too. Once a tool could read the repo, that

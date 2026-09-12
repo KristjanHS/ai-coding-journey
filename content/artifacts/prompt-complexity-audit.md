@@ -34,8 +34,8 @@ Three findings, quoted from the plan it wrote:
 
 > Overlap between local and CI versions of the same tool (e.g., `semgrep.yml` vs `semgrep_local.yml`).
 
-The same section counted CodeQL and Semgrep each wired twice across eight-to-nine workflows — a CI
-job duplicated against a local `act` copy. A second finding named a whole templating layer living
+That names a CI job duplicated against a local `act` copy — the same Semgrep check wired as both
+`semgrep.yml` and `semgrep_local.yml`. A second finding named a whole templating layer living
 inside a transcription tool:
 
 > Shell + Python automation to **delete app-specific files** and rebrand the repo for a different project.
