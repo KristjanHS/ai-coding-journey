@@ -53,26 +53,14 @@ hook, not inside the config-adoption session that tripped over it.
 The second lesson is smaller and concrete. A passing test run's output is almost entirely progress
 dots, and filtering them out is a one-line change to how the command is invoked: one run's stdout
 went from 672 bytes to 32. What that saves across a whole session I never measured — the byte count
-on a single run is the whole claim.
+on a single run is the whole claim. The filter passes failure blocks intact, and it is for reading
+a run, never for gating a commit on one — the pipe reports `tail`'s exit status, not the suite's.
 
 ## Artifact
 
-From this repo's private working notes, dated 2026-07-27 and 2026-04-26 — sanitised excerpts,
-not a public page. The output filter, as used:
+The inherited suite's diagnosis, from the repo's own working notes, now housed with the hook it
+pinned: [The copied test pinned deleted behaviour](../atoms/configuring--a-copied-test-pins-dead-behaviour.md)
 
-```bash
-python3 -m pytest tests/ -q 2>&1 | grep -vE '^[.sxXFEP]+ +\[ *[0-9]+%\]$' | tail -20
-```
+## Atoms
 
-Measured on one passing run's captured stdout: **672 bytes → 32 bytes**. Failure blocks do not
-match the filtered shape, so they survive intact. The pipe reports `tail`'s exit status, not the
-suite's, so this form is for reading a run, never for gating a commit on one.
-
-The inherited-suite diagnosis, verbatim from the same notes:
-
-> `make check` is red on a clean tree — 57 pre-existing failures, all in
-> `tests/hooks/test_docs_bloat_gate_v2.py`. Verified pre-existing by stashing my changes (57 failed
-> / 21 passed at clean HEAD). The cause: that suite asserts `rc == 2` (blocked) for writes to gated
-> paths, but the global `docs-bloat-gate.py` header now reads "Signals on .md writes (all advisory —
-> warn, never block)" — S2/S3 became advisory and the S1 tier caps were removed on 2026-07-25. The
-> suite pins a contract that was deliberately deleted.
+- [The copied test pinned deleted behaviour](../atoms/configuring--a-copied-test-pins-dead-behaviour.md)

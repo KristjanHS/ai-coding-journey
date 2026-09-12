@@ -66,13 +66,10 @@ already costed, are what make them an argument.
 
 ## Artifact
 
-The finding, as the generator emits it — an availability matrix rather than a metrics table, because
-the honest content of two of these rows is a named absence:
+The generator emits an availability matrix rather than a metrics table, because the honest content
+of two of its rows is a named absence:
+[The absence is a state, not a missing value](../atoms/asking--the-absence-is-a-state.md)
 
-```json
-{ "id": "cursor",  "tokens": "floor", "share": 0.267 }
-{ "id": "copilot", "tokens": "none",  "share": null   }
-```
+## Atoms
 
-A chart cannot render `null`. A table of states can, and that constraint is what kept the measurements
-page truthful — before there was any reason to redact it.
+- [The absence is a state, not a missing value](../atoms/asking--the-absence-is-a-state.md)

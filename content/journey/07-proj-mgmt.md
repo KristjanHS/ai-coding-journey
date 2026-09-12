@@ -41,7 +41,9 @@ real property and it is not the property the number sounds like. Nothing in the 
 testing guide describes the tests that exist, or whether a reader needs 460 lines to run three test
 files. The repo then sat untouched for four and a half months, so no reader ever put the documents
 under load. A gate that can only resolve links will report a perfect score on documentation that is
-never read.
+never read. The three inputs behind the weighted total were link resolution, a count of document
+types against a checklist and a line-count limit — a score for the formatting, presented as a score
+for the documentation.
 
 **Declaring v1 complete on the day it was designed.** The roadmap was versioned — there was a v2 and a
 v3 written down. Neither happened. Moving the design document to `old_already_implemented` the same day
@@ -80,54 +82,10 @@ it belongs to August and to a different repo.
 
 ## Artifact
 
-The review fix, the commit message body verbatim from the repo's own git log — commit `3355e94`, dated
-2026-03-29. One external tracker's field name is elided, and the trailer is dropped:
+One of the seven `/pm:` commands authored that afternoon — the checkable procedure that raises this
+chapter's peak to `configuring`:
+[The command names the loaders it must call](../atoms/configuring--the-command-names-its-loaders.md)
 
-```text
-Fix code review issues: type safety, dead code, consistency
+## Atoms
 
-- Remove dead O(n^2) code block in schema.py task validation
-- Fix Task TypedDict: use NotRequired only for [an external tracker's id]
-- Eliminate redundant people.json load in import main()
-- Warn on non-YYYY-MM-DD date strings in import
-- Make export main() return int consistently with import
-```
-
-And the documentation pass's own score block, verbatim from
-`learn/260329-1625-proj-mgmt/summary.md`, dated 2026-03-29:
-
-```text
-validation_score = 100%
-docs_coverage    = 100% (6/6 core docs for this project type)
-size_compliance  = 100% (all under 800/300 line limits)
-
-learn_score = (100 × 0.5) + (100 × 0.3) + (100 × 0.2) = 100
-```
-
-The three inputs are link resolution, a count of document types against a checklist, and a line-count
-limit. The weighted total is presented as a score for the documentation. It is a score for the
-formatting.
-
-And one of the seven commands authored in-repo that afternoon — the opening of
-`.claude/commands/pm/conflict-check.md`, committed 13:27 on 2026-03-29. This is the artifact that
-raises the chapter's peak to `configuring`: it is a checkable procedure written for this project, not
-a baseline adopted from elsewhere.
-
-```markdown
-Detect dependency conflicts and date inconsistencies within a project.
-
-$ARGUMENTS — project slug. If omitted and multiple projects exist, ask which one.
-
-## Steps
-
-1. **Load and validate data.**
-   Read `data/people.json` via `pm.loader.load_people`, then load the project via `pm.loader.load_project`. Stop on validation errors — schema issues are reported here, not below.
-
-2. **Check dependency chains.**
-   - **Circular dependencies**: walk the dependency graph (DFS). Report each cycle found. (The schema validator already catches these, but confirm and explain them in plain language.)
-   - **Finish-to-start violations**: for every `finish-to-start` dependency, verify the predecessor's end date is before the dependent task's start date. Flag violations with both task names and dates.
-```
-
-It names the loader functions it must call and the order it must check in, and it says where errors
-stop. That is the shape the later rules layer has too — which is exactly why adopting that layer read
-as progress when it was not.
+- [The command names the loaders it must call](../atoms/configuring--the-command-names-its-loaders.md)

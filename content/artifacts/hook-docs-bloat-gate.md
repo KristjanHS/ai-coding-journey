@@ -41,6 +41,20 @@ size ratchet still blocks (opt-in, bypassable, override cap N=3).
 
 Only the size cap still stops the write. Anything that judges wording now just warns.
 
+The copy rotted where the original moved on. The hook was first authored in the `fte-budget-planner`
+repo (2026-04-25) and promoted to the global configuration in May; on 2026-07-27 that repo's
+inherited test suite was still asserting the blocking contract this version had deleted two days
+earlier. The diagnosis, verbatim from that repo's working notes (2026-07-27):
+
+```text
+`make check` is red on a clean tree — 57 pre-existing failures, all in
+`tests/hooks/test_docs_bloat_gate_v2.py`. Verified pre-existing by stashing my changes (57 failed
+/ 21 passed at clean HEAD). The cause: that suite asserts `rc == 2` (blocked) for writes to gated
+paths, but the global `docs-bloat-gate.py` header now reads "Signals on .md writes (all advisory —
+warn, never block)" — S2/S3 became advisory and the S1 tier caps were removed on 2026-07-25. The
+suite pins a contract that was deliberately deleted.
+```
+
 ## Where it came from
 
 `.claude/hooks/docs-bloat-gate.py` in the **public** repo `KristjanHS/claudeconf`, at the commit of

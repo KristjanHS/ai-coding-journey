@@ -59,7 +59,7 @@ the repo's configuration in that window was told it was a Python project.
 **Freshly written tests leaked a stubbed global into each other.** The June test suite stubbed `fetch`
 per test and restored mocks, but restoring mocks does not unwind a stubbed global, so any later test in
 the same file would silently have inherited the stub. A same-day review pass caught it; the fix
-commit is quoted below.
+commit, `e71fe18`, adds `vi.unstubAllGlobals()` to every `afterEach`.
 
 ## What I learned
 
@@ -80,75 +80,10 @@ agent will half-read wrong.
 
 ## Artifact
 
-The project-authored rule that raises this chapter's peak to `configuring` — `.claude/rules/api-routes.md`,
-verbatim as first committed in `ca0f68d` on 2026-06-24. It is not in the global config baseline; it
-names this app's routes, its upstream weather services and its own error shape:
+The project-authored rule that raised this chapter's peak to `configuring`, and the caching line in
+it that can be checked against a route file:
+[The rule names its own routes](../atoms/configuring--the-rule-names-its-own-routes.md)
 
-```markdown
----
-paths:
-  - "app/api/**/route.ts"
-last_verified: 2026-06-24
----
-# API Route Conventions
+## Atoms
 
-## Conventions
-
-App Router `GET` handlers (`app/api/<name>/route.ts`) proxying external weather APIs. No dynamic `[id]` routes yet — when added, params are a Promise: `await context.params`.
-
-- **Live data**: set `export const dynamic = "force-dynamic"`, else Next caches the response at build time.
-- **External fetch**: `fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, cache: "no-store" })`, then `if (!response.ok) throw new Error(...)`.
-- **Required env vars**: guard before use — `if (!apiKey) return NextResponse.json({ error: "Missing X" }, { status: 500 })`.
-- **Errors**: `NextResponse.json({ error, detail? }, { status })`. No `{ success, data }` envelope — keep success payloads route-specific.
-- **XML parsing** (`humidity`/`beach` via `xml2js`): prefer a typed shape over widening to `any`.
-```
-
-The wrap bug, commit `ffbc0ca` dated 2026-06-24, message body verbatim with the trailers dropped:
-
-```text
-Add lib/geo.test.ts and fix degToCompass wrap bug
-
-Task 3 of test-framework-design plan. Tests: haversine (identity,
-1-deg latitude ~111.19 km, known city pair); dmsToDecimal;
-degToCompass boundaries + 360 wrap; findNearestStation incl.
-empty-array -> null.
-
-Fixes a real production bug surfaced by the boundary test:
-degToCompass used Math.round((deg/45) % 8), so bearings in
-[337.5, 360) rounded 7.5 -> 8 and returned dirs[8] === undefined.
-Corrected to Math.round(deg/45) % 8.
-```
-
-The reviewer-caught defect and its fix, commit `e71fe18` the same day, trailers dropped:
-
-```text
-Address code review (Important): unstub globals + drop dead import
-
-- Add vi.unstubAllGlobals() to every afterEach. vi.restoreAllMocks()
-  does not unwind vi.stubGlobal('fetch', ...); without this, a future
-  test added after a stubbing test in the same file would silently
-  inherit the stub instead of the real global.
-- Remove the dead 'import { afterEach, beforeEach } from "vitest"' in
-  the weather test — beforeEach was unused and afterEach is already a
-  global (globals: true).
-```
-
-And the opening of the test-framework design document, `docs/plans/2026-06-24-test-framework-design.md`
-as first committed in `ef11c41` on 2026-06-24 and archived the next day — the first fourteen lines:
-
-```text
-# Test Framework Design — dewpoint-ts
-
-**Date:** 2026-06-24
-**Status:** Approved design (not yet implemented)
-**Stack:** Next.js 15 (App Router), React 18, TypeScript 5.7 (`strict`, `noEmit`), npm, Vercel
-
-## Goal
-
-Introduce automated tests to a project that currently has none. Tests should protect
-the real bug-risk surface — data/parsing logic, API route behavior, and basic component
-wiring — without imposing infrastructure disproportionate to a one-page app.
-
-The verification gate today is `tsc → lint → build` (no test runner). This design adds a
-`test` step between lint and build.
-```
+- [The rule names its own routes](../atoms/configuring--the-rule-names-its-own-routes.md)

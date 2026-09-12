@@ -75,46 +75,10 @@ is a claim about a moment, and the only counts worth trusting are the ones a che
 
 ## Artifact
 
-The repo's own instruction file on its first day — the rules section of `CLAUDE.md` as committed in
-`baba13a` on 2026-04-04, the day-one artifact that makes this repo's peak `configuring`:
+The repo's own instruction file on its first day — the three numbered rules that make this repo's
+peak `configuring`:
+[Day one opened with an instruction file](../atoms/configuring--day-one-had-an-instruction-file.md)
 
-```markdown
-## Critical Rules
+## Atoms
 
-1. **Stdlib only** — no external dependencies. JSON parsing, file I/O, argparse only.
-2. **After every change, run `pytest tests/ -q`** and verify all pass.
-3. **JSONL log format is not ours to control** — be defensive about missing fields, never crash on unexpected data.
-```
-
-The day-one defect, commit `687ef96`, message body verbatim with the trailer dropped:
-
-```text
-Fix project log directory slug: remove double-dash bug
-
-The slug computation prepended an extra `-` when `/` already becomes
-`-`, producing `--home-...` instead of `-home-...`. This caused
-`find_project_log_dir()` to fail for CWD-based session discovery.
-```
-
-The test cut, commit `08440b1`, forty-four minutes after the suite was added:
-
-```text
-Remove 18 low-value tests (Categories A, B, E)
-
-Delete tests that verify Python language guarantees (len, sum, max,
-dataclass defaults), redundant tests already covered by better tests,
-and cross-layer CLI duplicates covered by parser + integration tests.
-```
-
-And the design document's out-of-scope list in full, from `docs/archive/2026-04-04-token-monitoring-design.md`,
-dated 2026-04-04, twenty days before the hook commit:
-
-```text
-## Out of Scope
-
-- Real-time hooks or warnings during sessions (add later if needed)
-- Hard token budgets or enforcement mechanisms
-- Session splitting rules (learn cadence from data first)
-- Automatic session management or context pruning
-- Plan document loading optimization (already handled by CLAUDE.md progressive disclosure)
-```
+- [Day one opened with an instruction file](../atoms/configuring--day-one-had-an-instruction-file.md)
