@@ -9,7 +9,6 @@ const KNOWN_GAPS: Record<string, string> = {
   'asking/cost': '00-copilot chat logged no token/cost field; no positive dated figure and no cost topic',
   'suggesting/control': 'Continue figures count all token events, chat included — no completion-only measurement',
   'suggesting/provenance': 'Continue cross-check & Cursor client-estimate fit no provenance topic in content/topics/',
-  'suggesting/quality': 'no quality topic covers the Continue era; its two-store cross-check has no topic home',
   'suggesting/cost': 'eras.json withholds every cost figure; the 0.10% floor share is token volume, not cost',
   'delegating/control': 'Codex 30.3% injected-context share is an all-rollouts aggregate — no line shows one handed-over task',
   'delegating/provenance': 'Codex history.jsonl stub is a measurement note; no content/topics/ home for a measurement-seeded atom',
