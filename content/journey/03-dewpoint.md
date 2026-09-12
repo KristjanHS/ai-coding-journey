@@ -28,20 +28,21 @@ The first life was a burst. Forty commits landed on 2025-07-14 alone, and the Ju
 sixty-eight; by the 17th the app was done and the repo went quiet for four and a half months. The
 second life is one commit, dated 2025-12-01 and titled "ported from streamlit to ts": a Next.js app
 arriving whole, about a thousand lines across sixteen files, with the Python original merged in beside
-it. Ten commits that afternoon got it onto Vercel. Then five more months of nothing.
+it. Ten commits that afternoon got it onto Vercel. Then nearly seven more months of nothing.
 
 The third life is a single day, 2026-06-24, and it is why this chapter's peak rung is `configuring`
 rather than the `suggesting` it opened on. Twenty-one commits that day added the project's first
 tests, a project `CLAUDE.md`, four rules under `.claude/rules/` and two skills — none of them copied
-from the global baseline, all of them written for this repo, git-dated inside it. The project was
-eleven months old and had never had a test.
+from the global baseline, all git-dated inside this repo, and the rule that raises the peak, like the
+instruction file, written for this app rather than installed. The project was eleven months old and
+had never had a test.
 
 ## What didn't work
 
-**A year-old production bug that no reader had noticed, found by the first boundary test.** The
+**A seven-month-old production bug that no reader had noticed, found by the first boundary test.** The
 compass-direction helper rounded a bearing into eight sectors with the modulo applied before the
 rounding, so every wind from between 337.5 and 360 degrees indexed past the end of the array and
-rendered as `undefined`. It had been that way since the December port. The commit that added the
+rendered as `undefined`. It had been that way since the day of the December port. The commit that added the
 first tests for that module fixed it in the same change.
 
 **Merge-conflict markers were committed and pushed.** The December port merged the Python line into
